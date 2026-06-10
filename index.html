@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>股票庫存</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif;background:#f0f2f5;color:#1a1a2e;padding:0 0 80px;min-height:100vh;font-size:14px;overflow-x:hidden}
+body.dark{background:#0d1117;color:#e6edf3}
+input,select,button{font-family:inherit;font-size:inherit;outline:none}
+.header{position:sticky;top:0;z-index:100;background:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8eaed;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dark .header{background:#161b22;border-color:#30363d}
+.header h1{font-size:17px;font-weight:700}
+.header .hdr-right{display:flex;align-items:center;gap:8px}
+.btn-theme{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#5f6368}
+.dark .btn-theme{border-color:#30363d;color:#8b949e}
+.btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
+.dark .btn-adv{border-color:#30363d;color:#58a6ff}
+.card{background:#fff;border-radius:12px;padding:14px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dark .card{background:#161b22;box-shadow:none;border:1px solid #30363d}
+.card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
+.dark .card-title{color:#8b949e}
+.form-row{display:flex;gap:8px;align-items:center}
+.form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
+.dark .form-row input,.dark .form-row select{background:#0d1117;border-color:#30363d;color:#e6edf3}
+.form-row input:focus,.form-row select:focus{border-color:#1a73e8}
+.dark .form-row input:focus,.dark .form-row select:focus{border-color:#58a6ff}
+.form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
+.form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+.form-row button:active{background:#1557b0}
+.form-row .sym-inp{flex:0 0 88px}
+.idx-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:10px 14px;margin:0 14px 8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dark .idx-bar{background:#161b22;border:1px solid #30363d;box-shadow:none}
+.idx-left{display:flex;flex-direction:column;gap:1px}
+.idx-name{font-size:11px;color:#5f6368}
+.dark .idx-name{color:#8b949e}
+.idx-info{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.idx-price{font-size:20px;font-weight:700}
+.idx-change{font-size:16px;font-weight:600}
+.idx-pct{font-size:16px}
+.idx-right{text-align:right;font-size:10px;color:#5f6368;min-width:60px}
+.dark .idx-right{color:#8b949e}
+.up{color:#d93025}.down{color:#188038}
+
+.table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
+.dark .table-scroll{background:#161b22;border-color:#30363d}
+.list-wrap{min-width:640px}
+.list-header{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:16px;color:#5f6368;font-weight:500;align-items:center}
+.dark .list-header{background:#0d1117;border-color:#30363d;color:#8b949e}
+.srow{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:14px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
+.dark .srow{border-color:#30363d}
+.srow:last-child{border-bottom:none}
+.list-header > div, .srow > div{text-align:right;padding:0 8px;white-space:nowrap}
+.list-header > div:nth-child(1), .srow > div:nth-child(1){text-align:left;position:sticky;left:0;z-index:2}
+.list-header > div:nth-child(7), .srow > div:nth-child(7){text-align:center;padding:0}
+.list-header > div:nth-child(1){background:#f8f9fa;z-index:3}
+.srow > div:nth-child(1){background:#fff;z-index:2}
+.dark .list-header > div:nth-child(1){background:#0d1117}
+.dark .srow > div:nth-child(1){background:#161b22}
+.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after{content:'';position:absolute;top:0;bottom:0;right:-6px;width:6px;background:linear-gradient(to right, rgba(0,0,0,0.06), transparent);pointer-events:none}
+.dark .list-header > div:nth-child(1)::after, .dark .srow > div:nth-child(1)::after{background:linear-gradient(to right, rgba(0,0,0,0.2), transparent)}
+
+.srow .sym{font-weight:700;color:#1a73e8;cursor:pointer;font-size:16px}
+.dark .srow .sym{color:#58a6ff}
+.srow .qty-cell{font-weight:500;color:#1a1a2e}
+.dark .srow .qty-cell{color:#e6edf3}
+.srow .price{font-weight:600}
+.srow .chgp{font-size:16px}
+.srow .chg{font-weight:600}
+.srow .total{font-weight:600}
+.srow .act{display:flex;gap:4px;justify-content:center}
+.srow .act button{background:#f1f3f4;border:1px solid #e8eaed;color:#5f6368;border-radius:5px;padding:5px 8px;font-size:13px;cursor:pointer;line-height:1.3}
+.dark .srow .act button{background:#21262d;border-color:#30363d;color:#8b949e}
+.srow .act .del-btn{color:#d93025;border-color:#fce8e6}
+.dark .srow .act .del-btn{color:#f85149;border-color:#f8514944}
+.loading{color:#9aa0a6;font-size:12px}
+.dark .loading{color:#8b949e}
+
+.summary{background:#fff;border-radius:12px;padding:14px 16px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dark .summary{background:#161b22;border:1px solid #30363d;box-shadow:none}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.sum-row .lab{color:#5f6368;font-size:16px}
+.dark .sum-row .lab{color:#8b949e}
+.sum-row .val{font-size:16px;font-weight:700}
+.sum-divider{height:1px;background:#e8eaed;margin:6px 0}
+.dark .sum-divider{background:#30363d}
+.save-area{margin:0 14px 10px}
+.btn-save{width:100%;padding:13px;background:#1a73e8;border:none;color:#fff;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-save:active{background:#1557b0}
+.history{margin:0 14px}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border:1px solid #e8eaed;border-radius:8px;margin-top:6px;font-size:16px}
+.dark .hist-item{background:#161b22;border-color:#30363d}
+.hist-item-left{display:flex;align-items:baseline;gap:12px}
+.hist-item .hdate{color:#5f6368;font-size:14px}
+.dark .hist-item .hdate{color:#8b949e}
+.hist-item .hval{font-weight:600}
+.del-hist-btn{background:transparent;border:none;color:#9aa0a6;font-size:14px;cursor:pointer;padding:4px 8px;border-radius:4px}
+.del-hist-btn:hover{background:#fce8e6;color:#d93025}
+.dark .del-hist-btn{color:#8b949e}
+.dark .del-hist-btn:hover{background:#f8514944;color:#f85149}
+.hist-empty{color:#9aa0a6;font-size:14px;text-align:center;padding:16px}
+.dark .hist-empty{color:#8b949e}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:999;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+.dark .modal{background:#161b22;border:1px solid #30363d;border-bottom:none}
+.modal h2{font-size:17px;margin-bottom:14px}
+.modal label{display:block;font-size:12px;color:#5f6368;margin:10px 0 3px}
+.dark .modal label{color:#8b949e}
+.modal input{width:100%;background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e}
+.dark .modal input{background:#0d1117;border-color:#30363d;color:#e6edf3}
+.modal input:focus{border-color:#1a73e8}
+.dark .modal input:focus{border-color:#58a6ff}
+.modal .btn-link{display:block;background:transparent;border:1px solid #1a73e8;color:#1a73e8;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;text-align:center;margin:4px 0 8px;cursor:pointer}
+.dark .modal .btn-link{border-color:#58a6ff;color:#58a6ff}
+.modal-close{width:100%;padding:12px;background:#f1f3f4;border:1px solid #e8eaed;color:#1a1a2e;border-radius:10px;font-size:15px;cursor:pointer;margin-top:14px}
+.dark .modal-close{background:#21262d;border-color:#30363d;color:#e6edf3}
+.key-status{font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
+.key-status.ok{background:#e6f4ea;color:#188038}
+.dark .key-status.ok{background:#23863622;color:#3fb950}
+.key-status.none{background:#f1f3f4;color:#9aa0a6}
+.dark .key-status.none{background:#21262d;color:#8b949e}
+
+.info-box{background:#fff3cd;color:#856404;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #ffeeba}
+.dark .info-box{background:#4d3800;color:#e6c35c;border-color:#664d03}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+@media(min-width:480px){body{max-width:480px;margin:0 auto}}
+</style>
+
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
+          .catch(err => console.log('Service Worker 註冊失敗:', err));
+      });
+    }
+  </script>
+</head>
+<body>
+<div class="header">
+  <h1>股票庫存</h1>
+  <div class="hdr-right">
+    <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+  </div>
+</div>
+
+<div class="summary" id="summaryArea" style="display:none;">
+  <div class="sum-row"><span class="lab">即時盈虧總計</span><span class="val" id="totalPnl">+0</span></div>
+  <div class="sum-divider"></div>
+  <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+</div>
+<div class="save-area" id="saveArea" style="display:none;"><button type="button" class="btn-save" onclick="saveDailyPnl()">儲存今日收盤盈虧總計</button></div>
+
+<div class="card">
+  <div class="card-title">新增持股</div>
+  <div class="form-row">
+    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
+    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
+    <button type="button" onclick="addStock()">＋</button>
+  </div>
+</div>
+<div class="idx-bar" id="idxCard">
+  <div class="idx-left">
+    <div class="idx-name">加權指數</div>
+    <div class="idx-info">
+      <span class="idx-price" id="idxPrice">—</span>
+      <span class="idx-change" id="idxChange"></span>
+      <span class="idx-pct" id="idxPct"></span>
+    </div>
+  </div>
+  <div class="idx-right">
+    <div id="idxTime"></div>
+    <div id="idxSource" style="margin-top:2px"></div>
+  </div>
+</div>
+
+<div class="table-scroll" id="tableScroll" style="display:none;">
+  <div class="list-wrap" id="listContainer">
+    <div class="list-header">
+      <div>代號</div><div>數量</div><div>股價</div><div>漲跌幅</div><div>漲跌</div><div>合計</div><div>動作</div>
+    </div>
+    <div id="listBody"></div>
+  </div>
+</div>
+
+<div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:#9aa0a6;font-size:16px">尚無持股，請在上方新增</div>
+
+<div class="history">
+  <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
+  <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>進階設定</h2>
+    <div style="text-align:center;margin-bottom:8px">
+      <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
+    </div>
+    
+    <div class="info-box">
+      申請Fugle API免費版，一個賬號僅能5檔股票使用，第一組API key包含加權指數，僅有4檔股票可使用，如果API key留空白，軟體會經由Yahoo提供報價，將會延遲15分鐘。
+    </div>
+
+    <label>Fugle API Key（主要）</label>
+    <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
+    <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
+    
+    <label>Fugle API Key 2（備用1）</label>
+    <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
+    <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+
+    <label>Fugle API Key 3（備用2）</label>
+    <input type="text" id="thirdFugleKeyInput" placeholder="輸入第三組 Key（選填）" autocomplete="off">
+    <div><span class="key-status none" id="thirdFugleKeyStatus">未設定</span></div>
+
+    <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
+  </div>
+</div>
+
+<script>
+let stocks=[],fugleKey='',secondFugleKey='',thirdFugleKey='',dailyRecords=[],darkMode=false,pollTimer=null;
+const SK='tw_stock_portfolio',FK='tw_fugle_key',SFK='tw_second_fugle_key',TFK='tw_third_fugle_key',RK='tw_records',TK='tw_theme';
+
+const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+const YAHOO='https://query2.finance.yahoo.com/v8/finance/chart/';
+
+function loadState(){
+  try{
+    const s=localStorage.getItem(SK);if(s)stocks=JSON.parse(s);
+    const f=localStorage.getItem(FK);if(f)fugleKey=f;
+    const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
+    const tf=localStorage.getItem(TFK);if(tf)thirdFugleKey=tf;
+    const r=localStorage.getItem(RK);if(r)dailyRecords=JSON.parse(r);
+    const t=localStorage.getItem(TK);if(t)darkMode=t==='dark';
+  }catch(e){
+    console.error("無法讀取本機儲存資料", e);
+  }
+  if(darkMode)document.body.classList.add('dark');
+  document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
+  document.getElementById('fugleKeyInput').value=fugleKey;
+  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('thirdFugleKeyInput').value=thirdFugleKey;
+  updateKeyStatus();
+}
+
+function saveHoldings(){
+  try{
+    localStorage.setItem(SK,JSON.stringify(stocks));
+  }catch(e){
+    console.error("儲存失敗", e);
+    showToast('無法儲存資料，請檢查瀏覽器隱私或無痕設定');
+  }
+}
+
+function saveKeys(){
+  fugleKey=document.getElementById('fugleKeyInput').value.trim();
+  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
+  thirdFugleKey=document.getElementById('thirdFugleKeyInput').value.trim();
+  try{
+    localStorage.setItem(FK,fugleKey);
+    localStorage.setItem(SFK,secondFugleKey);
+    localStorage.setItem(TFK,thirdFugleKey);
+  }catch(e){}
+  updateKeyStatus();
+}
+
+function saveRecords(){
+  try{ localStorage.setItem(RK,JSON.stringify(dailyRecords)); }
+  catch(e){}
+}
+
+function toggleTheme(){
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
+  try{ localStorage.setItem(TK,darkMode?'dark':'light'); }catch(e){}
+}
+
+function updateKeyStatus(){
+  ['fugleKey','secondFugleKey','thirdFugleKey'].forEach((id,i)=>{
+    const el=document.getElementById(id+'Status');
+    if(!el)return;
+    const val = i===0 ? fugleKey : (i===1 ? secondFugleKey : thirdFugleKey);
+    if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
+    else{el.textContent='未設定';el.className='key-status none';}
+  });
+}
+
+// ===== API =====
+async function fetchFugle(symbol){
+  const keys = [fugleKey, secondFugleKey, thirdFugleKey].filter(k => k);
+  if(keys.length === 0) return null;
+
+  const url = FUGLE + encodeURIComponent(symbol);
+  
+  for(let key of keys){
+    try {
+      const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(6000)});
+      if(resp.ok){
+        const d = await resp.json();
+        if(d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent};
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
+async function fetchYahoo(symbol){
+  const tryFetch = async (sym) => {
+    const url = YAHOO + encodeURIComponent(sym) + '?range=1d&interval=1m';
+    const resp = await fetch(url, {signal: AbortSignal.timeout(4000)});
+    if(!resp.ok) return null;
+    const d = await resp.json();
+    const r = d?.chart?.result?.[0];
+    if(!r) return null;
+    
+    const meta = r.meta || {};
+    const c = r.indicators?.quote?.[0]?.close || [];
+    const price = meta.regularMarketPrice ?? meta.previousClose ?? (c.length > 0 ? c[c.length - 1] : null);
+    const prev = meta.chartPreviousClose || meta.previousClose || null;
+    
+    if(price == null) return null;
+    
+    let chg = null, pct = null;
+    if(prev != null){
+      chg = +(price - prev).toFixed(2);
+      pct = +((chg / prev) * 100).toFixed(2);
+    }
+    return {price, change: chg, changePercent: pct};
+  };
+
+  try {
+    let res = await tryFetch(symbol + '.TW');
+    if(!res) res = await tryFetch(symbol + '.TWO');
+    return res;
+  } catch(e) { 
+    return null; 
+  }
+}
+
+async function fetchWeightedIndex(){
+  const keys = [fugleKey, secondFugleKey, thirdFugleKey].filter(k => k);
+  
+  if(keys.length > 0){
+    const url = FUGLE + 'IX0001';
+    for(let key of keys){
+      try{
+        const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(5000)});
+        if(resp.ok){
+          const d = await resp.json();
+          const p = d.lastPrice ?? d.closePrice ?? d.price;
+          if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+        }
+      }catch(e){}
+    }
+  }
+  
+  try{
+    const url=YAHOO+encodeURIComponent('^TWII')+'?range=1d&interval=1m';
+    const resp=await fetch(url,{signal:AbortSignal.timeout(5000)});
+    if(!resp.ok)return null;
+    const d=await resp.json();
+    const r=d?.chart?.result?.[0];
+    if(!r)return null;
+    const meta=r.meta||{};
+    const q=r.indicators?.quote?.[0]||{};
+    const c=q.close||[];
+    const price=meta.regularMarketPrice??meta.previousClose??(c.length>0?c[c.length-1]:null);
+    const prev=meta.chartPreviousClose||meta.previousClose||null;
+    let chg=null,pct=null;
+    if(price!=null&&prev!=null){chg=+(price-prev).toFixed(2);pct=+((chg/prev)*100).toFixed(2);}
+    if(price==null)return null;
+    return{price,change:chg,changePercent:pct,source:'Yahoo'};
+  }catch(e){return null}
+}
+
+async function refreshPrices(){
+  const idxR=await fetchWeightedIndex();
+  const idxEl=document.getElementById('idxPrice');
+  const idxChgEl=document.getElementById('idxChange');
+  const idxPctEl=document.getElementById('idxPct');
+  const idxTimeEl=document.getElementById('idxTime');
+  const idxSrcEl=document.getElementById('idxSource');
+  if(idxR){
+    idxEl.textContent=idxR.price.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
+    idxChgEl.className='idx-change '+(idxR.change>=0?'up':'down');
+    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
+    idxPctEl.className='idx-pct '+(idxR.changePercent>=0?'up':'down');
+    idxTimeEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    idxSrcEl.textContent='via '+idxR.source;
+  }else{
+    idxEl.textContent='—';idxChgEl.textContent='';idxPctEl.textContent='';
+    idxTimeEl.textContent='離線';idxSrcEl.textContent='';
+  }
+  
+  const results = await Promise.all(stocks.map(async (s)=>{
+    let r = await fetchFugle(s.symbol);
+    if(!r) r = await fetchYahoo(s.symbol);
+    return {s,r};
+  }));
+  
+  for(const {s,r} of results){
+    if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
+  }
+  updateSummary();
+}
+
+function renderRow(s){
+  const el=document.querySelector('.srow[data-id="'+s.id+'"]');
+  if(!el)return;
+  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+  
+  let p = s.price;
+  let chg = s.change ?? 0;
+  const total=+(shares*chg).toFixed(0);
+  
+  el.querySelector('.sym').textContent=s.symbol;
+  const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
+  
+  const pEl=el.querySelector('.price');
+  if(p!=null){
+    pEl.textContent=formatPrice(p);
+  }else pEl.innerHTML='<span class="loading">載入中</span>';
+  
+  const cp=el.querySelector('.chgp');
+  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  else{cp.textContent='—';cp.className='chgp';}
+  
+  const cg=el.querySelector('.chg');
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+  else{cg.textContent='—';cg.className='chg';}
+  
+  el.querySelector('.total').textContent=(total>=0?'+':'')+total.toLocaleString();
+  el.querySelector('.total').className='total '+(total>=0?'up':'down');
+}
+
+function renderAll(){
+  const body=document.getElementById('listBody');
+  const empty=document.getElementById('emptyState');
+  const tableScroll=document.getElementById('tableScroll');
+  const sumArea = document.getElementById('summaryArea');
+  const saveArea = document.getElementById('saveArea');
+  
+  body.innerHTML='';
+  if(stocks.length===0){
+    empty.style.display='block';
+    tableScroll.style.display='none';
+    sumArea.style.display='none';
+    saveArea.style.display='none';
+    return;
+  }
+  
+  empty.style.display='none';
+  tableScroll.style.display='block';
+  sumArea.style.display='block';
+  saveArea.style.display='block';
+  
+  for(const s of stocks){
+    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
+    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    
+    let p = s.price;
+    let chg = s.change ?? 0;
+    const total=+(shares*chg).toFixed(0);
+    
+    let pStr='—';if(p!=null)pStr=formatPrice(p);
+    const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
+    const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
+    
+    div.innerHTML=
+      '<div class="sym">'+s.symbol+'</div>'+
+      '<div class="qty-cell">'+s.displayQty+' '+s.displayUnit+'</div>'+
+      '<div class="price">'+pStr+'</div>'+
+      '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
+      '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
+      '<div class="total '+(total>=0?'up':'down')+'">'+(total>=0?'+':'')+total.toLocaleString()+'</div>'+
+      '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
+    
+    body.appendChild(div);
+  }
+  updateSummary();
+}
+
+function updateSummary(){
+  let pnl=0,asset=0;
+  for(const s of stocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0;
+    pnl+=+(sh*c).toFixed(0);
+    asset+=+(sh*p).toFixed(0);
+  }
+  
+  const pe=document.getElementById('totalPnl');
+  pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();
+  pe.className='val '+(pnl>=0?'up':'down');
+  
+  const ae = document.getElementById('totalAsset');
+  ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();
+  ae.className = 'val'; 
+}
+
+function addStock(){
+  const sym=document.getElementById('symInput').value.trim().toUpperCase();
+  const qty=parseInt(document.getElementById('qtyInput').value);
+  const unit=document.getElementById('unitSelect').value;
+  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
+  if(stocks.some(s=>s.symbol===sym)){showToast('該股票已存在');return}
+  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  stocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+  saveHoldings();
+  renderAll();
+  document.getElementById('symInput').value='';document.getElementById('qtyInput').value='';
+  showToast('已新增 '+sym);
+  refreshPrices();
+}
+
+function deleteStock(id){
+  if(!confirm('確定刪除？'))return;
+  stocks=stocks.filter(s=>s.id!==id);
+  saveHoldings();renderAll();showToast('已刪除');
+}
+
+function editStock(id){
+  const s=stocks.find(x=>x.id===id);
+  if(!s)return;
+  const ns=prompt('修改代號：',s.symbol);
+  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;}
+  const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
+  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
+  saveHoldings();renderAll();showToast('已修改');refreshPrices();
+}
+
+function saveDailyPnl(){
+  let pnl=0,asset=0;
+  for(const s of stocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0;
+    pnl+=+(sh*c).toFixed(0);
+    asset+=+(sh*p).toFixed(0);
+  }
+  const n=new Date();
+  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  dailyRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
+  if(dailyRecords.length>50)dailyRecords=dailyRecords.slice(0,50);
+  saveRecords();renderHistory();
+  showToast('已儲存 '+ds+' 盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+}
+
+function deleteHistory(timestamp) {
+  if(!confirm('確定刪除此筆記錄？')) return;
+  dailyRecords = dailyRecords.filter(r => r.timestamp !== timestamp);
+  saveRecords();
+  renderHistory();
+  showToast('記錄已刪除');
+}
+
+function renderHistory(){
+  const body=document.getElementById('historyBody');
+  if(dailyRecords.length===0){body.innerHTML='<div class=\"hist-empty\">尚無記錄</div>';return;}
+  body.innerHTML='';
+  for(const r of dailyRecords){
+    const d=document.createElement('div');d.className='hist-item';
+    d.innerHTML='<div class="hist-item-left"><span class=\"hdate\">'+r.date+' '+r.time+'</span><span class=\"hval '+(r.totalPnl>=0?'up':'down')+'\">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class=\"del-hist-btn\" onclick=\"deleteHistory('+r.timestamp+')\">✕</button>';
+    body.appendChild(d);
+  }
+}
+
+function openModal(){
+  document.getElementById('fugleKeyInput').value=fugleKey;
+  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('thirdFugleKeyInput').value=thirdFugleKey;
+  updateKeyStatus();
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveAndCloseModal(){
+  saveKeys();
+  document.getElementById('modalOverlay').classList.remove('show');
+  showToast('設定已儲存');
+  refreshPrices();
+}
+
+function formatPrice(p){
+  if(p==null)return '—';
+  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return p.toFixed(2);
+}
+
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+async function refresh(){await refreshPrices()}
+
+// Init
+loadState();renderAll();renderHistory();
+setTimeout(refresh,300);
+pollTimer=setInterval(refresh,35000);
+
+// 防呆機制：使用 e.preventDefault() 避免 Enter 鍵誤觸發重新整理表單
+document.getElementById('symInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') {
+    e.preventDefault();
+    document.getElementById('qtyInput').focus();
+  }
+});
+document.getElementById('qtyInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') {
+    e.preventDefault();
+    addStock();
+  }
+});
+
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+console.log('股票庫存 v2.2 已啟動 (總計置頂版)');
+</script>
+</body>
+</html>
