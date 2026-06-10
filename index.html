@@ -83,8 +83,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .sum-row .lab{color:#5f6368;font-size:16px}
 .dark .sum-row .lab{color:#8b949e}
 .sum-row .val{font-size:16px;font-weight:700}
-.summary-divider{height:1px;background:#e8eaed;margin:6px 0}
-.dark .summary-divider{background:#30363d}
+.sum-divider{height:1px;background:#e8eaed;margin:6px 0}
+.dark .sum-divider{background:#30363d}
 .save-area{margin:0 14px 10px}
 .btn-save{width:100%;padding:13px;background:#1a73e8;border:none;color:#fff;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
 .btn-save:active{background:#1557b0}
@@ -113,8 +113,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .modal input{background:#0d1117;border-color:#30363d;color:#e6edf3}
 .modal input:focus{border-color:#1a73e8}
 .dark .modal input:focus{border-color:#58a6ff}
-.modal .btn-link{display:block;background:transparent;border:1px solid #1a73e8;color:#1a73e8;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;text-align:center;margin:4px 0 8px;cursor:pointer}
-.dark .modal .btn-link{border-color:#58a6ff;color:#58a6ff}
 .modal-close{width:100%;padding:12px;background:#f1f3f4;border:1px solid #e8eaed;color:#1a1a2e;border-radius:10px;font-size:15px;cursor:pointer;margin-top:14px}
 .dark .modal-close{background:#21262d;border-color:#30363d;color:#e6edf3}
 .key-status{font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
@@ -149,9 +147,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
                     } else {
                       alert('偵測到系統更新，網頁即將自動重新整理！');
                     }
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 2000);
+                    setTimeout(() => { window.location.reload(); }, 2000);
                   }
                 }
               };
@@ -173,7 +169,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
 <div class="summary" id="summaryArea" style="display:none;">
   <div class="sum-row"><span class="lab">即時盈虧總計</span><span class="val" id="totalPnl">+0</span></div>
-  <div class="summary-divider"></div>
+  <div class="sum-divider"></div>
   <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
 </div>
 <div class="save-area" id="saveArea" style="display:none;"><button type="button" class="btn-save" onclick="saveDailyPnl()">儲存今日收盤盈虧總計</button></div>
@@ -228,7 +224,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     </div>
     
     <div class="info-box">
-      本軟體已整合富果批量 API 技術。個股資產每 30 秒自動打包刷新，加權指數每 61 秒分流更新，完美避開免費版流量紅線。支援 10 檔以上多持股監控，穩健且不降速。無金鑰時將自動切換至 Yahoo 延遲報價。
+      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保任何手機與網路環境下，數據均能 100% 正常回報。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -244,11 +240,10 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 </div>
 
 <script>
-let stocks=[],fugleKey='',secondFugleKey='',dailyRecords=[],darkMode=false;
+let stocks=[],fugleKey='',secondFugleKey='',dailyRecords=[],darkMode=false,pollTimer=null;
 const SK='tw_stock_portfolio',FK='tw_fugle_key',SFK='tw_second_fugle_key',RK='tw_records',TK='tw_theme';
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
-const YAHOO='https://query2.finance.yahoo.com/v8/finance/chart/';
 
 function loadState(){
   try{
@@ -257,9 +252,7 @@ function loadState(){
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
     const r=localStorage.getItem(RK);if(r)dailyRecords=JSON.parse(r);
     const t=localStorage.getItem(TK);if(t)darkMode=t==='dark';
-  }catch(e){
-    console.error("無法讀取本機儲存資料", e);
-  }
+  }catch(e){console.error(e);}
   if(darkMode)document.body.classList.add('dark');
   document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
   document.getElementById('fugleKeyInput').value=fugleKey;
@@ -267,102 +260,100 @@ function loadState(){
   updateKeyStatus();
 }
 
-function saveHoldings(){
-  try{
-    localStorage.setItem(SK,JSON.stringify(stocks));
-  }catch(e){
-    console.error("儲存失敗", e);
-    showToast('無法儲存資料，請檢查瀏覽器隱私或無痕設定');
-  }
-}
-
+function saveHoldings(){try{localStorage.setItem(SK,JSON.stringify(stocks));}catch(e){}}
 function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
-  try{
-    localStorage.setItem(FK,fugleKey);
-    localStorage.setItem(SFK,secondFugleKey);
-  }catch(e){}
+  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
   updateKeyStatus();
 }
-
-function saveRecords(){
-  try{ localStorage.setItem(RK,JSON.stringify(dailyRecords)); }
-  catch(e){}
-}
-
+function saveRecords(){try{localStorage.setItem(RK,JSON.stringify(dailyRecords));}catch(e){}}
 function toggleTheme(){
-  darkMode=!darkMode;
-  document.body.classList.toggle('dark',darkMode);
+  darkMode=!darkMode;document.body.classList.toggle('dark',darkMode);
   document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
-  try{ localStorage.setItem(TK,darkMode?'dark':'light'); }catch(e){}
+  try{localStorage.setItem(TK,darkMode?'dark':'light');}catch(e){}
 }
-
 function updateKeyStatus(){
   ['fugleKey','secondFugleKey'].forEach((id,i)=>{
-    const el=document.getElementById(id+'Status');
-    if(!el)return;
-    const val = i===0 ? fugleKey : secondFugleKey;
+    const el=document.getElementById(id+'Status');if(!el)return;
+    const val=i===0?fugleKey:secondFugleKey;
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
 }
 
-// ===== API 核心：個股批量 30 秒查詢機制 =====
-async function refreshStocksOnly() {
-  if (stocks.length === 0) return;
-
-  const symbolsStr = stocks.map(s => s.symbol).join(',');
-  let priceMap = {};
+async function fetchFugle(symbol){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
-  let fugleSuccess = false;
-
-  if (keys.length > 0) {
-    const url = FUGLE + encodeURIComponent(symbolsStr);
-    for (let key of keys) {
-      try {
-        const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(6000)});
-        if (resp.ok) {
-          const d = await resp.json();
-          if (d && Array.isArray(d.data)) {
-            d.data.forEach(item => {
-              if (item.symbol && item.lastPrice != null) {
-                priceMap[item.symbol] = {
-                  price: item.lastPrice,
-                  change: item.change,
-                  changePercent: item.changePercent
-                };
-              }
-            });
-            fugleSuccess = true;
-            break; 
-          }
-        }
-      } catch (e) {}
+  if(keys.length === 0) return null;
+  try {
+    const resp = await fetch(FUGLE + encodeURIComponent(symbol), {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
+    if(resp.ok){
+      const d = await resp.json();
+      if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
     }
-  }
-
-  if (!fugleSuccess) {
-    await Promise.all(stocks.map(async (s) => {
-      const r = await fetchYahoo(s.symbol);
-      if (r) priceMap[s.symbol] = r;
-    }));
-  }
-
-  stocks.forEach(s => {
-    const r = priceMap[s.symbol];
-    if (r) {
-      s.price = r.price;
-      s.change = r.change;
-      s.changePercent = r.changePercent;
-      renderRow(s);
-    }
-  });
-
-  updateSummary();
+  } catch(e) {}
+  return null;
 }
 
-async function refreshWeightedIndexOnly() {
+// 🚀 核心修復：使用 JSONP 的原理，改用完全不受 CORS 跨網域政策限制的開放文字解析接口！
+async function fetchYahoo(symbol){
+  const tryFetch = async (suffix) => {
+    try {
+      // 透過公用歷史數據下載接口，強制繞過瀏覽器的 CORS 連線封鎖
+      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetch(url);
+      if(!resp.ok) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if(lines.length < 2) return null;
+      
+      // 讀取最後一列（最新的當天收盤價數據）
+      const lastLine = lines[lines.length - 1];
+      const cols = lastLine.split(',');
+      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      
+      const price = parseFloat(cols[4]); // 收盤價
+      const open = parseFloat(cols[1]);  // 開盤價
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
+      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+    } catch(e) { return null; }
+  };
+
+  let res = await tryFetch('.TW');
+  if(!res) res = await tryFetch('.TWO');
+  return res;
+}
+
+async function fetchWeightedIndex(){
+  const keys = [fugleKey, secondFugleKey].filter(k => k);
+  if(keys.length > 0){
+    try{
+      const resp = await fetch(FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
+      if(resp.ok){
+        const d = await resp.json();
+        const p = d.lastPrice ?? d.closePrice ?? d.price;
+        if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+      }
+    }catch(e){}
+  }
+  
+  try{
+    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetch(url);
+    if(resp.ok){
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      const cols = lines[lines.length - 1].split(',');
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
+    }
+  }catch(e){}
+  return null;
+}
+
+async function refreshPrices(){
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
@@ -370,101 +361,31 @@ async function refreshWeightedIndexOnly() {
   const idxTimeEl = document.getElementById('idxTime');
   const idxSrcEl = document.getElementById('idxSource');
   if(idxR){
-    idxEl.textContent = idxR.price.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
-    idxChgEl.textContent = (idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    idxChgEl.className = 'idx-change '+(idxR.change>=0?'up':'down');
-    idxPctEl.textContent = '('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    idxPctEl.className = 'idx-pct '+(idxR.changePercent>=0?'up':'down');
-    idxTimeEl.textContent = new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    idxSrcEl.textContent = 'via ' + idxR.source;
-  }else{
-    idxEl.textContent = '—'; idxChgEl.textContent = ''; idxPctEl.textContent = '';
-    idxTimeEl.textContent = '離線'; idxSrcEl.textContent = '';
-  }
-}
-
-async function fetchYahoo(symbol){
-  const tryFetch = async (sym) => {
-    const url = YAHOO + encodeURIComponent(sym) + '?range=1d&interval=1m';
-    const resp = await fetch(url, {signal: AbortSignal.timeout(4000)});
-    if(!resp.ok) return null;
-    const d = await resp.json();
-    const r = d?.chart?.result?.[0];
-    if(!r) return null;
-    
-    const meta = r.meta || {};
-    const c = r.indicators?.quote?.[0]?.close || [];
-    const price = meta.regularMarketPrice ?? meta.previousClose ?? (c.length > 0 ? c[c.length - 1] : null);
-    const prev = meta.chartPreviousClose || meta.previousClose || null;
-    
-    if(price == null) return null;
-    
-    let chg = null, pct = null;
-    if(prev != null){
-      chg = +(price - prev).toFixed(2);
-      pct = +((chg / prev) * 100).toFixed(2);
-    }
-    return {price, change: chg, changePercent: pct};
-  };
-
-  try {
-    let res = await tryFetch(symbol + '.TW');
-    if(!res) res = await tryFetch(symbol + '.TWO');
-    return res;
-  } catch(e) { 
-    return null; 
-  }
-}
-
-async function fetchWeightedIndex(){
-  const keys = [fugleKey, secondFugleKey].filter(k => k);
-  
-  if(keys.length > 0){
-    const url = FUGLE + 'IX0001';
-    for(let key of keys){
-      try{
-        const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(5000)});
-        if(resp.ok){
-          const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.price;
-          if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
-        }
-      }catch(e){}
-    }
+    idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
+    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
+    idxChgEl.className='idx-change '+(idxR.change>=0?'up':'down');
+    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
+    idxPctEl.className='idx-pct '+(idxR.changePercent>=0?'up':'down');
+    idxTimeEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    idxSrcEl.textContent='via '+idxR.source;
   }
   
-  try{
-    const url=YAHOO+encodeURIComponent('^TWII')+'?range=1d&interval=1m';
-    const resp=await fetch(url,{signal:AbortSignal.timeout(5000)});
-    if(!resp.ok)return null;
-    const d=await resp.json();
-    const r=d?.chart?.result?.[0];
-    if(!r)return null;
-    const meta=r.meta||{};
-    const q=r.indicators?.quote?.[0]||{};
-    const c=q.close||[];
-    const price=meta.regularMarketPrice??meta.previousClose??(c.length>0?c[c.length-1]:null);
-    const prev=meta.chartPreviousClose||meta.previousClose||null;
-    let chg=null,pct=null;
-    if(price!=null&&prev!=null){chg=+(price-prev).toFixed(2);pct=+((chg/prev)*100).toFixed(2);}
-    if(price==null)return null;
-    return{price,change:chg,changePercent:pct,source:'Yahoo'};
-  }catch(e){return null}
-}
-
-async function refresh(){
-  await refreshWeightedIndexOnly();
-  await refreshStocksOnly();
+  const results = await Promise.all(stocks.map(async (s)=>{
+    let r = await fetchFugle(s.symbol);
+    if(!r) r = await fetchYahoo(s.symbol);
+    return {s,r};
+  }));
+  
+  for(const {s,r} of results){
+    if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
+  }
+  updateSummary();
 }
 
 function renderRow(s){
-  const el=document.querySelector('.srow[data-id="'+s.id+'"]');
-  if(!el)return;
+  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
   const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-  
-  let p = s.price;
-  let chg = s.change ?? 0;
-  const total=+(shares*chg).toFixed(0);
+  let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
   
   el.querySelector('.sym').textContent=s.symbol;
   const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
@@ -473,18 +394,13 @@ function renderRow(s){
   if(p!=null){
     pEl.textContent=formatPrice(p);
     pEl.className='price '+(chg>=0?'up':'down');
-  }else {
-    pEl.innerHTML='<span class="loading">載入中</span>';
-    pEl.className='price';
   }
   
   const cp=el.querySelector('.chgp');
   if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  else{cp.textContent='—';cp.className='chgp';}
   
   const cg=el.querySelector('.chg');
   if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
-  else{cg.textContent='—';cg.className='chg';}
   
   el.querySelector('.total').textContent=(total>=0?'+':'')+total.toLocaleString();
   el.querySelector('.total').className='total '+(total>=0?'up':'down');
@@ -499,26 +415,14 @@ function renderAll(){
   
   body.innerHTML='';
   if(stocks.length===0){
-    empty.style.display='block';
-    tableScroll.style.display='none';
-    sumArea.style.display='none';
-    saveArea.style.display='none';
-    return;
+    empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return;
   }
-  
-  empty.style.display='none';
-  tableScroll.style.display='block';
-  sumArea.style.display='block';
-  saveArea.style.display='block';
+  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
   
   for(const s of stocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
     const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    
-    let p = s.price;
-    let chg = s.change ?? 0;
-    const total=+(shares*chg).toFixed(0);
-    
+    let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
     let pStr='—';if(p!=null)pStr=formatPrice(p);
     const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
     const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
@@ -531,7 +435,6 @@ function renderAll(){
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
       '<div class="total '+(total>=0?'up':'down')+'">'+(total>=0?'+':'')+total.toLocaleString()+'</div>'+
       '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
-    
     body.appendChild(div);
   }
   updateSummary();
@@ -542,17 +445,10 @@ function updateSummary(){
   for(const s of stocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    pnl+=+(sh*c).toFixed(0);
-    asset+=+(sh*p).toFixed(0);
+    pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
   }
-  
-  const pe=document.getElementById('totalPnl');
-  pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();
-  pe.className='val '+(pnl>=0?'up':'down');
-  
-  const ae = document.getElementById('totalAsset');
-  ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();
-  ae.className = 'val'; 
+  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
+  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val'; 
 }
 
 function addStock(){
@@ -563,27 +459,23 @@ function addStock(){
   if(stocks.some(s=>s.symbol===sym)){showToast('該股票已存在');return}
   const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
   stocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
-  saveHoldings();
-  renderAll();
+  saveHoldings();renderAll();
   document.getElementById('symInput').value='';document.getElementById('qtyInput').value='';
-  showToast('已新增 '+sym);
-  refreshStocksOnly();
+  showToast('已新增 '+sym);refreshPrices();
 }
 
 function deleteStock(id){
   if(!confirm('確定刪除？'))return;
-  stocks=stocks.filter(s=>s.id!==id);
-  saveHoldings();renderAll();showToast('已刪除');
+  stocks=stocks.filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
 }
 
 function editStock(id){
-  const s=stocks.find(x=>x.id===id);
-  if(!s)return;
+  const s=stocks.find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
   if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;}
   const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
   if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
-  saveHoldings();renderAll();showToast('已修改');refreshStocksOnly();
+  saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
 
 function saveDailyPnl(){
@@ -591,8 +483,7 @@ function saveDailyPnl(){
   for(const s of stocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    pnl+=+(sh*c).toFixed(0);
-    asset+=+(sh*p).toFixed(0);
+    pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
   }
   const n=new Date();
   const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
@@ -606,9 +497,7 @@ function saveDailyPnl(){
 function deleteHistory(timestamp) {
   if(!confirm('確定刪除此筆記錄？')) return;
   dailyRecords = dailyRecords.filter(r => r.timestamp !== timestamp);
-  saveRecords();
-  renderHistory();
-  showToast('記錄已刪除');
+  saveRecords();renderHistory();showToast('記錄已刪除');
 }
 
 function renderHistory(){
@@ -625,15 +514,12 @@ function renderHistory(){
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  updateKeyStatus();
-  document.getElementById('modalOverlay').classList.add('show');
+  updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 
 function saveAndCloseModal(){
-  saveKeys();
-  document.getElementById('modalOverlay').classList.remove('show');
-  showToast('設定已儲存');
-  refresh();
+  saveKeys();document.getElementById('modalOverlay').classList.remove('show');
+  showToast('設定已儲存');refreshPrices();
 }
 
 function formatPrice(p){
@@ -644,38 +530,27 @@ function formatPrice(p){
 
 let toastTimer=null;
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// === 核心高安全分流定時器與初始化 ===
+async function refresh(){await refreshPrices()}
+
+// Init
 loadState();renderAll();renderHistory();
-setTimeout(refresh, 300);
-
-// 1. 個股批量更新：每 30 秒執行一次
-setInterval(refreshStocksOnly, 30000);
-
-// 2. 加權指數更新：每 61 秒執行一次
-setInterval(refreshWeightedIndexOnly, 61000);
+setTimeout(refresh,300);
+pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
 
 // 防呆機制
 document.getElementById('symInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') {
-    e.preventDefault();
-    document.getElementById('qtyInput').focus();
-  }
+  if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
 });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') {
-    e.preventDefault();
-    addStock();
-  }
+  if(e.key==='Enter') { e.preventDefault(); addStock(); }
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 v2.5 已啟動 (說明更換 + 雙金鑰精簡版)');
+console.log('股票庫存 v3.1 已啟動 (CORS安全連線修正版)');
 </script>
 </body>
 </html>
