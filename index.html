@@ -431,7 +431,12 @@ function renderRow(s){
   const pEl=el.querySelector('.price');
   if(p!=null){
     pEl.textContent=formatPrice(p);
-  }else pEl.innerHTML='<span class="loading">載入中</span>';
+    // 補上股價跟隨漲跌呈現紅綠色的邏輯
+    pEl.className='price '+(chg>=0?'up':'down');
+  }else {
+    pEl.innerHTML='<span class="loading">載入中</span>';
+    pEl.className='price';
+  }
   
   const cp=el.querySelector('.chgp');
   if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
@@ -478,10 +483,11 @@ function renderAll(){
     const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
     const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
     
+    // 這裡同樣幫股價所在的 <div> 加上對應漲跌的 'up' 或 'down' class
     div.innerHTML=
       '<div class="sym">'+s.symbol+'</div>'+
       '<div class="qty-cell">'+s.displayQty+' '+s.displayUnit+'</div>'+
-      '<div class="price">'+pStr+'</div>'+
+      '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
       '<div class="total '+(total>=0?'up':'down')+'">'+(total>=0?'+':'')+total.toLocaleString()+'</div>'+
