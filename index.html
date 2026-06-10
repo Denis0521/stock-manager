@@ -83,8 +83,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .sum-row .lab{color:#5f6368;font-size:16px}
 .dark .sum-row .lab{color:#8b949e}
 .sum-row .val{font-size:16px;font-weight:700}
-.sum-divider{height:1px;background:#e8eaed;margin:6px 0}
-.dark .sum-divider{background:#30363d}
+.summary-divider{height:1px;background:#e8eaed;margin:6px 0}
+.dark .summary-divider{background:#30363d}
 .save-area{margin:0 14px 10px}
 .btn-save{width:100%;padding:13px;background:#1a73e8;border:none;color:#fff;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
 .btn-save:active{background:#1557b0}
@@ -133,21 +133,17 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
   <link rel="manifest" href="manifest.json">
   <script>
-    // 🌟 核心修改點：加入 Service Worker 的即時更新機制
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(reg => {
             console.log('Service Worker 註冊成功:', reg.scope);
-            
-            // 監聽是否有新的 Service Worker 檔案（代表你上傳了新程式碼）
             reg.onupdatefound = () => {
               const installingWorker = reg.installing;
               if (installingWorker == null) return;
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    // 當新版檔案下載完成，直接利用網頁原有的 Toast 提示使用者，並在 2 秒後重整
                     if (typeof showToast === 'function') {
                       showToast('系統已在背景更新，2秒後將自動重新整理...');
                     } else {
@@ -177,7 +173,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
 <div class="summary" id="summaryArea" style="display:none;">
   <div class="sum-row"><span class="lab">即時盈虧總計</span><span class="val" id="totalPnl">+0</span></div>
-  <div class="sum-divider"></div>
+  <div class="summary-divider"></div>
   <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
 </div>
 <div class="save-area" id="saveArea" style="display:none;"><button type="button" class="btn-save" onclick="saveDailyPnl()">儲存今日收盤盈虧總計</button></div>
@@ -232,28 +228,24 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     </div>
     
     <div class="info-box">
-      申請Fugle API免費版，一個賬號僅能5檔股票使用，第一組API key包含加權指數，僅有4檔股票可使用，如果API key留空白，軟體會經由Yahoo提供報價，將會延遲15分鐘。
+      本軟體已整合富果批量 API 技術。個股資產每 30 秒自動打包刷新，加權指數每 61 秒分流更新，完美避開免費版流量紅線。支援 10 檔以上多持股監控，穩健且不降速。無金鑰時將自動切換至 Yahoo 延遲報價。
     </div>
 
     <label>Fugle API Key（主要）</label>
     <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
     <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
     
-    <label>Fugle API Key 2（備用1）</label>
+    <label>Fugle API Key 2（備用）</label>
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-
-    <label>Fugle API Key 3（備用2）</label>
-    <input type="text" id="thirdFugleKeyInput" placeholder="輸入第三組 Key（選填）" autocomplete="off">
-    <div><span class="key-status none" id="thirdFugleKeyStatus">未設定</span></div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
   </div>
 </div>
 
 <script>
-let stocks=[],fugleKey='',secondFugleKey='',thirdFugleKey='',dailyRecords=[],darkMode=false,pollTimer=null;
-const SK='tw_stock_portfolio',FK='tw_fugle_key',SFK='tw_second_fugle_key',TFK='tw_third_fugle_key',RK='tw_records',TK='tw_theme';
+let stocks=[],fugleKey='',secondFugleKey='',dailyRecords=[],darkMode=false;
+const SK='tw_stock_portfolio',FK='tw_fugle_key',SFK='tw_second_fugle_key',RK='tw_records',TK='tw_theme';
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 const YAHOO='https://query2.finance.yahoo.com/v8/finance/chart/';
@@ -263,7 +255,6 @@ function loadState(){
     const s=localStorage.getItem(SK);if(s)stocks=JSON.parse(s);
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const tf=localStorage.getItem(TFK);if(tf)thirdFugleKey=tf;
     const r=localStorage.getItem(RK);if(r)dailyRecords=JSON.parse(r);
     const t=localStorage.getItem(TK);if(t)darkMode=t==='dark';
   }catch(e){
@@ -273,7 +264,6 @@ function loadState(){
   document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('thirdFugleKeyInput').value=thirdFugleKey;
   updateKeyStatus();
 }
 
@@ -289,11 +279,9 @@ function saveHoldings(){
 function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
-  thirdFugleKey=document.getElementById('thirdFugleKeyInput').value.trim();
   try{
     localStorage.setItem(FK,fugleKey);
     localStorage.setItem(SFK,secondFugleKey);
-    localStorage.setItem(TFK,thirdFugleKey);
   }catch(e){}
   updateKeyStatus();
 }
@@ -311,32 +299,88 @@ function toggleTheme(){
 }
 
 function updateKeyStatus(){
-  ['fugleKey','secondFugleKey','thirdFugleKey'].forEach((id,i)=>{
+  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
     const el=document.getElementById(id+'Status');
     if(!el)return;
-    const val = i===0 ? fugleKey : (i===1 ? secondFugleKey : thirdFugleKey);
+    const val = i===0 ? fugleKey : secondFugleKey;
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
 }
 
-// ===== API =====
-async function fetchFugle(symbol){
-  const keys = [fugleKey, secondFugleKey, thirdFugleKey].filter(k => k);
-  if(keys.length === 0) return null;
+// ===== API 核心：個股批量 30 秒查詢機制 =====
+async function refreshStocksOnly() {
+  if (stocks.length === 0) return;
 
-  const url = FUGLE + encodeURIComponent(symbol);
-  
-  for(let key of keys){
-    try {
-      const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(6000)});
-      if(resp.ok){
-        const d = await resp.json();
-        if(d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent};
-      }
-    } catch(e) {}
+  const symbolsStr = stocks.map(s => s.symbol).join(',');
+  let priceMap = {};
+  const keys = [fugleKey, secondFugleKey].filter(k => k);
+  let fugleSuccess = false;
+
+  if (keys.length > 0) {
+    const url = FUGLE + encodeURIComponent(symbolsStr);
+    for (let key of keys) {
+      try {
+        const resp = await fetch(url, {headers: {'X-API-KEY': key}, signal: AbortSignal.timeout(6000)});
+        if (resp.ok) {
+          const d = await resp.json();
+          if (d && Array.isArray(d.data)) {
+            d.data.forEach(item => {
+              if (item.symbol && item.lastPrice != null) {
+                priceMap[item.symbol] = {
+                  price: item.lastPrice,
+                  change: item.change,
+                  changePercent: item.changePercent
+                };
+              }
+            });
+            fugleSuccess = true;
+            break; 
+          }
+        }
+      } catch (e) {}
+    }
   }
-  return null;
+
+  if (!fugleSuccess) {
+    await Promise.all(stocks.map(async (s) => {
+      const r = await fetchYahoo(s.symbol);
+      if (r) priceMap[s.symbol] = r;
+    }));
+  }
+
+  stocks.forEach(s => {
+    const r = priceMap[s.symbol];
+    if (r) {
+      s.price = r.price;
+      s.change = r.change;
+      s.changePercent = r.changePercent;
+      renderRow(s);
+    }
+  });
+
+  updateSummary();
+}
+
+async function refreshWeightedIndexOnly() {
+  const idxR = await fetchWeightedIndex();
+  const idxEl = document.getElementById('idxPrice');
+  const idxChgEl = document.getElementById('idxChange');
+  const idxPctEl = document.getElementById('idxPct');
+  const idxTimeEl = document.getElementById('idxTime');
+  const idxSrcEl = document.getElementById('idxSource');
+  if(idxR){
+    idxEl.textContent = idxR.price.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+    idxChgEl.textContent = (idxR.change>=0?'+':'')+idxR.change.toFixed(2);
+    idxChgEl.className = 'idx-change '+(idxR.change>=0?'up':'down');
+    idxPctEl.textContent = '('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
+    idxPctEl.className = 'idx-pct '+(idxR.changePercent>=0?'up':'down');
+    idxTimeEl.textContent = new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    idxSrcEl.textContent = 'via ' + idxR.source;
+  }else{
+    idxEl.textContent = '—'; idxChgEl.textContent = ''; idxPctEl.textContent = '';
+    idxTimeEl.textContent = '離線'; idxSrcEl.textContent = '';
+  }
 }
 
 async function fetchYahoo(symbol){
@@ -373,7 +417,7 @@ async function fetchYahoo(symbol){
 }
 
 async function fetchWeightedIndex(){
-  const keys = [fugleKey, secondFugleKey, thirdFugleKey].filter(k => k);
+  const keys = [fugleKey, secondFugleKey].filter(k => k);
   
   if(keys.length > 0){
     const url = FUGLE + 'IX0001';
@@ -408,36 +452,9 @@ async function fetchWeightedIndex(){
   }catch(e){return null}
 }
 
-async function refreshPrices(){
-  const idxR=await fetchWeightedIndex();
-  const idxEl=document.getElementById('idxPrice');
-  const idxChgEl=document.getElementById('idxChange');
-  const idxPctEl=document.getElementById('idxPct');
-  const idxTimeEl=document.getElementById('idxTime');
-  const idxSrcEl=document.getElementById('idxSource');
-  if(idxR){
-    idxEl.textContent=idxR.price.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
-    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    idxChgEl.className='idx-change '+(idxR.change>=0?'up':'down');
-    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    idxPctEl.className='idx-pct '+(idxR.changePercent>=0?'up':'down');
-    idxTimeEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    idxSrcEl.textContent='via '+idxR.source;
-  }else{
-    idxEl.textContent='—';idxChgEl.textContent='';idxPctEl.textContent='';
-    idxTimeEl.textContent='離線';idxSrcEl.textContent='';
-  }
-  
-  const results = await Promise.all(stocks.map(async (s)=>{
-    let r = await fetchFugle(s.symbol);
-    if(!r) r = await fetchYahoo(s.symbol);
-    return {s,r};
-  }));
-  
-  for(const {s,r} of results){
-    if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
-  }
-  updateSummary();
+async function refresh(){
+  await refreshWeightedIndexOnly();
+  await refreshStocksOnly();
 }
 
 function renderRow(s){
@@ -550,7 +567,7 @@ function addStock(){
   renderAll();
   document.getElementById('symInput').value='';document.getElementById('qtyInput').value='';
   showToast('已新增 '+sym);
-  refreshPrices();
+  refreshStocksOnly();
 }
 
 function deleteStock(id){
@@ -566,7 +583,7 @@ function editStock(id){
   if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;}
   const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
   if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
-  saveHoldings();renderAll();showToast('已修改');refreshPrices();
+  saveHoldings();renderAll();showToast('已修改');refreshStocksOnly();
 }
 
 function saveDailyPnl(){
@@ -608,7 +625,6 @@ function renderHistory(){
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('thirdFugleKeyInput').value=thirdFugleKey;
   updateKeyStatus();
   document.getElementById('modalOverlay').classList.add('show');
 }
@@ -617,7 +633,7 @@ function saveAndCloseModal(){
   saveKeys();
   document.getElementById('modalOverlay').classList.remove('show');
   showToast('設定已儲存');
-  refreshPrices();
+  refresh();
 }
 
 function formatPrice(p){
@@ -634,12 +650,15 @@ function showToast(msg){
   toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-async function refresh(){await refreshPrices()}
-
-// Init
+// === 核心高安全分流定時器與初始化 ===
 loadState();renderAll();renderHistory();
-setTimeout(refresh,300);
-pollTimer=setInterval(refresh,35000);
+setTimeout(refresh, 300);
+
+// 1. 個股批量更新：每 30 秒執行一次
+setInterval(refreshStocksOnly, 30000);
+
+// 2. 加權指數更新：每 61 秒執行一次
+setInterval(refreshWeightedIndexOnly, 61000);
 
 // 防呆機制
 document.getElementById('symInput').addEventListener('keydown',e=>{
@@ -656,7 +675,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 v2.2 已啟動 (總計置頂版)');
+console.log('股票庫存 v2.5 已啟動 (說明更換 + 雙金鑰精簡版)');
 </script>
 </body>
 </html>
