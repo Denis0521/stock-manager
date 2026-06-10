@@ -133,10 +133,34 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
   <link rel="manifest" href="manifest.json">
   <script>
+    // 🌟 核心修改點：加入 Service Worker 的即時更新機制
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
+          .then(reg => {
+            console.log('Service Worker 註冊成功:', reg.scope);
+            
+            // 監聽是否有新的 Service Worker 檔案（代表你上傳了新程式碼）
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              if (installingWorker == null) return;
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    // 當新版檔案下載完成，直接利用網頁原有的 Toast 提示使用者，並在 2 秒後重整
+                    if (typeof showToast === 'function') {
+                      showToast('系統已在背景更新，2秒後將自動重新整理...');
+                    } else {
+                      alert('偵測到系統更新，網頁即將自動重新整理！');
+                    }
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 2000);
+                  }
+                }
+              };
+            };
+          })
           .catch(err => console.log('Service Worker 註冊失敗:', err));
       });
     }
@@ -431,7 +455,6 @@ function renderRow(s){
   const pEl=el.querySelector('.price');
   if(p!=null){
     pEl.textContent=formatPrice(p);
-    // 補上股價跟隨漲跌呈現紅綠色的邏輯
     pEl.className='price '+(chg>=0?'up':'down');
   }else {
     pEl.innerHTML='<span class="loading">載入中</span>';
@@ -483,7 +506,6 @@ function renderAll(){
     const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
     const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
     
-    // 這裡同樣幫股價所在的 <div> 加上對應漲跌的 'up' 或 'down' class
     div.innerHTML=
       '<div class="sym">'+s.symbol+'</div>'+
       '<div class="qty-cell">'+s.displayQty+' '+s.displayUnit+'</div>'+
@@ -574,11 +596,11 @@ function deleteHistory(timestamp) {
 
 function renderHistory(){
   const body=document.getElementById('historyBody');
-  if(dailyRecords.length===0){body.innerHTML='<div class=\"hist-empty\">尚無記錄</div>';return;}
+  if(dailyRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
   body.innerHTML='';
   for(const r of dailyRecords){
     const d=document.createElement('div');d.className='hist-item';
-    d.innerHTML='<div class="hist-item-left"><span class=\"hdate\">'+r.date+' '+r.time+'</span><span class=\"hval '+(r.totalPnl>=0?'up':'down')+'\">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class=\"del-hist-btn\" onclick=\"deleteHistory('+r.timestamp+')\">✕</button>';
+    d.innerHTML='<div class="hist-item-left"><span class="hdate">'+r.date+' '+r.time+'</span><span class="hval '+(r.totalPnl>=0?'up':'down')+'">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory('+r.timestamp+')">✕</button>';
     body.appendChild(d);
   }
 }
@@ -619,7 +641,7 @@ loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
 pollTimer=setInterval(refresh,35000);
 
-// 防呆機制：使用 e.preventDefault() 避免 Enter 鍵誤觸發重新整理表單
+// 防呆機制
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') {
     e.preventDefault();
