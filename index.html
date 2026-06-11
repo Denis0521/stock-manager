@@ -131,11 +131,14 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
   <link rel="manifest" href="manifest.json">
   <script>
+    // 🚀 核心優化：PWA 新版文件下載完畢後，1 秒內自動進行無縫的完全重新整理
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(reg => {
             console.log('Service Worker 註冊成功:', reg.scope);
+            
+            // 主動偵測 sw.js 文件的位元變更
             reg.onupdatefound = () => {
               const installingWorker = reg.installing;
               if (installingWorker == null) return;
@@ -143,11 +146,12 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
                 if (installingWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
                     if (typeof showToast === 'function') {
-                      showToast('系統已在背景更新，2秒後將自動重新整理...');
-                    } else {
-                      alert('偵測到系統更新，網頁即將自動重新整理！');
+                      showToast('🚀 偵測到系統升級，正在自動清除快取並重新整理...');
                     }
-                    setTimeout(() => { window.location.reload(); }, 2000);
+                    setTimeout(() => {
+                      // 強制瀏覽器跳過快取，直接向伺服器重新拉一份全新的網頁
+                      window.location.reload(true); 
+                    }, 1200);
                   }
                 }
               };
@@ -295,11 +299,9 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 🚀 核心修復：使用 JSONP 的原理，改用完全不受 CORS 跨網域政策限制的開放文字解析接口！
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
-      // 透過公用歷史數據下載接口，強制繞過瀏覽器的 CORS 連線封鎖
       const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
       const resp = await fetch(url);
       if(!resp.ok) return null;
@@ -307,13 +309,12 @@ async function fetchYahoo(symbol){
       const lines = text.trim().split('\n');
       if(lines.length < 2) return null;
       
-      // 讀取最後一列（最新的當天收盤價數據）
       const lastLine = lines[lines.length - 1];
       const cols = lastLine.split(',');
       if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
       
-      const price = parseFloat(cols[4]); // 收盤價
-      const open = parseFloat(cols[1]);  // 開盤價
+      const price = parseFloat(cols[4]); 
+      const open = parseFloat(cols[1]);  
       const chg = +(price - open).toFixed(2);
       const pct = +((chg / open) * 100).toFixed(2);
       return {price, change: chg, changePercent: pct, source: 'Yahoo'};
@@ -469,6 +470,7 @@ function deleteStock(id){
   stocks=stocks.filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
 }
 
+// ...其餘編輯與歷史記錄代碼維持不變...
 function editStock(id){
   const s=stocks.find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
@@ -477,7 +479,6 @@ function editStock(id){
   if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
   saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
-
 function saveDailyPnl(){
   let pnl=0,asset=0;
   for(const s of stocks){
@@ -493,13 +494,11 @@ function saveDailyPnl(){
   saveRecords();renderHistory();
   showToast('已儲存 '+ds+' 盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
-
 function deleteHistory(timestamp) {
   if(!confirm('確定刪除此筆記錄？')) return;
   dailyRecords = dailyRecords.filter(r => r.timestamp !== timestamp);
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
-
 function renderHistory(){
   const body=document.getElementById('historyBody');
   if(dailyRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
@@ -539,7 +538,7 @@ async function refresh(){await refreshPrices()}
 // Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
+pollTimer=setInterval(refresh,30000); // 每 30 秒安全同步更新
 
 // 防呆機制
 document.getElementById('symInput').addEventListener('keydown',e=>{
