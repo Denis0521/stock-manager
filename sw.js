@@ -1,5 +1,5 @@
 // 每次修改程式碼，建議可以把 v1 改成 v2，強制瀏覽器判定更新
-const CACHE_NAME = 'stock-manager-v2'; 
+const CACHE_NAME = 'stock-manager-v1'; 
 const ASSETS = [
   'index.html',
   'manifest.json'
