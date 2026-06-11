@@ -21,7 +21,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 /* --- 分頁切換列 --- */
 .tabs-bar{display:flex;background:#fff;padding:6px 14px;margin:10px 14px 0;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);gap:6px}
 .dark .tabs-bar{background:#161b22;box-shadow:none;border:1px solid #30363d}
-.tab-btn{flex:1;padding:8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;text-align:center;transition:all 0.2s}
+.tab-btn{flex:1;padding:8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dark .tab-btn{background:#21262d;color:#8b949e}
 .tab-btn.active{background:#1a73e8;color:#fff}
 .dark .tab-btn.active{background:#1f6feb;color:#fff}
@@ -155,7 +155,6 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .tab-btn { background: #1a1d22; color: #a0aec0; }
 .tech .tab-btn.active { background: linear-gradient(135deg, #4a90e2 0%, #165298 100%); color: #fff; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.2); }
 .tech .btn-theme, .tech .btn-adv, .tech .srow .act button { background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%); border: 1px solid #4a5464; color: #e2e8f0; }
-/* 修正表格頭部白色塊 */
 .tech .list-header { background: transparent; border-bottom-color: #3d4552; }
 .tech .srow { border-bottom-color: #2d333f; }
 .tech .list-header > div:nth-child(1), .tech .srow > div:nth-child(1) { background-color: #2b3039 !important; border-radius: 4px 0 0 4px; }
@@ -178,7 +177,6 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .tab-btn { background: #0b132b; color: #95a5a6; }
 .blue-dark .tab-btn.active { background: #00b4d8; color: #fff; }
 .blue-dark .btn-theme, .blue-dark .btn-adv, .blue-dark .srow .act button { border-color: #3a506b; color: #fff; background: rgba(255,255,255,0.05); }
-/* 修正表格頭部白色塊 */
 .blue-dark .list-header { background: transparent; border-bottom-color: #3a506b; }
 .blue-dark .srow { border-bottom-color: #232f52; }
 .blue-dark .list-header > div:nth-child(1), .blue-dark .srow > div:nth-child(1) { background-color: #1c2541 !important; }
@@ -200,7 +198,6 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .tab-btn { background: #edf2f7; color: #4a5568; }
 .blue-light .tab-btn.active { background: #3182ce; color: #fff; }
 .blue-light .btn-theme, .blue-light .btn-adv, .blue-light .srow .act button { border-color: #cbd5e0; color: #4a5568; background: #fff; }
-/* 修正表格頭部白色塊 */
 .blue-light .list-header { background: #f0f7fd; border-bottom-color: #e2e8f0; }
 .blue-light .srow { border-bottom-color: #edf2f7; }
 .blue-light .list-header > div:nth-child(1), .blue-light .srow > div:nth-child(1) { background-color: #ffffff !important; }
@@ -222,7 +219,6 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .tab-btn { background: #fff5f5; color: #702459; }
 .pink .tab-btn.active { background: #d63384; color: #fff; }
 .pink .btn-theme, .pink .btn-adv, .pink .srow .act button { border-color: #fbb6ce; color: #b83280; background: #fff; }
-/* 修正表格頭部白色塊 */
 .pink .list-header { background: #fff0f6; border-bottom-color: #fed7d7; }
 .pink .srow { border-bottom-color: #fff5f5; }
 .pink .list-header > div:nth-child(1), .pink .srow > div:nth-child(1) { background-color: #ffffff !important; }
@@ -250,9 +246,9 @@ body.pink { background-color: #fff5f5; color: #702459; }
 </div>
 
 <div class="tabs-bar">
-  <button type="button" class="tab-btn active" onclick="switchTab(0)" id="tab0">分頁 A</button>
-  <button type="button" class="tab-btn" onclick="switchTab(1)" id="tab1">分頁 B</button>
-  <button type="button" class="tab-btn" onclick="switchTab(2)" id="tab2">分頁 C</button>
+  <button type="button" class="tab-btn active" onclick="switchTab(0)" ondblclick="renameTab(0)" id="tab0">分頁 A</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)" ondblclick="renameTab(1)" id="tab1">分頁 B</button>
+  <button type="button" class="tab-btn" onclick="switchTab(2)" ondblclick="renameTab(2)" id="tab2">分頁 C</button>
 </div>
 
 <div class="summary" id="summaryArea" style="display:none;">
@@ -333,9 +329,10 @@ body.pink { background-color: #fff5f5; color: #702459; }
 let currentTab = 0;
 let tabStocks = [[], [], []];
 let tabRecords = [[], [], []];
+let tabNames = ['分頁 A', '分頁 B', '分頁 C']; // 預設名稱
 
 let fugleKey='',secondFugleKey='',pollTimer=null;
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab';
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
@@ -346,6 +343,9 @@ function loadState(){
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
+    
+    // 載入分頁名稱
+    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
 
     for(let i=0; i<3; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -408,9 +408,26 @@ function switchTab(tabIndex){
   refreshPrices();
 }
 
+// 變更分頁名稱函式
+function renameTab(tabIndex) {
+  const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`;
+  const newName = prompt('請輸入此分頁的新名稱：', oldName);
+  if (newName !== null) {
+    const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim();
+    tabNames[tabIndex] = finalName;
+    try {
+      localStorage.setItem(TN_KEY, JSON.stringify(tabNames));
+    } catch(e){}
+    updateTabUI();
+    showToast(`已更名為「${finalName}」`);
+  }
+}
+
 function updateTabUI(){
   for(let i=0; i<3; i++){
     const btn = document.getElementById(`tab${i}`);
+    // 渲染自訂名稱
+    btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
     if(i === currentTab) btn.classList.add('active');
     else btn.classList.remove('active');
   }
@@ -700,7 +717,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.1.0 已啟動 (完美修正表格標題色塊與外觀對齊)');
+console.log('股票庫存 V3.1.0 已啟動 (加入分頁自訂名稱功能)');
 </script>
 </body>
 </html>
