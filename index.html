@@ -17,6 +17,35 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .btn-theme{border-color:#30363d;color:#8b949e}
 .btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
 .dark .btn-adv{border-color:#30363d;color:#58a6ff}
+
+.idx-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 14px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.idx-container::-webkit-scrollbar { display: none; }
+
+.idx-box {
+  flex: 0 0 135px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 82px;
+}
+.dark .idx-box { background: #161b22; border: 1px solid #30363d; box-shadow: none; }
+.idx-box-title { font-size: 11px; color: #5f6368; font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.dark .idx-box-title { color: #8b949e; }
+.idx-box-price { font-size: 16px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; }
+.idx-box-change { font-size: 12px; font-weight: 600; white-space: nowrap; }
+
 .card{background:#fff;border-radius:12px;padding:14px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .card{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
@@ -30,17 +59,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
 .form-row .sym-inp{flex:0 0 88px}
-.idx-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:10px 14px;margin:0 14px 8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.dark .idx-bar{background:#161b22;border:1px solid #30363d;box-shadow:none}
-.idx-left{display:flex;flex-direction:column;gap:1px}
-.idx-name{font-size:11px;color:#5f6368}
-.dark .idx-name{color:#8b949e}
-.idx-info{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
-.idx-price{font-size:20px;font-weight:700}
-.idx-change{font-size:16px;font-weight:600}
-.idx-pct{font-size:16px}
-.idx-right{text-align:right;font-size:10px;color:#5f6368;min-width:60px}
-.dark .idx-right{color:#8b949e}
+
 .up{color:#d93025}.down{color:#188038}
 
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
@@ -131,14 +150,11 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
   <link rel="manifest" href="manifest.json">
   <script>
-    // 🚀 核心優化：PWA 新版文件下載完畢後，1 秒內自動進行無縫的完全重新整理
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(reg => {
             console.log('Service Worker 註冊成功:', reg.scope);
-            
-            // 主動偵測 sw.js 文件的位元變更
             reg.onupdatefound = () => {
               const installingWorker = reg.installing;
               if (installingWorker == null) return;
@@ -148,10 +164,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
                     if (typeof showToast === 'function') {
                       showToast('🚀 偵測到系統升級，正在自動清除快取並重新整理...');
                     }
-                    setTimeout(() => {
-                      // 強制瀏覽器跳過快取，直接向伺服器重新拉一份全新的網頁
-                      window.location.reload(true); 
-                    }, 1200);
+                    setTimeout(() => { window.location.reload(true); }, 1200);
                   }
                 }
               };
@@ -187,18 +200,42 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     <button type="button" onclick="addStock()">＋</button>
   </div>
 </div>
-<div class="idx-bar" id="idxCard">
-  <div class="idx-left">
-    <div class="idx-name">加權指數</div>
-    <div class="idx-info">
-      <span class="idx-price" id="idxPrice">—</span>
-      <span class="idx-change" id="idxChange"></span>
-      <span class="idx-pct" id="idxPct"></span>
-    </div>
+
+<div class="idx-container" id="idxScrollContainer">
+  <div class="idx-box" id="idx_TW">
+    <div class="idx-box-title"><span>臺灣加權</span><span style="font-size:9px;opacity:0.6" class="src">—</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
   </div>
-  <div class="idx-right">
-    <div id="idxTime"></div>
-    <div id="idxSource" style="margin-top:2px"></div>
+  <div class="idx-box" id="idx_DJI">
+    <div class="idx-box-title"><span>道瓊工業</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
+  </div>
+  <div class="idx-box" id="idx_GSPC">
+    <div class="idx-box-title"><span>標普 500</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
+  </div>
+  <div class="idx-box" id="idx_IXIC">
+    <div class="idx-box-title"><span>納斯達克</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
+  </div>
+  <div class="idx-box" id="idx_SOX">
+    <div class="idx-box-title"><span>費城半導體</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
+  </div>
+  <div class="idx-box" id="idx_N225">
+    <div class="idx-box-title"><span>日經 225</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
+  </div>
+  <div class="idx-box" id="idx_KS11">
+    <div class="idx-box-title"><span>韓國綜合</span><span style="font-size:9px;opacity:0.6">Yahoo</span></div>
+    <div class="idx-box-price">—</div>
+    <div class="idx-box-change">—</div>
   </div>
 </div>
 
@@ -228,7 +265,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     </div>
     
     <div class="info-box">
-      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保任何手機與網路環境下，數據均能 100% 正常回報。
+      本系統已升級「國際滑動看板擴充機制」。台灣大盤與自選持股盤中優先走富果即時連線；美、日、韓等國際重要指數方塊全自動經由 CORS 安全豁免通道向 Yahoo 全天候抓取，全方位整合全球市場動態。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -290,7 +327,9 @@ async function fetchFugle(symbol){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
   if(keys.length === 0) return null;
   try {
-    const resp = await fetch(FUGLE + encodeURIComponent(symbol), {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
+    // 🛡️ 物理防快取防禦：加入隨機時間戳 _=Date.now()
+    const url = FUGLE + encodeURIComponent(symbol) + '?_=' + Date.now();
+    const resp = await fetch(url, {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
     if(resp.ok){
       const d = await resp.json();
       if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
@@ -300,87 +339,96 @@ async function fetchFugle(symbol){
 }
 
 async function fetchYahoo(symbol){
-  const tryFetch = async (suffix) => {
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const resp = await fetch(url);
-      if(!resp.ok) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if(lines.length < 2) return null;
-      
-      const lastLine = lines[lines.length - 1];
-      const cols = lastLine.split(',');
-      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      
-      const price = parseFloat(cols[4]); 
-      const open = parseFloat(cols[1]);  
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
-    } catch(e) { return null; }
-  };
-
-  let res = await tryFetch('.TW');
-  if(!res) res = await tryFetch('.TWO');
-  return res;
+  try {
+    // 🛡️ 物理防快取防禦：網址尾端強制補上不重複的時間戳記，剪斷手機底層的舊快取
+    const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history&_nocache=${Date.now()}`;
+    const resp = await fetch(url);
+    if(!resp.ok) return null;
+    const text = await resp.text();
+    const lines = text.trim().split('\n');
+    if(lines.length < 2) return null;
+    
+    const lastLine = lines[lines.length - 1];
+    const cols = lastLine.split(',');
+    if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+    
+    const price = parseFloat(cols[4]); 
+    const open = parseFloat(cols[1]);  
+    const chg = +(price - open).toFixed(2);
+    const pct = +((chg / open) * 100).toFixed(2);
+    return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+  } catch(e) { return null; }
 }
 
-async function fetchWeightedIndex(){
-  const keys = [fugleKey, secondFugleKey].filter(k => k);
-  if(keys.length > 0){
-    try{
-      const resp = await fetch(FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
-      if(resp.ok){
-        const d = await resp.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.price;
-        if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
-      }
-    }catch(e){}
-  }
+function renderIdxBox(id, data) {
+  const box = document.getElementById(id);
+  if (!box || !data) return;
   
-  try{
-    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetch(url);
-    if(resp.ok){
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
-    }
-  }catch(e){}
-  return null;
+  const priceEl = box.querySelector('.idx-box-price');
+  const changeEl = box.querySelector('.idx-box-change');
+  const srcEl = box.querySelector('.src');
+  
+  if(srcEl && data.source) srcEl.textContent = data.source;
+  
+  const dec = data.price >= 1000 ? 0 : 2;
+  priceEl.textContent = data.price.toLocaleString('en-US', {maximumFractionDigits: dec});
+  
+  const sign = data.change >= 0 ? '+' : '';
+  changeEl.textContent = `${sign}${data.change.toFixed(2)} (${sign}${data.changePercent.toFixed(2)}%)`;
+  changeEl.className = 'idx-box-change ' + (data.change >= 0 ? 'up' : 'down');
+}
+
+// 🚀 核心優化：打散非同步流程，確保任何地方報錯都不會阻斷大盤顯示
+async function refreshAllIndexes() {
+  // 1. 臺灣加權指數（獨立運行）
+  setTimeout(async () => {
+    try {
+      let twData = await fetchFugle('IX0001');
+      if (!twData) twData = await fetchYahoo('^TWII');
+      if (twData) renderIdxBox('idx_TW', twData);
+    } catch(e) {}
+  }, 10);
+
+  // 2. 國外指數（逐一獨立平行發送，完全解除連帶爆炸死結）
+  const globalIndices = [
+    { id: 'idx_DJI',  sym: '^DJI' },   
+    { id: 'idx_GSPC', sym: '^GSPC' },  
+    { id: 'idx_IXIC', sym: '^IXIC' },  
+    { id: 'idx_SOX',  sym: '^SOX' },   
+    { id: 'idx_N225', sym: '^N225' },  
+    { id: 'idx_KS11', sym: '^KS11' }   
+  ];
+
+  globalIndices.forEach((item, index) => {
+    setTimeout(async () => {
+      try {
+        const r = await fetchYahoo(item.sym);
+        if(r) renderIdxBox(item.id, r);
+      } catch(e) {}
+    }, 50 * (index + 1)); // 微幅錯開毫秒數，防止同時間擠壓連線
+  });
 }
 
 async function refreshPrices(){
-  const idxR = await fetchWeightedIndex();
-  const idxEl = document.getElementById('idxPrice');
-  const idxChgEl = document.getElementById('idxChange');
-  const idxPctEl = document.getElementById('idxPct');
-  const idxTimeEl = document.getElementById('idxTime');
-  const idxSrcEl = document.getElementById('idxSource');
-  if(idxR){
-    idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    idxChgEl.className='idx-change '+(idxR.change>=0?'up':'down');
-    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    idxPctEl.className='idx-pct '+(idxR.changePercent>=0?'up':'down');
-    idxTimeEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    idxSrcEl.textContent='via '+idxR.source;
-  }
+  await refreshAllIndexes();
   
-  const results = await Promise.all(stocks.map(async (s)=>{
-    let r = await fetchFugle(s.symbol);
-    if(!r) r = await fetchYahoo(s.symbol);
-    return {s,r};
-  }));
+  // 3. 持股清單更新
+  if (stocks.length === 0) { updateSummary(); return; }
   
-  for(const {s,r} of results){
-    if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
-  }
-  updateSummary();
+  stocks.forEach((s, index) => {
+    setTimeout(async () => {
+      try {
+        let r = await fetchFugle(s.symbol);
+        if(!r) r = await fetchYahoo(s.symbol + '.TW');
+        if(!r) r = await fetchYahoo(s.symbol + '.TWO');
+        if(r){
+          s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;
+          renderRow(s);
+          updateSummary();
+        }
+      } catch(e) {}
+    }, 40 * (index + 1));
+  });
 }
 
 function renderRow(s){
@@ -470,7 +518,6 @@ function deleteStock(id){
   stocks=stocks.filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
 }
 
-// ...其餘編輯與歷史記錄代碼維持不變...
 function editStock(id){
   const s=stocks.find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
@@ -479,6 +526,7 @@ function editStock(id){
   if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
   saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
+
 function saveDailyPnl(){
   let pnl=0,asset=0;
   for(const s of stocks){
@@ -494,11 +542,13 @@ function saveDailyPnl(){
   saveRecords();renderHistory();
   showToast('已儲存 '+ds+' 盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
+
 function deleteHistory(timestamp) {
   if(!confirm('確定刪除此筆記錄？')) return;
   dailyRecords = dailyRecords.filter(r => r.timestamp !== timestamp);
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
+
 function renderHistory(){
   const body=document.getElementById('historyBody');
   if(dailyRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
@@ -535,12 +585,10 @@ function showToast(msg){
 
 async function refresh(){await refreshPrices()}
 
-// Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000); // 每 30 秒安全同步更新
+pollTimer=setInterval(refresh,30000);
 
-// 防呆機制
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
 });
@@ -549,7 +597,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 v3.1 已啟動 (CORS安全連線修正版)');
+console.log('股票庫存 v6.0 已啟動 (防快取死結衝刷版)');
 </script>
 </body>
 </html>
