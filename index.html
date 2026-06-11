@@ -128,15 +128,17 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .toast.show{opacity:1}
 
 /* =========================================
-   未來科技 (Future Tech) 佈景主題 - 金屬立體風格
+   未來科技 (Future Tech) 佈景主題 - 灰白鈦金屬立體風格
    ========================================= */
 body.tech {
-  background-color: #1a1d21;
+  background-color: #23272d; /* 鈦金屬深色基底 */
   background-image: 
-    linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%),
-    radial-gradient(at center, rgba(50,55,65,1) 0%, rgba(20,22,25,1) 100%);
-  color: #aab2bd;
+    linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%),
+    radial-gradient(at top center, #2d323a 0%, #181b20 100%);
+  color: #c8d1dc; /* 提高主要文字亮度，確保清晰 */
 }
+
+/* --- 灰白金屬板塊（加強外立體高光邊緣） --- */
 .tech .header,
 .tech .card,
 .tech .idx-bar,
@@ -144,101 +146,135 @@ body.tech {
 .tech .summary,
 .tech .hist-item,
 .tech .modal {
-  background: linear-gradient(145deg, #202329, #1b1e22);
-  border: 1px solid #2a2e35;
-  box-shadow: 6px 6px 12px #14161a, -4px -4px 10px rgba(255,255,255,0.03);
+  background: linear-gradient(135deg, #323842 0%, #242930 100%); /* 灰白鈦鋼漸層 */
+  border: 1px solid #3d4552;
+  box-shadow: 
+    5px 5px 12px rgba(12,14,18,0.7),                       /* 右下深色投影 */
+    -3px -3px 8px rgba(255,255,255,0.08),                  /* 左上金屬折射高光 */
+    inset 1px 1px 0px rgba(255,255,255,0.05);              /* 內部邊緣反光 */
   border-radius: 10px;
 }
 .tech .header {
-  background: #1d2024;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  background: #2b3039;
+  box-shadow: 0 4px 12px rgba(12,14,18,0.5);
   border-radius: 0 0 10px 10px;
 }
+
+/* --- 精緻金屬雕刻內凹字體（白銀色系，高清晰度） --- */
 .tech h1,
 .tech .card-title,
 .tech .idx-name,
 .tech .list-header > div,
-.tech .sym,
 .tech .qty-cell,
 .tech .sum-row .lab,
 .tech .hdate {
-  color: #121416;
-  text-shadow: 1px 1px 1px rgba(255,255,255,0.06), -1px -1px 1px rgba(0,0,0,0.5);
+  color: #e2e8f0; /* 白銀文字 */
+  text-shadow: 
+    -1px -1px 1px rgba(0,0,0,0.8),  /* 上方深色內陰影，向下凹陷 */
+    1px 1px 1px rgba(255,255,255,0.15); /* 下方銀白反光邊 */
 }
+.tech .card-title, .tech .idx-name, .tech .list-header > div {
+  color: #a0aec0; /* 次要標題採用稍暗的銀灰色 */
+}
+
+/* --- 數據內凹刻印感 --- */
 .tech .idx-price,
-.tech .idx-change,
-.tech .idx-pct,
 .tech .price,
-.tech .chgp,
-.tech .chg,
 .tech .total,
 .tech .val,
 .tech .hval {
-  color: #0f1113;
-  font-weight: 700;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.05), -1px -1px 0px rgba(0,0,0,0.7);
-  letter-spacing: 0.5px;
+  color: #ffffff;
+  text-shadow: 
+    -1px -1px 1px rgba(0,0,0,0.9),
+    1px 1px 1px rgba(255,255,255,0.15);
 }
+
+/* --- 修正台股漲跌色：上漲紅、下跌綠（融入未來感螢光色系） --- */
 .tech .up { 
-  color: #2ed573 !important; 
-  text-shadow: 0 0 5px rgba(46, 213, 115, 0.3), 1px 1px 0px rgba(255,255,255,0.05), -1px -1px 0px rgba(0,0,0,0.7) !important;
+  color: #ff4d4d !important; /* 螢光亮紅 */
+  text-shadow: 
+    0 0 6px rgba(255,77,77,0.3),
+    -1px -1px 1px rgba(0,0,0,0.9),
+    1px 1px 1px rgba(255,255,255,0.1) !important;
 }
 .tech .down { 
-  color: #ff4757 !important; 
-  text-shadow: 0 0 5px rgba(255, 71, 87, 0.3), 1px 1px 0px rgba(255,255,255,0.05), -1px -1px 0px rgba(0,0,0,0.7) !important;
+  color: #2ecc71 !important; /* 螢光亮綠 */
+  text-shadow: 
+    0 0 6px rgba(46,204,113,0.3),
+    -1px -1px 1px rgba(0,0,0,0.9),
+    1px 1px 1px rgba(255,255,255,0.1) !important;
 }
 .tech .srow .sym {
-  color: #54a0ff !important;
-  text-shadow: 0 0 5px rgba(84, 160, 255, 0.3), 1px 1px 1px rgba(255,255,255,0.06), -1px -1px 1px rgba(0,0,0,0.5) !important;
+  color: #3498db !important; /* 科技藍代號 */
+  text-shadow: 
+    0 0 4px rgba(52,152,219,0.2),
+    -1px -1px 1px rgba(0,0,0,0.8),
+    1px 1px 1px rgba(255,255,255,0.15) !important;
 }
+
+/* --- 輸入框與選擇框（更深邃的內凹槽） --- */
 .tech input, .tech select {
-  background: #16181b;
-  border: 1px solid #25282d;
-  color: #e6edf3;
-  box-shadow: inset 3px 3px 6px #0e1012, inset -1px -1px 2px rgba(255,255,255,0.02);
+  background: #1a1d22;
+  border: 1px solid #2d333f;
+  color: #ffffff;
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6), 
+    inset -1px -1px 2px rgba(255,255,255,0.02);
   border-radius: 6px;
 }
 .tech input:focus, .tech select:focus {
-  border-color: #54a0ff;
-  box-shadow: inset 2px 2px 4px #0e1012, 0 0 5px rgba(84, 160, 255, 0.5);
+  border-color: #3498db;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6), 0 0 6px rgba(52,152,219,0.4);
 }
+
+/* 金屬按鈕（凸起層次） --- */
 .tech .form-row button,
 .tech .btn-save {
-  background: linear-gradient(145deg, #1e73e8, #1557b0);
-  box-shadow: 3px 3px 6px #101215, -1px -1px 2px rgba(255,255,255,0.1);
+  background: linear-gradient(135deg, #4a90e2 0%, #165298 100%);
+  box-shadow: 
+    2px 2px 5px rgba(0,0,0,0.4),
+    -1px -1px 2px rgba(255,255,255,0.2);
   border: none;
-  text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+  color: #ffffff;
+  text-shadow: -1px -1px 1px rgba(0,0,0,0.3);
 }
 .tech .form-row button:active,
 .tech .btn-save:active {
-  background: #1557b0;
-  box-shadow: inset 2px 2px 5px #0e1012;
+  background: #11437c;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
 }
+
+/* 次要控制鈕 */
 .tech .btn-theme, .tech .btn-adv, .tech .srow .act button {
-  background: linear-gradient(145deg, #2a2e35, #22262b);
-  border: 1px solid #363b42;
-  color: #8b949e;
-  box-shadow: 2px 2px 4px #14161a;
+  background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%);
+  border: 1px solid #4a5464;
+  color: #e2e8f0;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
 }
-.tech .del-btn { color: #ff4757; border-color: #44272a; }
-.tech .table-scroll { border-color: #2a2e35; }
-.tech .list-header { background: #1d2024; border-bottom-color: #2a2e35; }
-.tech .srow { border-bottom-color: #25282d; }
+.tech .del-btn { color: #ff4d4d; border-color: #632d2d; }
+
+/* --- 表格與凍結欄位處理 --- */
+.tech .table-scroll { border-color: #3d4552; }
+.tech .list-header { background: #2b3039; border-bottom-color: #3d4552; }
+.tech .srow { border-bottom-color: #2d333f; }
 .tech .list-header > div:nth-child(1),
-.tech .srow > div:nth-child(1) { background-color: #1d2024 !important; }
+.tech .srow > div:nth-child(1) { background-color: #2b3039 !important; }
 .tech .list-header > div:nth-child(1)::after, 
-.tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.3), transparent); }
-.tech .sum-divider { background: #2a2e35; }
-.tech .key-status.none { background: #25282d; color: #8b949e; box-shadow: inset 1px 1px 2px #101215; }
-.tech .key-status.ok { background: #1a3e2a; color: #2ed573; box-shadow: inset 1px 1px 2px #101215; }
-.tech .info-box { background: #3a321a; color: #e6c35c; border-color: #5c4d23; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2); }
-.tech .del-hist-btn { color: #8b949e; }
-.tech .del-hist-btn:hover { background: rgba(255,71,87,0.1); color: #ff4757; }
-.tech .toast { background: #0a0b0d; border: 1px solid #54a0ff; color: #54a0ff; box-shadow: 0 0 15px rgba(84, 160, 255, 0.3); }
-.tech #unitSelect option { background-color: #1d2024; color: #e6edf3; }
+.tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.4), transparent); }
+
+/* 其他細節元件 */
+.tech .sum-divider { background: #3d4552; }
+.tech .key-status.none { background: #1a1d22; color: #a0aec0; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
+.tech .key-status.ok { background: #1b432a; color: #2ecc71; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
+.tech .info-box { background: #4a3e1b; color: #f6ad55; border-color: #685422; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3); }
+.tech .del-hist-btn { color: #a0aec0; }
+.tech .del-hist-btn:hover { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+.tech .toast { background: #15181c; border: 1px solid #4a90e2; color: #4a90e2; box-shadow: 0 0 12px rgba(74,144,226,0.4); }
+.tech #unitSelect option { background-color: #2b3039; color: #ffffff; }
 .v-box { text-align:center; font-size:11px; color:#9aa0a6; margin-top:16px; padding-top:10px; border-top:1px dashed #dadce0; }
 .dark .v-box { border-top-color:#30363d; color:#8b949e; }
-.tech .v-box { border-top-color:#2a2e35; color:#5f6368; text-shadow: 1px 1px 0px rgba(255,255,255,0.05); }
+.tech .v-box { border-top-color:#3d4552; color:#a0aec0; text-shadow: -1px -1px 0px rgba(0,0,0,0.5); }
 
 @media(min-width:480px){body{max-width:480px;margin:0 auto}}
 </style>
@@ -686,7 +722,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V2.0.0 已啟動 (CORS安全連線修正與未來科技主題版)');
+console.log('股票庫存 V2.0.0 已啟動 (灰白鈦金屬高清晰與台股漲跌色修正版)');
 </script>
 </body>
 </html>
