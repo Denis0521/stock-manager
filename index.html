@@ -155,7 +155,11 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .tab-btn { background: #1a1d22; color: #a0aec0; }
 .tech .tab-btn.active { background: linear-gradient(135deg, #4a90e2 0%, #165298 100%); color: #fff; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.2); }
 .tech .btn-theme, .tech .btn-adv, .tech .srow .act button { background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%); border: 1px solid #4a5464; color: #e2e8f0; }
-.tech .list-header > div:nth-child(1), .tech .srow > div:nth-child(1) { background-color: #2b3039 !important; }
+/* 修正表格頭部白色塊 */
+.tech .list-header { background: transparent; border-bottom-color: #3d4552; }
+.tech .srow { border-bottom-color: #2d333f; }
+.tech .list-header > div:nth-child(1), .tech .srow > div:nth-child(1) { background-color: #2b3039 !important; border-radius: 4px 0 0 4px; }
+.tech .list-header > div:nth-child(1)::after, .tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.4), transparent); }
 .tech .btn-link { color: #4a90e2 !important; font-weight: bold; text-shadow: none; }
 
 /* =========================================
@@ -174,6 +178,9 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .tab-btn { background: #0b132b; color: #95a5a6; }
 .blue-dark .tab-btn.active { background: #00b4d8; color: #fff; }
 .blue-dark .btn-theme, .blue-dark .btn-adv, .blue-dark .srow .act button { border-color: #3a506b; color: #fff; background: rgba(255,255,255,0.05); }
+/* 修正表格頭部白色塊 */
+.blue-dark .list-header { background: transparent; border-bottom-color: #3a506b; }
+.blue-dark .srow { border-bottom-color: #232f52; }
 .blue-dark .list-header > div:nth-child(1), .blue-dark .srow > div:nth-child(1) { background-color: #1c2541 !important; }
 .blue-dark .btn-link { color: #00b4d8 !important; font-weight: bold; }
 
@@ -193,6 +200,9 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .tab-btn { background: #edf2f7; color: #4a5568; }
 .blue-light .tab-btn.active { background: #3182ce; color: #fff; }
 .blue-light .btn-theme, .blue-light .btn-adv, .blue-light .srow .act button { border-color: #cbd5e0; color: #4a5568; background: #fff; }
+/* 修正表格頭部白色塊 */
+.blue-light .list-header { background: #f0f7fd; border-bottom-color: #e2e8f0; }
+.blue-light .srow { border-bottom-color: #edf2f7; }
 .blue-light .list-header > div:nth-child(1), .blue-light .srow > div:nth-child(1) { background-color: #ffffff !important; }
 .blue-light .btn-link { color: #2b6cb0 !important; font-weight: bold; }
 
@@ -212,6 +222,9 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .tab-btn { background: #fff5f5; color: #702459; }
 .pink .tab-btn.active { background: #d63384; color: #fff; }
 .pink .btn-theme, .pink .btn-adv, .pink .srow .act button { border-color: #fbb6ce; color: #b83280; background: #fff; }
+/* 修正表格頭部白色塊 */
+.pink .list-header { background: #fff0f6; border-bottom-color: #fed7d7; }
+.pink .srow { border-bottom-color: #fff5f5; }
 .pink .list-header > div:nth-child(1), .pink .srow > div:nth-child(1) { background-color: #ffffff !important; }
 .pink .btn-link { color: #d63384 !important; font-weight: bold; }
 
@@ -310,21 +323,19 @@ body.pink { background-color: #fff5f5; color: #702459; }
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
 
-    <div class="v-box">核心版本：V3.0.0</div>
+    <div class="v-box">核心版本：V3.1.0</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
   </div>
 </div>
 
 <script>
-// 多分頁核心配置
 let currentTab = 0;
-let tabStocks = [[], [], []]; // 儲存三個分頁的獨立持股
-let tabRecords = [[], [], []]; // 儲存三個分頁的獨立歷史紀錄
+let tabStocks = [[], [], []];
+let tabRecords = [[], [], []];
 
 let fugleKey='',secondFugleKey='',pollTimer=null;
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab';
-// 帶分頁索引的 LocalStorage Key 產生器
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
@@ -332,20 +343,15 @@ const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
 function loadState(){
   try{
-    // 載入全域設定
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    
-    // 載入最後停留的分頁
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
 
-    // 載入三個分頁各自的獨立數據
     for(let i=0; i<3; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
     
-    // 載入與套用主題
     const t=localStorage.getItem(TK);
     applyThemeText(t);
   }catch(e){console.error(e);}
@@ -365,7 +371,7 @@ function applyThemeText(t){
   else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; }
   else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; }
   else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; }
-  else { themeBtn.textContent='🌙'; } // light
+  else { themeBtn.textContent='🌙'; }
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
@@ -392,7 +398,6 @@ function toggleTheme(){
   try{localStorage.setItem(TK, nextTheme);}catch(e){}
 }
 
-// 分頁切換核心邏輯
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
   currentTab = tabIndex;
@@ -695,7 +700,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.0.0 已啟動 (多帳戶分頁與多色彩高清晰主題版)');
+console.log('股票庫存 V3.1.0 已啟動 (完美修正表格標題色塊與外觀對齊)');
 </script>
 </body>
 </html>
