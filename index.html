@@ -143,6 +143,10 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .info-box{background:#fff3cd;color:#856404;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #ffeeba}
 .dark .info-box{background:#4d3800;color:#e6c35c;border-color:#664d03}
 
+/* 🚀 版本號專用 CSS 樣式 */
+.version-tag { text-align: center; font-size: 11px; color: #9aa0a6; margin-top: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.dark .version-tag { color: #57606a; }
+
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 @media(min-width:480px){body{max-width:480px;margin:0 auto}}
@@ -273,6 +277,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
+    
+    <div class="version-tag">Version v9.0</div>
   </div>
 </div>
 
@@ -333,25 +339,26 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 🚀 頂級優化：改用 100% 免疫 GitHub 跨網域限制、免 Key、免設白名單的時序報價標準看板接口
-async function fetchGlobalIndexHq(symbol) {
+async function fetchYahooIndexChart(symbol) {
   try {
-    const url = `https://query1.finance.yahoo.com/v6/finance/quoteHq/share?symbols=${encodeURIComponent(symbol)}&corsDomain=finance.yahoo.com&_=${Date.now()}`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d&_nocache=${Date.now()}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!resp.ok) return null;
     const d = await resp.json();
-    const quote = d?.quoteResponse?.result?.[0];
-    if (!quote || quote.regularMarketPrice == null) return null;
+    const meta = d?.chart?.result?.[0]?.meta;
+    if (!meta || meta.regularMarketPrice == null) return null;
+    
+    const price = meta.regularMarketPrice;
+    const prev = meta.chartPreviousClose || meta.previousClose || price;
     return {
-      price: quote.regularMarketPrice,
-      change: quote.regularMarketChange ?? 0,
-      changePercent: quote.regularMarketChangePercent ?? 0,
+      price: price,
+      change: price - prev,
+      changePercent: prev !== 0 ? ((price - prev) / prev) * 100 : 0,
       source: 'Yahoo'
     };
   } catch (e) { return null; }
 }
 
-// 🚀 備援個股下載接口（維持個股高度穩定相容性）
 async function fetchYahooStock(symbol){
   try {
     const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history&_nocache=${Date.now()}`;
@@ -382,16 +389,14 @@ function renderIdxBox(id, data) {
 }
 
 async function refreshAllIndexes() {
-  // 1. 臺灣加權（免除 GitHub 白名單死結限制，全天候看板直連）
   setTimeout(async () => {
     try {
       let twData = await fetchFugle('IX0001');
-      if (!twData) twData = await fetchGlobalIndexHq('^TWII'); // 智慧分流直連
+      if (!twData) twData = await fetchYahooIndexChart('^TWII');
       if (twData) renderIdxBox('idx_TW', twData);
     } catch(e) {}
   }, 10);
 
-  // 2. 國外指數方塊列（獨立安全高併發載入）
   const globalIndices = [
     { id: 'idx_DJI',  sym: '^DJI' },   
     { id: 'idx_GSPC', sym: '^GSPC' },  
@@ -404,7 +409,7 @@ async function refreshAllIndexes() {
   globalIndices.forEach((item, index) => {
     setTimeout(async () => {
       try {
-        const r = await fetchGlobalIndexHq(item.sym);
+        const r = await fetchYahooIndexChart(item.sym);
         if(r) renderIdxBox(item.id, r);
       } catch(e) {}
     }, 40 * (index + 1));
@@ -452,6 +457,7 @@ function renderRow(s){
   el.querySelector('.total').className='total '+(total>=0?'up':'down');
 }
 
+/* 其餘渲染功能維持不變 */
 function renderAll(){
   const body=document.getElementById('listBody');
   const empty=document.getElementById('emptyState');
@@ -557,20 +563,12 @@ function renderHistory(){
   }
 }
 
-document.getElementById('symInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
-});
-document.getElementById('qtyInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); addStock(); }
-});
-
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 function saveAndCloseModal(){saveKeys();document.getElementById('modalOverlay').classList.remove('show');refreshPrices();}
-document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
