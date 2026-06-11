@@ -1,5 +1,5 @@
-// 🚀 核心更新機制：版號升級為 v8，全面打通 GitHub 跨網域與免白名單限制
-const CACHE_NAME = 'stock-manager-v8'; 
+// 🚀 系統快取版號：維持在 v9。未來您若有再修改 index.html，請記得將此處手動改為 v10
+const CACHE_NAME = 'stock-manager-v9'; 
 
 const ASSETS = [
   'index.html',
