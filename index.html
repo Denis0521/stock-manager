@@ -54,7 +54,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .idx-box-name{font-size:11px;color:#5f6368;font-weight:500}
 .dark .idx-box-name{color:#8b949e}
 .idx-box-price{font-size:16px;font-weight:700;margin:2px 0}
-.idx-box-change-row{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
+.idx-box-change-row{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;flex-wrap:nowrap}
 .idx-box-src{font-size:9px;color:#9aa0a6;text-align:right;margin-top:2px}
 .dark .idx-box-src{color:#5f6368}
 
@@ -443,7 +443,7 @@ function updateKeyStatus(){
   });
 }
 
-// 🌐 異步調用並解析 Google Sheets CSV 的背景引擎
+// 🌐 異步調用並解析 Google Sheets CSV 的背景引擎 (升級相容版)
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -460,11 +460,23 @@ async function fetchGlobalIndicesFromGoogle() {
       const columns = rows[i].split(',');
       if (columns.length < 3) continue;
 
-      const name = columns[0].replace(/"/g, '');
+      const name = columns[0].replace(/"/g, '').trim();
       const price = parseFloat(columns[1]);
-      const pct = parseFloat(columns[2]) * 100;
+      
+      let rawPctStr = columns[2].replace(/"/g, '').trim();
+      let pct = 0;
+      if (rawPctStr.includes('%')) {
+        pct = parseFloat(rawPctStr.replace('%', ''));
+      } else {
+        pct = parseFloat(rawPctStr) * 100;
+      }
 
-      if (isNaN(price)) continue;
+      if (isNaN(price) || isNaN(pct)) continue;
+
+      // 🛠️ 智能核心升級：自動依據「當前價」與「漲跌幅%」逆向回推計算「漲跌點數金額」
+      // 計算公式：昨收 = 當前價 / (1 + 漲跌幅)，漲跌點數 = 當前價 - 昨收
+      const originalClose = price / (1 + (pct / 100));
+      const changeAmt = price - originalClose;
 
       const card = document.createElement('div');
       card.className = 'idx-card-box';
@@ -472,11 +484,13 @@ async function fetchGlobalIndicesFromGoogle() {
       const sign = pct >= 0 ? '+' : '';
       const cls = pct >= 0 ? 'up' : 'down';
 
+      // 🛠️ 完美呈現：同時包含金額漲跌、百分比漲跌幅
       card.innerHTML = `
         <div class="idx-box-name">${name}</div>
         <div class="idx-box-price">${price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
         <div class="idx-box-change-row ${cls}">
-          <span>${sign}${pct.toFixed(2)}%</span>
+          <span>${sign}${changeAmt.toFixed(2)}</span>
+          <span>(${sign}${pct.toFixed(2)}%)</span>
         </div>
         <div class="idx-box-src">via Google</div>
       `;
@@ -552,6 +566,7 @@ async function fetchWeightedIndex(){
 }
 
 async function refreshPrices(){
+  // 1. 抓取台股加權
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
@@ -566,8 +581,10 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
+  // 2. 抓取全球大盤
   fetchGlobalIndicesFromGoogle();
   
+  // 3. 持股數據更新
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
