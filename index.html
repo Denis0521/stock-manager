@@ -6,7 +6,7 @@
 <title>股票庫存</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif;background:#f0f2f5;color:#1a1a2e;padding:0 0 80px;min-height:100vh;font-size:14px;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif;background:#f0f2f5;color:#1a1a2e;padding:0 0 80px;min-height:100vh;font-size:14px;overflow-x:hidden;transition: background-color 0.2s, color 0.2s}
 body.dark{background:#0d1117;color:#e6edf3}
 input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .header{position:sticky;top:0;z-index:100;background:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8eaed;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -17,6 +17,15 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .btn-theme{border-color:#30363d;color:#8b949e}
 .btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
 .dark .btn-adv{border-color:#30363d;color:#58a6ff}
+
+/* --- 分頁切換列 --- */
+.tabs-bar{display:flex;background:#fff;padding:6px 14px;margin:10px 14px 0;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);gap:6px}
+.dark .tabs-bar{background:#161b22;box-shadow:none;border:1px solid #30363d}
+.tab-btn{flex:1;padding:8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;text-align:center;transition:all 0.2s}
+.dark .tab-btn{background:#21262d;color:#8b949e}
+.tab-btn.active{background:#1a73e8;color:#fff}
+.dark .tab-btn.active{background:#1f6feb;color:#fff}
+
 .card{background:#fff;border-radius:12px;padding:14px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .card{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
@@ -25,7 +34,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
 .dark .form-row input,.dark .form-row select{background:#0d1117;border-color:#30363d;color:#e6edf3}
 .form-row input:focus,.form-row select:focus{border-color:#1a73e8}
-.dark .form-row input:focus,.dark .dark .form-row select:focus{border-color:#58a6ff}
+.dark .form-row input:focus,.dark .form-row select:focus{border-color:#58a6ff}
 .form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
@@ -62,7 +71,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .list-header > div:nth-child(1)::after, .dark .srow > div:nth-child(1)::after{background:linear-gradient(to right, rgba(0,0,0,0.2), transparent)}
 
 .srow .sym{font-weight:700;color:#1a73e8;cursor:pointer;font-size:16px}
-.dark .srow .sym{color:#58a6ff}
+.dark .srow .sym {color:#58a6ff}
 .srow .qty-cell{font-weight:500;color:#1a1a2e}
 .dark .srow .qty-cell{color:#e6edf3}
 .srow .price{font-weight:600}
@@ -123,190 +132,100 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
 .info-box{background:#fff3cd;color:#856404;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #ffeeba}
 .dark .info-box{background:#4d3800;color:#e6c35c;border-color:#664d03}
-
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
+/* 深色模式下連結清晰度優化 */
+.dark .btn-link { color: #58a6ff !important; font-weight: bold; }
+
 /* =========================================
-   未來科技 (Future Tech) 佈景主題 - 灰白鈦金屬立體風格
+   1. 未來科技 (Tech) - 灰白鈦金屬立體風格
    ========================================= */
-body.tech {
-  background-color: #23272d; /* 鈦金屬深色基底 */
-  background-image: 
-    linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%),
-    radial-gradient(at top center, #2d323a 0%, #181b20 100%);
-  color: #c8d1dc; /* 提高主要文字亮度，確保清晰 */
-}
+body.tech { background-color: #23272d; background-image: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%), radial-gradient(at top center, #2d323a 0%, #181b20 100%); color: #c8d1dc; }
+.tech .header, .tech .card, .tech .idx-bar, .tech .table-scroll, .tech .summary, .tech .hist-item, .tech .modal, .tech .tabs-bar { background: linear-gradient(135deg, #323842 0%, #242930 100%); border: 1px solid #3d4552; box-shadow: 5px 5px 12px rgba(12,14,18,0.7), -3px -3px 8px rgba(255,255,255,0.08), inset 1px 1px 0px rgba(255,255,255,0.05); border-radius: 10px; }
+.tech .header { background: #2b3039; box-shadow: 0 4px 12px rgba(12,14,18,0.5); border-radius: 0 0 10px 10px; }
+.tech h1, .tech .card-title, .tech .idx-name, .tech .list-header > div, .tech .qty-cell, .tech .sum-row .lab, .tech .hdate { color: #e2e8f0; text-shadow: -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15); }
+.tech .card-title, .tech .idx-name, .tech .list-header > div { color: #a0aec0; }
+.tech .idx-price, .tech .price, .tech .total, .tech .val, .tech .hval { color: #ffffff; text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.15); }
+.tech .up { color: #ff4d4d !important; text-shadow: 0 0 6px rgba(255,77,77,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
+.tech .down { color: #2ecc71 !important; text-shadow: 0 0 6px rgba(46,204,113,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
+.tech .srow .sym { color: #3498db !important; text-shadow: 0 0 4px rgba(52,152,219,0.2), -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15) !important; }
+.tech input, .tech select { background: #1a1d22; border: 1px solid #2d333f; color: #ffffff; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.6); border-radius: 6px; }
+.tech .form-row button, .tech .btn-save { background: linear-gradient(135deg, #4a90e2 0%, #165298 100%); color: #fff; border: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
+.tech .tab-btn { background: #1a1d22; color: #a0aec0; }
+.tech .tab-btn.active { background: linear-gradient(135deg, #4a90e2 0%, #165298 100%); color: #fff; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.2); }
+.tech .btn-theme, .tech .btn-adv, .tech .srow .act button { background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%); border: 1px solid #4a5464; color: #e2e8f0; }
+.tech .list-header > div:nth-child(1), .tech .srow > div:nth-child(1) { background-color: #2b3039 !important; }
+.tech .btn-link { color: #4a90e2 !important; font-weight: bold; text-shadow: none; }
 
-/* --- 灰白金屬板塊（加強外立體高光邊緣） --- */
-.tech .header,
-.tech .card,
-.tech .idx-bar,
-.tech .table-scroll,
-.tech .summary,
-.tech .hist-item,
-.tech .modal {
-  background: linear-gradient(135deg, #323842 0%, #242930 100%); /* 灰白鈦鋼漸層 */
-  border: 1px solid #3d4552;
-  box-shadow: 
-    5px 5px 12px rgba(12,14,18,0.7),                       /* 右下深色投影 */
-    -3px -3px 8px rgba(255,255,255,0.08),                  /* 左上金屬折射高光 */
-    inset 1px 1px 0px rgba(255,255,255,0.05);              /* 內部邊緣反光 */
-  border-radius: 10px;
-}
-.tech .header {
-  background: #2b3039;
-  box-shadow: 0 4px 12px rgba(12,14,18,0.5);
-  border-radius: 0 0 10px 10px;
-}
+/* =========================================
+   2. 深藍版 (Deep Blue) - 靜謐深海風格
+   ========================================= */
+body.blue-dark { background-color: #0b132b; color: #95a5a6; }
+.blue-dark .header, .blue-dark .card, .blue-dark .idx-bar, .blue-dark .table-scroll, .blue-dark .summary, .blue-dark .hist-item, .blue-dark .modal, .blue-dark .tabs-bar { background: #1c2541; border: 1px solid #3a506b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 10px; }
+.blue-dark .header { background: #111a33; border-bottom: 1px solid #3a506b; }
+.blue-dark h1, .blue-dark .qty-cell, .blue-dark .sum-row .lab, .blue-dark .hdate { color: #ffffff; }
+.blue-dark .card-title, .blue-dark .idx-name, .blue-dark .list-header > div { color: #5bc0be; }
+.blue-dark .idx-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
+.blue-dark .up { color: #ff6b6b !important; } .blue-dark .down { color: #2ecc71 !important; }
+.blue-dark .srow .sym { color: #00b4d8 !important; }
+.blue-dark input, .blue-dark select { background: #0b132b; border: 1px solid #3a506b; color: #fff; }
+.blue-dark .form-row button, .blue-dark .btn-save { background: #00b4d8; color: #fff; }
+.blue-dark .tab-btn { background: #0b132b; color: #95a5a6; }
+.blue-dark .tab-btn.active { background: #00b4d8; color: #fff; }
+.blue-dark .btn-theme, .blue-dark .btn-adv, .blue-dark .srow .act button { border-color: #3a506b; color: #fff; background: rgba(255,255,255,0.05); }
+.blue-dark .list-header > div:nth-child(1), .blue-dark .srow > div:nth-child(1) { background-color: #1c2541 !important; }
+.blue-dark .btn-link { color: #00b4d8 !important; font-weight: bold; }
 
-/* --- 精緻金屬雕刻內凹字體（白銀色系，高清晰度） --- */
-.tech h1,
-.tech .card-title,
-.tech .idx-name,
-.tech .list-header > div,
-.tech .qty-cell,
-.tech .sum-row .lab,
-.tech .hdate {
-  color: #e2e8f0; /* 白銀文字 */
-  text-shadow: 
-    -1px -1px 1px rgba(0,0,0,0.8),  /* 上方深色內陰影，向下凹陷 */
-    1px 1px 1px rgba(255,255,255,0.15); /* 下方銀白反光邊 */
-}
-.tech .card-title, .tech .idx-name, .tech .list-header > div {
-  color: #a0aec0; /* 次要標題採用稍暗的銀灰色 */
-}
+/* =========================================
+   3. 淺藍版 (Light Blue) - 清爽晴空風格
+   ========================================= */
+body.blue-light { background-color: #edf2f7; color: #4a5568; }
+.blue-light .header, .blue-light .card, .blue-light .idx-bar, .blue-light .table-scroll, .blue-light .summary, .blue-light .hist-item, .blue-light .modal, .blue-light .tabs-bar { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(142,176,211,0.15); border-radius: 10px; }
+.blue-light .header { background: #e6f0fa; border-bottom: 1px solid #cbd5e0; }
+.blue-light h1, .blue-light .qty-cell, .blue-light .sum-row .lab, .blue-light .hdate { color: #2b6cb0; }
+.blue-light .card-title, .blue-light .idx-name, .blue-light .list-header > div { color: #4a5568; }
+.blue-light .idx-price, .blue-light .price, .blue-light .total, .blue-light .val, .blue-light .hval { color: #1a202c; font-weight: 700; }
+.blue-light .up { color: #e53e3e !important; } .blue-light .down { color: #38a169 !important; }
+.blue-light .srow .sym { color: #2b6cb0 !important; }
+.blue-light input, .blue-light select { background: #f7fafc; border: 1px solid #cbd5e0; color: #2d3748; }
+.blue-light .form-row button, .blue-light .btn-save { background: #3182ce; color: #fff; }
+.blue-light .tab-btn { background: #edf2f7; color: #4a5568; }
+.blue-light .tab-btn.active { background: #3182ce; color: #fff; }
+.blue-light .btn-theme, .blue-light .btn-adv, .blue-light .srow .act button { border-color: #cbd5e0; color: #4a5568; background: #fff; }
+.blue-light .list-header > div:nth-child(1), .blue-light .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.blue-light .btn-link { color: #2b6cb0 !important; font-weight: bold; }
 
-/* --- 數據內凹刻印感 --- */
-.tech .idx-price,
-.tech .price,
-.tech .total,
-.tech .val,
-.tech .hval {
-  color: #ffffff;
-  text-shadow: 
-    -1px -1px 1px rgba(0,0,0,0.9),
-    1px 1px 1px rgba(255,255,255,0.15);
-}
+/* =========================================
+   4. 粉色版 (Pink) - 浪漫櫻花風格
+   ========================================= */
+body.pink { background-color: #fff5f5; color: #702459; }
+.pink .header, .pink .card, .pink .idx-bar, .pink .table-scroll, .pink .summary, .pink .hist-item, .pink .modal, .pink .tabs-bar { background: #ffffff; border: 1px solid #fed7d7; box-shadow: 0 4px 8px rgba(244,143,177,0.15); border-radius: 10px; }
+.pink .header { background: #fff0f6; border-bottom: 1px solid #fbb6ce; }
+.pink h1, .pink .qty-cell, .pink .sum-row .lab, .pink .hdate { color: #b83280; }
+.pink .card-title, .pink .idx-name, .pink .list-header > div { color: #9b2c2c; }
+.pink .idx-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
+.pink .up { color: #e53e3e !important; } .pink .down { color: #38a169 !important; }
+.pink .srow .sym { color: #d63384 !important; }
+.pink input, .pink select { background: #fffaf0; border: 1px solid #fbb6ce; color: #4a123a; }
+.pink .form-row button, .pink .btn-save { background: #d63384; color: #fff; }
+.pink .tab-btn { background: #fff5f5; color: #702459; }
+.pink .tab-btn.active { background: #d63384; color: #fff; }
+.pink .btn-theme, .pink .btn-adv, .pink .srow .act button { border-color: #fbb6ce; color: #b83280; background: #fff; }
+.pink .list-header > div:nth-child(1), .pink .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.pink .btn-link { color: #d63384 !important; font-weight: bold; }
 
-/* --- 修正台股漲跌色：上漲紅、下跌綠（融入未來感螢光色系） --- */
-.tech .up { 
-  color: #ff4d4d !important; /* 螢光亮紅 */
-  text-shadow: 
-    0 0 6px rgba(255,77,77,0.3),
-    -1px -1px 1px rgba(0,0,0,0.9),
-    1px 1px 1px rgba(255,255,255,0.1) !important;
-}
-.tech .down { 
-  color: #2ecc71 !important; /* 螢光亮綠 */
-  text-shadow: 
-    0 0 6px rgba(46,204,113,0.3),
-    -1px -1px 1px rgba(0,0,0,0.9),
-    1px 1px 1px rgba(255,255,255,0.1) !important;
-}
-.tech .srow .sym {
-  color: #3498db !important; /* 科技藍代號 */
-  text-shadow: 
-    0 0 4px rgba(52,152,219,0.2),
-    -1px -1px 1px rgba(0,0,0,0.8),
-    1px 1px 1px rgba(255,255,255,0.15) !important;
-}
-
-/* --- 輸入框與選擇框（更深邃的內凹槽） --- */
-.tech input, .tech select {
-  background: #1a1d22;
-  border: 1px solid #2d333f;
-  color: #ffffff;
-  box-shadow: 
-    inset 3px 3px 6px rgba(0,0,0,0.6), 
-    inset -1px -1px 2px rgba(255,255,255,0.02);
-  border-radius: 6px;
-}
-.tech input:focus, .tech select:focus {
-  border-color: #3498db;
-  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6), 0 0 6px rgba(52,152,219,0.4);
-}
-
-/* 金屬按鈕（凸起層次） --- */
-.tech .form-row button,
-.tech .btn-save {
-  background: linear-gradient(135deg, #4a90e2 0%, #165298 100%);
-  box-shadow: 
-    2px 2px 5px rgba(0,0,0,0.4),
-    -1px -1px 2px rgba(255,255,255,0.2);
-  border: none;
-  color: #ffffff;
-  text-shadow: -1px -1px 1px rgba(0,0,0,0.3);
-}
-.tech .form-row button:active,
-.tech .btn-save:active {
-  background: #11437c;
-  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
-}
-
-/* 次要控制鈕 */
-.tech .btn-theme, .tech .btn-adv, .tech .srow .act button {
-  background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%);
-  border: 1px solid #4a5464;
-  color: #e2e8f0;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-  text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
-}
-.tech .del-btn { color: #ff4d4d; border-color: #632d2d; }
-
-/* --- 表格與凍結欄位處理 --- */
-.tech .table-scroll { border-color: #3d4552; }
-.tech .list-header { background: #2b3039; border-bottom-color: #3d4552; }
-.tech .srow { border-bottom-color: #2d333f; }
-.tech .list-header > div:nth-child(1),
-.tech .srow > div:nth-child(1) { background-color: #2b3039 !important; }
-.tech .list-header > div:nth-child(1)::after, 
-.tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.4), transparent); }
-
-/* 其他細節元件 */
-.tech .sum-divider { background: #3d4552; }
-.tech .key-status.none { background: #1a1d22; color: #a0aec0; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
-.tech .key-status.ok { background: #1b432a; color: #2ecc71; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
-.tech .info-box { background: #4a3e1b; color: #f6ad55; border-color: #685422; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3); }
-.tech .del-hist-btn { color: #a0aec0; }
-.tech .del-hist-btn:hover { background: rgba(255,77,77,0.15); color: #ff4d4d; }
-.tech .toast { background: #15181c; border: 1px solid #4a90e2; color: #4a90e2; box-shadow: 0 0 12px rgba(74,144,226,0.4); }
-.tech #unitSelect option { background-color: #2b3039; color: #ffffff; }
 .v-box { text-align:center; font-size:11px; color:#9aa0a6; margin-top:16px; padding-top:10px; border-top:1px dashed #dadce0; }
 .dark .v-box { border-top-color:#30363d; color:#8b949e; }
 .tech .v-box { border-top-color:#3d4552; color:#a0aec0; text-shadow: -1px -1px 0px rgba(0,0,0,0.5); }
+.blue-dark .v-box { border-top-color:#3a506b; color:#5bc0be; }
+.blue-light .v-box { border-top-color:#e2e8f0; color:#4a5568; }
+.pink .v-box { border-top-color:#fed7d7; color:#b83280; }
 
 @media(min-width:480px){body{max-width:480px;margin:0 auto}}
 </style>
 
   <link rel="manifest" href="manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => {
-            console.log('Service Worker 註冊成功:', reg.scope);
-            reg.onupdatefound = () => {
-              const installingWorker = reg.installing;
-              if (installingWorker == null) return;
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed') {
-                  if (navigator.serviceWorker.controller) {
-                    if (typeof showToast === 'function') {
-                      showToast('系統已在背景更新，2秒後將自動重新整理...');
-                    } else {
-                      alert('偵測到系統更新，網頁即將自動重新整理！');
-                    }
-                    setTimeout(() => { window.location.reload(); }, 2000);
-                  }
-                }
-              };
-            };
-          })
-          .catch(err => console.log('Service Worker 註冊失敗:', err));
-      });
-    }
-  </script>
 </head>
 <body>
 <div class="header">
@@ -315,6 +234,12 @@ body.tech {
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
+</div>
+
+<div class="tabs-bar">
+  <button type="button" class="tab-btn active" onclick="switchTab(0)" id="tab0">分頁 A</button>
+  <button type="button" class="tab-btn" onclick="switchTab(1)" id="tab1">分頁 B</button>
+  <button type="button" class="tab-btn" onclick="switchTab(2)" id="tab2">分頁 C</button>
 </div>
 
 <div class="summary" id="summaryArea" style="display:none;">
@@ -385,67 +310,104 @@ body.tech {
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
 
-    <div class="v-box">核心版本：V2.0.0</div>
+    <div class="v-box">核心版本：V3.0.0</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
   </div>
 </div>
 
 <script>
-let stocks=[],fugleKey='',secondFugleKey='',dailyRecords=[],pollTimer=null;
-const SK='tw_stock_portfolio',FK='tw_fugle_key',SFK='tw_second_fugle_key',RK='tw_records',TK='tw_theme';
+// 多分頁核心配置
+let currentTab = 0;
+let tabStocks = [[], [], []]; // 儲存三個分頁的獨立持股
+let tabRecords = [[], [], []]; // 儲存三個分頁的獨立歷史紀錄
+
+let fugleKey='',secondFugleKey='',pollTimer=null;
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab';
+// 帶分頁索引的 LocalStorage Key 產生器
+const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
+const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
 function loadState(){
   try{
-    const s=localStorage.getItem(SK);if(s)stocks=JSON.parse(s);
+    // 載入全域設定
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const r=localStorage.getItem(RK);if(r)dailyRecords=JSON.parse(r);
     
-    const t=localStorage.getItem(TK);
-    const themeBtn=document.getElementById('themeBtn');
-    if(t==='dark'){
-      document.body.classList.add('dark');
-      themeBtn.textContent='☀️';
-    }else if(t==='tech'){
-      document.body.classList.add('tech');
-      themeBtn.textContent='🚀';
-    }else{
-      themeBtn.textContent='🌙';
+    // 載入最後停留的分頁
+    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
+
+    // 載入三個分頁各自的獨立數據
+    for(let i=0; i<3; i++){
+      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
+      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
+    
+    // 載入與套用主題
+    const t=localStorage.getItem(TK);
+    applyThemeText(t);
   }catch(e){console.error(e);}
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   updateKeyStatus();
+  updateTabUI();
 }
 
-function saveHoldings(){try{localStorage.setItem(SK,JSON.stringify(stocks));}catch(e){}}
+function applyThemeText(t){
+  const body=document.body;
+  const themeBtn=document.getElementById('themeBtn');
+  body.classList.remove('dark','tech','blue-dark','blue-light','pink');
+  
+  if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; }
+  else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; }
+  else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; }
+  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; }
+  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; }
+  else { themeBtn.textContent='🌙'; } // light
+}
+
+function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
 function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
   try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
   updateKeyStatus();
 }
-function saveRecords(){try{localStorage.setItem(RK,JSON.stringify(dailyRecords));}catch(e){}}
+function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
 
 function toggleTheme(){
   const body=document.body;
-  const themeBtn=document.getElementById('themeBtn');
-  if(body.classList.contains('dark')){
-    body.classList.remove('dark');
-    body.classList.add('tech');
-    themeBtn.textContent='🚀';
-    try{localStorage.setItem(TK,'tech');}catch(e){}
-  }else if(body.classList.contains('tech')){
-    body.classList.remove('tech');
-    themeBtn.textContent='🌙';
-    try{localStorage.setItem(TK,'light');}catch(e){}
-  }else{
-    body.classList.add('dark');
-    themeBtn.textContent='☀️';
-    try{localStorage.setItem(TK,'dark');}catch(e){}
+  let nextTheme = 'light';
+  
+  if(body.classList.contains('dark')){ nextTheme = 'tech'; }
+  else if(body.classList.contains('tech')){ nextTheme = 'blue-dark'; }
+  else if(body.classList.contains('blue-dark')){ nextTheme = 'blue-light'; }
+  else if(body.classList.contains('blue-light')){ nextTheme = 'pink'; }
+  else if(body.classList.contains('pink')){ nextTheme = 'light'; }
+  else { nextTheme = 'dark'; }
+
+  applyThemeText(nextTheme);
+  try{localStorage.setItem(TK, nextTheme);}catch(e){}
+}
+
+// 分頁切換核心邏輯
+function switchTab(tabIndex){
+  if(currentTab === tabIndex) return;
+  currentTab = tabIndex;
+  try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
+  updateTabUI();
+  renderAll();
+  renderHistory();
+  refreshPrices();
+}
+
+function updateTabUI(){
+  for(let i=0; i<3; i++){
+    const btn = document.getElementById(`tab${i}`);
+    if(i === currentTab) btn.classList.add('active');
+    else btn.classList.remove('active');
   }
 }
 
@@ -543,7 +505,8 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source;
   }
   
-  const results = await Promise.all(stocks.map(async (s)=>{
+  const currentStocks = tabStocks[currentTab];
+  const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
     if(!r) r = await fetchYahoo(s.symbol);
     return {s,r};
@@ -587,12 +550,14 @@ function renderAll(){
   const saveArea = document.getElementById('saveArea');
   
   body.innerHTML='';
-  if(stocks.length===0){
+  const currentStocks = tabStocks[currentTab];
+
+  if(currentStocks.length===0){
     empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return;
   }
   empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
   
-  for(const s of stocks){
+  for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
     const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
@@ -615,7 +580,8 @@ function renderAll(){
 
 function updateSummary(){
   let pnl=0,asset=0;
-  for(const s of stocks){
+  const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
     pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
@@ -629,9 +595,12 @@ function addStock(){
   const qty=parseInt(document.getElementById('qtyInput').value);
   const unit=document.getElementById('unitSelect').value;
   if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
-  if(stocks.some(s=>s.symbol===sym)){showToast('該股票已存在');return}
+  
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
+  
   const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  stocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value='';document.getElementById('qtyInput').value='';
   showToast('已新增 '+sym);refreshPrices();
@@ -639,11 +608,11 @@ function addStock(){
 
 function deleteStock(id){
   if(!confirm('確定刪除？'))return;
-  stocks=stocks.filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
+  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
 }
 
 function editStock(id){
-  const s=stocks.find(x=>x.id===id);if(!s)return;
+  const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
   if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;}
   const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
@@ -653,7 +622,8 @@ function editStock(id){
 
 function saveDailyPnl(){
   let pnl=0,asset=0;
-  for(const s of stocks){
+  const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
     pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
@@ -661,23 +631,26 @@ function saveDailyPnl(){
   const n=new Date();
   const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
   const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  dailyRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
-  if(dailyRecords.length>50)dailyRecords=dailyRecords.slice(0,50);
+  
+  const currentRecords = tabRecords[currentTab];
+  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
+  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
   saveRecords();renderHistory();
-  showToast('已儲存 '+ds+' 盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  showToast('已儲存今日盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
 
 function deleteHistory(timestamp) {
   if(!confirm('確定刪除此筆記錄？')) return;
-  dailyRecords = dailyRecords.filter(r => r.timestamp !== timestamp);
+  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
 
 function renderHistory(){
   const body=document.getElementById('historyBody');
-  if(dailyRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
+  const currentRecords = tabRecords[currentTab];
+  if(!currentRecords || currentRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
   body.innerHTML='';
-  for(const r of dailyRecords){
+  for(const r of currentRecords){
     const d=document.createElement('div');d.className='hist-item';
     d.innerHTML='<div class="hist-item-left"><span class="hdate">'+r.date+' '+r.time+'</span><span class="hval '+(r.totalPnl>=0?'up':'down')+'">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory('+r.timestamp+')">✕</button>';
     body.appendChild(d);
@@ -722,7 +695,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V2.0.0 已啟動 (灰白鈦金屬高清晰與台股漲跌色修正版)');
+console.log('股票庫存 V3.0.0 已啟動 (多帳戶分頁與多色彩高清晰主題版)');
 </script>
 </body>
 </html>
