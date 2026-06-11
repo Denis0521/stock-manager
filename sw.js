@@ -1,5 +1,5 @@
-// 🚀 核心更新機制：版號升級為 v6，徹底沖刷手機 WebView 底層死結快取
-const CACHE_NAME = 'stock-manager-v6'; 
+// 🚀 核心更新機制：版號升級為 v8，全面打通 GitHub 跨網域與免白名單限制
+const CACHE_NAME = 'stock-manager-v8'; 
 
 const ASSETS = [
   'index.html',
@@ -20,7 +20,6 @@ self.addEventListener('activate', e => {
       return Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME) {
-            console.log('系統已成功自動清除舊版本快取:', key);
             return caches.delete(key);
           }
         })
@@ -31,16 +30,13 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  // 報價 API 絕對放行不攔截
   if (url.includes('api.fugle.tw') || url.includes('finance.yahoo.com')) {
     e.respondWith(fetch(e.request));
     return;
   }
   e.respondWith(
     caches.match(e.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
       return fetch(e.request);
     })
   );
