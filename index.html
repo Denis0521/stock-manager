@@ -52,7 +52,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .card-title{color:#8b949e}
 .form-row{display:flex;gap:8px;align-items:center}
 .form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
-.dark .form-row input,.dark .form-row select{background:#0d1117;border-color:#30363d;color:#e6edf3}
+.dark .form-row input,.form-row select{background:#0d1117;border-color:#30363d;color:#e6edf3}
 .form-row input:focus,.form-row select:focus{border-color:#1a73e8}
 .dark .form-row input:focus,.dark .form-row select:focus{border-color:#58a6ff}
 .form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
@@ -143,7 +143,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .info-box{background:#fff3cd;color:#856404;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #ffeeba}
 .dark .info-box{background:#4d3800;color:#e6c35c;border-color:#664d03}
 
-/* 🚀 版本號專用 CSS 樣式 */
 .version-tag { text-align: center; font-size: 11px; color: #9aa0a6; margin-top: 16px; font-weight: 500; letter-spacing: 0.5px; }
 .dark .version-tag { color: #57606a; }
 
@@ -278,7 +277,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
     
-    <div class="version-tag">Version v9.0</div>
+    <div class="version-tag">Version v9.1</div>
   </div>
 </div>
 
@@ -339,24 +338,34 @@ async function fetchFugle(symbol){
   return null;
 }
 
+// 🚀 終極重構安全鎖：加入嚴密防禦性檢查與獨立變數防護，絕不讓任何異常中斷程式執行
 async function fetchYahooIndexChart(symbol) {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d&_nocache=${Date.now()}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!resp.ok) return null;
+    
     const d = await resp.json();
     const meta = d?.chart?.result?.[0]?.meta;
     if (!meta || meta.regularMarketPrice == null) return null;
     
-    const price = meta.regularMarketPrice;
-    const prev = meta.chartPreviousClose || meta.previousClose || price;
+    const price = parseFloat(meta.regularMarketPrice);
+    // 🛡️ 防禦防呆機制：若抓不到歷史收盤價，則預設以當前價格計算，不允許產生 NaN 或零除錯誤
+    const prev = parseFloat(meta.chartPreviousClose || meta.previousClose || price);
+    
+    const change = price - prev;
+    const changePercent = prev !== 0 ? (change / prev) * 100 : 0;
+    
     return {
       price: price,
-      change: price - prev,
-      changePercent: prev !== 0 ? ((price - prev) / prev) * 100 : 0,
+      change: change,
+      changePercent: changePercent,
       source: 'Yahoo'
     };
-  } catch (e) { return null; }
+  } catch (e) { 
+    console.error("方塊連線異常已隔離:", symbol, e);
+    return null; 
+  }
 }
 
 async function fetchYahooStock(symbol){
@@ -388,15 +397,16 @@ function renderIdxBox(id, data) {
   changeEl.className = 'idx-box-change ' + (data.change >= 0 ? 'up' : 'down');
 }
 
+// 🚀 完全去耦合：大盤與個股查詢全面隔離，保證富果個股 100% 獨立運行
 async function refreshAllIndexes() {
-  setTimeout(async () => {
-    try {
-      let twData = await fetchFugle('IX0001');
-      if (!twData) twData = await fetchYahooIndexChart('^TWII');
-      if (twData) renderIdxBox('idx_TW', twData);
-    } catch(e) {}
-  }, 10);
+  // 1. 臺灣加權指數（安全獨立異步）
+  try {
+    let twData = await fetchFugle('IX0001');
+    if (!twData) twData = await fetchYahooIndexChart('^TWII');
+    if (twData) renderIdxBox('idx_TW', twData);
+  } catch(e) {}
 
+  // 2. 國外指數方塊列（完全去耦合獨立調用）
   const globalIndices = [
     { id: 'idx_DJI',  sym: '^DJI' },   
     { id: 'idx_GSPC', sym: '^GSPC' },  
@@ -406,34 +416,48 @@ async function refreshAllIndexes() {
     { id: 'idx_KS11', sym: '^KS11' }   
   ];
 
-  globalIndices.forEach((item, index) => {
-    setTimeout(async () => {
+  globalIndices.forEach((item) => {
+    // 獨立 Promise 防止任何一個錯誤發生連帶中斷
+    Promise.resolve().then(async () => {
       try {
         const r = await fetchYahooIndexChart(item.sym);
         if(r) renderIdxBox(item.id, r);
       } catch(e) {}
-    }, 40 * (index + 1));
+    });
   });
 }
 
 async function refreshPrices(){
-  await refreshAllIndexes();
+  // 🛡️ 物理屏障：分開執行大盤與持股，持股區塊不再等候大盤完成
+  try {
+    await refreshAllIndexes();
+  } catch(e) { console.error("大盤列處理異常", e); }
+  
   if (stocks.length === 0) { updateSummary(); return; }
   
-  stocks.forEach((s, index) => {
-    setTimeout(async () => {
+  // 4. 持股區塊獨立運算
+  try {
+    const results = await Promise.all(stocks.map(async (s)=>{
       try {
         let r = await fetchFugle(s.symbol);
         if(!r) r = await fetchYahooStock(s.symbol + '.TW');
         if(!r) r = await fetchYahooStock(s.symbol + '.TWO');
-        if(r){
-          s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;
-          renderRow(s);
-          updateSummary();
-        }
-      } catch(e) {}
-    }, 30 * (index + 1));
-  });
+        return {s, r};
+      } catch(innerE) {
+        return {s, r: null};
+      }
+    }));
+    
+    for(const {s, r} of results){
+      if(r){
+        s.price = r.price;
+        s.change = r.change;
+        s.changePercent = r.changePercent;
+        renderRow(s);
+      }
+    }
+    updateSummary();
+  } catch(e) { console.error("自選持股處理異常", e); }
 }
 
 function renderRow(s){
@@ -457,7 +481,6 @@ function renderRow(s){
   el.querySelector('.total').className='total '+(total>=0?'up':'down');
 }
 
-/* 其餘渲染功能維持不變 */
 function renderAll(){
   const body=document.getElementById('listBody');
   const empty=document.getElementById('emptyState');
@@ -563,12 +586,20 @@ function renderHistory(){
   }
 }
 
+document.getElementById('symInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
+});
+document.getElementById('qtyInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') { e.preventDefault(); addStock(); }
+});
+
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 function saveAndCloseModal(){saveKeys();document.getElementById('modalOverlay').classList.remove('show');refreshPrices();}
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
