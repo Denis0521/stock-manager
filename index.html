@@ -39,17 +39,25 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
 .form-row .sym-inp{flex:0 0 88px}
-.idx-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:10px 14px;margin:0 14px 8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.dark .idx-bar{background:#161b22;border:1px solid #30363d;box-shadow:none}
-.idx-left{display:flex;flex-direction:column;gap:1px}
-.idx-name{font-size:11px;color:#5f6368}
-.dark .idx-name{color:#8b949e}
-.idx-info{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
-.idx-price{font-size:20px;font-weight:700}
-.idx-change{font-size:16px;font-weight:600}
-.idx-pct{font-size:16px}
-.idx-right{text-align:right;font-size:10px;color:#5f6368;min-width:60px}
-.dark .idx-right{color:#8b949e}
+
+/* ===================================================
+   🚀 全球大盤指數水平滑動區域 (CORS 免疫 Google API 版)
+   =================================================== */
+.idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.idx-scroll-container::-webkit-scrollbar{height:4px}
+.idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px}
+.dark .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+
+.idx-card-box{flex:0 0 160px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start}
+.dark .idx-card-box{background:#161b22;border:1px solid #30363d;box-shadow:none}
+
+.idx-box-name{font-size:11px;color:#5f6368;font-weight:500}
+.dark .idx-box-name{color:#8b949e}
+.idx-box-price{font-size:16px;font-weight:700;margin:2px 0}
+.idx-box-change-row{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
+.idx-box-src{font-size:9px;color:#9aa0a6;text-align:right;margin-top:2px}
+.dark .idx-box-src{color:#5f6368}
+
 .up{color:#d93025}.down{color:#188038}
 
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
@@ -142,11 +150,11 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
    1. 未來科技 (Tech) - 灰白鈦金屬立體風格
    ========================================= */
 body.tech { background-color: #23272d; background-image: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%), radial-gradient(at top center, #2d323a 0%, #181b20 100%); color: #c8d1dc; }
-.tech .header, .tech .card, .tech .idx-bar, .tech .table-scroll, .tech .summary, .tech .hist-item, .tech .modal, .tech .tabs-bar { background: linear-gradient(135deg, #323842 0%, #242930 100%); border: 1px solid #3d4552; box-shadow: 5px 5px 12px rgba(12,14,18,0.7), -3px -3px 8px rgba(255,255,255,0.08), inset 1px 1px 0px rgba(255,255,255,0.05); border-radius: 10px; }
+.tech .header, .tech .card, .tech .table-scroll, .tech .summary, .tech .hist-item, .tech .modal, .tech .tabs-bar, .tech .idx-card-box { background: linear-gradient(135deg, #323842 0%, #242930 100%); border: 1px solid #3d4552; box-shadow: 5px 5px 12px rgba(12,14,18,0.7), -3px -3px 8px rgba(255,255,255,0.08), inset 1px 1px 0px rgba(255,255,255,0.05); border-radius: 10px; }
 .tech .header { background: #2b3039; box-shadow: 0 4px 12px rgba(12,14,18,0.5); border-radius: 0 0 10px 10px; }
-.tech h1, .tech .card-title, .tech .idx-name, .tech .list-header > div, .tech .qty-cell, .tech .sum-row .lab, .tech .hdate { color: #e2e8f0; text-shadow: -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15); }
-.tech .card-title, .tech .idx-name, .tech .list-header > div { color: #a0aec0; }
-.tech .idx-price, .tech .price, .tech .total, .tech .val, .tech .hval { color: #ffffff; text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.15); }
+.tech h1, .tech .card-title, .tech .idx-box-name, .tech .list-header > div, .tech .qty-cell, .tech .sum-row .lab, .tech .hdate { color: #e2e8f0; text-shadow: -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15); }
+.tech .card-title, .tech .idx-box-name, .tech .list-header > div { color: #a0aec0; text-shadow: none; }
+.tech .idx-box-price, .tech .price, .tech .total, .tech .val, .tech .hval { color: #ffffff; text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.15); }
 .tech .up { color: #ff4d4d !important; text-shadow: 0 0 6px rgba(255,77,77,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
 .tech .down { color: #2ecc71 !important; text-shadow: 0 0 6px rgba(46,204,113,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
 .tech .srow .sym { color: #3498db !important; text-shadow: 0 0 4px rgba(52,152,219,0.2), -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15) !important; }
@@ -165,11 +173,11 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
    2. 深藍版 (Deep Blue) - 靜謐深海風格
    ========================================= */
 body.blue-dark { background-color: #0b132b; color: #95a5a6; }
-.blue-dark .header, .blue-dark .card, .blue-dark .idx-bar, .blue-dark .table-scroll, .blue-dark .summary, .blue-dark .hist-item, .blue-dark .modal, .blue-dark .tabs-bar { background: #1c2541; border: 1px solid #3a506b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 10px; }
+.blue-dark .header, .blue-dark .card, .blue-dark .table-scroll, .blue-dark .summary, .blue-dark .hist-item, .blue-dark .modal, .blue-dark .tabs-bar, .blue-dark .idx-card-box { background: #1c2541; border: 1px solid #3a506b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 10px; }
 .blue-dark .header { background: #111a33; border-bottom: 1px solid #3a506b; }
 .blue-dark h1, .blue-dark .qty-cell, .blue-dark .sum-row .lab, .blue-dark .hdate { color: #ffffff; }
-.blue-dark .card-title, .blue-dark .idx-name, .blue-dark .list-header > div { color: #5bc0be; }
-.blue-dark .idx-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
+.blue-dark .card-title, .blue-dark .idx-box-name, .blue-dark .list-header > div { color: #5bc0be; }
+.blue-dark .idx-box-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
 .blue-dark .up { color: #ff6b6b !important; } .blue-dark .down { color: #2ecc71 !important; }
 .blue-dark .srow .sym { color: #00b4d8 !important; }
 .blue-dark input, .blue-dark select { background: #0b132b; border: 1px solid #3a506b; color: #fff; }
@@ -186,10 +194,10 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
    3. 淺藍版 (Light Blue) - 清爽晴空風格
    ========================================= */
 body.blue-light { background-color: #edf2f7; color: #4a5568; }
-.blue-light .header, .blue-light .card, .blue-light .idx-bar, .blue-light .table-scroll, .blue-light .summary, .blue-light .hist-item, .blue-light .modal, .blue-light .tabs-bar { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(142,176,211,0.15); border-radius: 10px; }
+.blue-light .header, .blue-light .card, .blue-light .table-scroll, .blue-light .summary, .blue-light .hist-item, .blue-light .modal, .blue-light .tabs-bar, .blue-light .idx-card-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(142,176,211,0.15); border-radius: 10px; }
 .blue-light .header { background: #e6f0fa; border-bottom: 1px solid #cbd5e0; }
 .blue-light h1, .blue-light .qty-cell, .blue-light .sum-row .lab, .blue-light .hdate { color: #2b6cb0; }
-.blue-light .card-title, .blue-light .idx-name, .blue-light .list-header > div { color: #4a5568; }
+.blue-light .card-title, .blue-light .idx-box-name, .blue-light .list-header > div { color: #4a5568; }
 .blue-light .idx-price, .blue-light .price, .blue-light .total, .blue-light .val, .blue-light .hval { color: #1a202c; font-weight: 700; }
 .blue-light .up { color: #e53e3e !important; } .blue-light .down { color: #38a169 !important; }
 .blue-light .srow .sym { color: #2b6cb0 !important; }
@@ -207,11 +215,11 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
    4. 粉色版 (Pink) - 浪漫櫻花風格
    ========================================= */
 body.pink { background-color: #fff5f5; color: #702459; }
-.pink .header, .pink .card, .pink .idx-bar, .pink .table-scroll, .pink .summary, .pink .hist-item, .pink .modal, .pink .tabs-bar { background: #ffffff; border: 1px solid #fed7d7; box-shadow: 0 4px 8px rgba(244,143,177,0.15); border-radius: 10px; }
+.pink .header, .pink .card, .pink .table-scroll, .pink .summary, .pink .hist-item, .pink .modal, .pink .tabs-bar, .pink .idx-card-box { background: #ffffff; border: 1px solid #fed7d7; box-shadow: 0 4px 8px rgba(244,143,177,0.15); border-radius: 10px; }
 .pink .header { background: #fff0f6; border-bottom: 1px solid #fbb6ce; }
 .pink h1, .pink .qty-cell, .pink .sum-row .lab, .pink .hdate { color: #b83280; }
-.pink .card-title, .pink .idx-name, .pink .list-header > div { color: #9b2c2c; }
-.pink .idx-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
+.pink .card-title, .pink .idx-box-name, .pink .list-header > div { color: #9b2c2c; }
+.pink .idx-box-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
 .pink .up { color: #e53e3e !important; } .pink .down { color: #38a169 !important; }
 .pink .srow .sym { color: #d63384 !important; }
 .pink input, .pink select { background: #fffaf0; border: 1px solid #fbb6ce; color: #4a123a; }
@@ -233,7 +241,6 @@ body.pink { background-color: #fff5f5; color: #702459; }
 
 @media(min-width:480px){body{max-width:480px;margin:0 auto}}
 </style>
-
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -267,18 +274,16 @@ body.pink { background-color: #fff5f5; color: #702459; }
     <button type="button" onclick="addStock()">＋</button>
   </div>
 </div>
-<div class="idx-bar" id="idxCard">
-  <div class="idx-left">
-    <div class="idx-name">加權指數</div>
-    <div class="idx-info">
-      <span class="idx-price" id="idxPrice">—</span>
-      <span class="idx-change" id="idxChange"></span>
-      <span class="idx-pct" id="idxPct"></span>
+
+<div class="idx-scroll-container" id="idxScrollContainer">
+  <div class="idx-card-box">
+    <div class="idx-box-name">臺灣加權指數</div>
+    <div class="idx-box-price" id="idxPrice">—</div>
+    <div class="idx-box-change-row">
+      <span id="idxChange"></span>
+      <span id="idxPct"></span>
     </div>
-  </div>
-  <div class="idx-right">
-    <div id="idxTime"></div>
-    <div id="idxSource" style="margin-top:2px"></div>
+    <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 </div>
 
@@ -326,10 +331,15 @@ body.pink { background-color: #fff5f5; color: #702459; }
 </div>
 
 <script>
+// ===================================================
+// 📌 核心對接：已自動套用你分享的 Google CSV 雲端網址
+// ===================================================
+let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+
 let currentTab = 0;
 let tabStocks = [[], [], []];
 let tabRecords = [[], [], []];
-let tabNames = ['分頁 A', '分頁 B', '分頁 C']; // 預設名稱
+let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
 
 let fugleKey='',secondFugleKey='',pollTimer=null;
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
@@ -343,15 +353,12 @@ function loadState(){
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
-    
-    // 載入分頁名稱
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
 
     for(let i=0; i<3; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
-    
     const t=localStorage.getItem(TK);
     applyThemeText(t);
   }catch(e){console.error(e);}
@@ -386,14 +393,12 @@ function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.st
 function toggleTheme(){
   const body=document.body;
   let nextTheme = 'light';
-  
   if(body.classList.contains('dark')){ nextTheme = 'tech'; }
   else if(body.classList.contains('tech')){ nextTheme = 'blue-dark'; }
   else if(body.classList.contains('blue-dark')){ nextTheme = 'blue-light'; }
   else if(body.classList.contains('blue-light')){ nextTheme = 'pink'; }
   else if(body.classList.contains('pink')){ nextTheme = 'light'; }
   else { nextTheme = 'dark'; }
-
   applyThemeText(nextTheme);
   try{localStorage.setItem(TK, nextTheme);}catch(e){}
 }
@@ -408,16 +413,13 @@ function switchTab(tabIndex){
   refreshPrices();
 }
 
-// 變更分頁名稱函式
 function renameTab(tabIndex) {
   const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`;
   const newName = prompt('請輸入此分頁的新名稱：', oldName);
   if (newName !== null) {
     const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim();
     tabNames[tabIndex] = finalName;
-    try {
-      localStorage.setItem(TN_KEY, JSON.stringify(tabNames));
-    } catch(e){}
+    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
     updateTabUI();
     showToast(`已更名為「${finalName}」`);
   }
@@ -426,7 +428,6 @@ function renameTab(tabIndex) {
 function updateTabUI(){
   for(let i=0; i<3; i++){
     const btn = document.getElementById(`tab${i}`);
-    // 渲染自訂名稱
     btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
     if(i === currentTab) btn.classList.add('active');
     else btn.classList.remove('active');
@@ -440,6 +441,48 @@ function updateKeyStatus(){
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
+}
+
+// 🌐 異步調用並解析 Google Sheets CSV 的背景引擎
+async function fetchGlobalIndicesFromGoogle() {
+  if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
+  try {
+    const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) return;
+    const text = await response.text();
+    const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+    
+    const container = document.getElementById('idxScrollContainer');
+    const boxes = container.querySelectorAll('.idx-card-box');
+    for(let i = 1; i < boxes.length; i++) { boxes[i].remove(); }
+
+    for(let i = 1; i < rows.length; i++) {
+      const columns = rows[i].split(',');
+      if (columns.length < 3) continue;
+
+      const name = columns[0].replace(/"/g, '');
+      const price = parseFloat(columns[1]);
+      const pct = parseFloat(columns[2]) * 100;
+
+      if (isNaN(price)) continue;
+
+      const card = document.createElement('div');
+      card.className = 'idx-card-box';
+      
+      const sign = pct >= 0 ? '+' : '';
+      const cls = pct >= 0 ? 'up' : 'down';
+
+      card.innerHTML = `
+        <div class="idx-box-name">${name}</div>
+        <div class="idx-box-price">${price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
+        <div class="idx-box-change-row ${cls}">
+          <span>${sign}${pct.toFixed(2)}%</span>
+        </div>
+        <div class="idx-box-src">via Google</div>
+      `;
+      container.appendChild(card);
+    }
+  } catch (e) { console.error("Google Index Fetch Error:", e); }
 }
 
 async function fetchFugle(symbol){
@@ -476,7 +519,6 @@ async function fetchYahoo(symbol){
       return {price, change: chg, changePercent: pct, source: 'Yahoo'};
     } catch(e) { return null; }
   };
-
   let res = await tryFetch('.TW');
   if(!res) res = await tryFetch('.TWO');
   return res;
@@ -494,7 +536,6 @@ async function fetchWeightedIndex(){
       }
     }catch(e){}
   }
-  
   try{
     const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
     const resp = await fetch(url);
@@ -515,17 +556,17 @@ async function refreshPrices(){
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
   const idxPctEl = document.getElementById('idxPct');
-  const idxTimeEl = document.getElementById('idxTime');
   const idxSrcEl = document.getElementById('idxSource');
   if(idxR){
     idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
     idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    idxChgEl.className='idx-change '+(idxR.change>=0?'up':'down');
+    idxChgEl.className=(idxR.change>=0?'up':'down');
     idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    idxPctEl.className='idx-pct '+(idxR.changePercent>=0?'up':'down');
-    idxTimeEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    idxSrcEl.textContent='via '+idxR.source;
+    idxPctEl.className=(idxR.changePercent>=0?'up':'down');
+    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
+
+  fetchGlobalIndicesFromGoogle();
   
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
@@ -533,7 +574,6 @@ async function refreshPrices(){
     if(!r) r = await fetchYahoo(s.symbol);
     return {s,r};
   }));
-  
   for(const {s,r} of results){
     if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
   }
@@ -553,10 +593,8 @@ function renderRow(s){
     pEl.textContent=formatPrice(p);
     pEl.className='price '+(chg>=0?'up':'down');
   }
-  
   const cp=el.querySelector('.chgp');
   if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  
   const cg=el.querySelector('.chg');
   if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
@@ -573,7 +611,6 @@ function renderAll(){
   
   body.innerHTML='';
   const currentStocks = tabStocks[currentTab];
-
   if(currentStocks.length===0){
     empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return;
   }
@@ -617,7 +654,6 @@ function addStock(){
   const qty=parseInt(document.getElementById('qtyInput').value);
   const unit=document.getElementById('unitSelect').value;
   if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
-  
   const currentStocks = tabStocks[currentTab];
   if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
   
@@ -717,7 +753,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.1.0 已啟動 (加入分頁自訂名稱功能)');
+console.log('股票庫存 V3.1.0 已啟動 (全球大盤指數 Google 雲端同步版)');
 </script>
 </body>
 </html>
