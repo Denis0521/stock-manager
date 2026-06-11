@@ -1,6 +1,5 @@
-// 🚀 核心更新機制：版號升級為 v9.1，阻斷非同步連帶崩潰死結
-const CACHE_NAME = 'stock-manager-v9.1'; 
-
+// 每次修改程式碼，建議可以把 v1 改成 v2，強制瀏覽器判定更新
+const CACHE_NAME = 'stock-manager-v2'; 
 const ASSETS = [
   'index.html',
   'manifest.json'
@@ -28,15 +27,22 @@ self.addEventListener('activate', e => {
   );
 });
 
+// 🚀 核心修正：放行所有股票報價 API，絕不快取死資料
 self.addEventListener('fetch', e => {
   const url = e.request.url;
+
+  // 💡 如果請求包含富果 API 或 Yahoo API，直接走網路，不進入快取攔截
   if (url.includes('api.fugle.tw') || url.includes('finance.yahoo.com')) {
     e.respondWith(fetch(e.request));
     return;
   }
+
+  // 其餘靜態檔案（如網頁、圖示）維持快取優先，確保離線可用
   e.respondWith(
     caches.match(e.request).then(cachedResponse => {
-      if (cachedResponse) return cachedResponse;
+      if (cachedResponse) {
+        return cachedResponse;
+      }
       return fetch(e.request);
     })
   );
