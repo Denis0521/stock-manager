@@ -283,24 +283,17 @@ body.pink { background-color: #fff5f5; color: #702459; }
   </div>
 </div>
 
+<!-- 🌍 左右滑動全球指數大看板區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- 臺灣加權 (固定由 富果/Yahoo 抓取) -->
   <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
-    <div class="idx-box-change-row" id="idxChangeRow">
+    <div class="idx-box-change-row">
       <span id="idxChange"></span>
       <span id="idxPct"></span>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
-  </div>
-  <div class="idx-card-box" id="futCard" style="display:none;">
-    <div class="idx-box-name">台指期貨</div>
-    <div class="idx-box-price" id="futPrice">—</div>
-    <div class="idx-box-change-row" id="futChangeRow">
-      <span id="futChange"></span>
-      <span id="futPct"></span>
-    </div>
-    <div class="idx-box-src" id="futSource">Loading...</div>
   </div>
 </div>
 
@@ -363,7 +356,6 @@ const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
-// 🚀 加入快取庫：讓大盤資料永不消失
 let cachedGlobalIndices = [];
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
@@ -382,7 +374,6 @@ function loadState(){
     const t=localStorage.getItem(TK);
     applyThemeText(t);
     
-    // 讀取快取的大盤資料
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) {
       cachedGlobalIndices = JSON.parse(cachedIdx);
@@ -470,12 +461,10 @@ function updateKeyStatus(){
   });
 }
 
-// 🌐 將大盤渲染邏輯獨立，方便快取直接調用
 function renderGlobalIndices(indices) {
   const container = document.getElementById('idxScrollContainer');
-  // 為了保留原本的前兩個(台灣加權, 台指期貨)，我們要從第三個開始移除舊資料
   const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 2; i < boxes.length; i++) { boxes[i].remove(); }
+  for(let i = 1; i < boxes.length; i++) { boxes[i].remove(); }
 
   indices.forEach(item => {
     const card = document.createElement('div');
@@ -495,7 +484,6 @@ function renderGlobalIndices(indices) {
   });
 }
 
-// 🌐 異步調用並解析 Google Sheets CSV
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -549,24 +537,6 @@ async function fetchFugle(symbol){
       if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
     }
   } catch(e) {}
-  return null;
-}
-
-// 🎯 新增：抓取台指期貨專用 (使用 Fugle 期權端點)
-async function fetchTaiwanFutures(){
-  const keys = [fugleKey, secondFugleKey].filter(k => k);
-  if(keys.length > 0){
-    try{
-      // 嘗試抓取期交所台指期近月合約 (TXF)
-      const futUrl = FUGLE.replace('/stock/', '/futopt/') + 'TXF';
-      const resp = await fetch(futUrl, {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
-      if(resp.ok){
-        const d = await resp.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.price;
-        if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
-      }
-    }catch(e){}
-  }
   return null;
 }
 
@@ -624,35 +594,22 @@ async function fetchWeightedIndex(){
 }
 
 async function refreshPrices(){
-  // 1. 刷新台股大盤
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
+  const idxChgEl = document.getElementById('idxChange');
+  const idxPctEl = document.getElementById('idxPct');
+  const idxSrcEl = document.getElementById('idxSource');
   if(idxR){
     idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-    document.getElementById('idxChange').textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    document.getElementById('idxChangeRow').className='idx-box-change-row '+(idxR.change>=0?'up':'down');
-    document.getElementById('idxPct').textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    document.getElementById('idxSource').textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
+    idxChgEl.className=(idxR.change>=0?'up':'down');
+    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
+    idxPctEl.className=(idxR.changePercent>=0?'up':'down');
+    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
-  // 2. 刷新台指期貨 (包含盤後)
-  const futR = await fetchTaiwanFutures();
-  const futCard = document.getElementById('futCard');
-  if(futR){
-    futCard.style.display = 'flex'; // 有抓到資料就顯示金屬方塊
-    document.getElementById('futPrice').textContent=futR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-    document.getElementById('futChange').textContent=(futR.change>=0?'+':'')+futR.change.toFixed(0);
-    document.getElementById('futChangeRow').className='idx-box-change-row '+(futR.change>=0?'up':'down');
-    document.getElementById('futPct').textContent='('+(futR.changePercent>=0?'+':'')+futR.changePercent.toFixed(2)+'%)';
-    document.getElementById('futSource').textContent='via '+futR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-  } else {
-    futCard.style.display = 'none'; // 沒抓到或沒 Key 就優雅隱藏
-  }
-
-  // 3. 刷新試算表國外大盤
   fetchGlobalIndicesFromGoogle();
   
-  // 4. 刷新持股列表
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
