@@ -48,14 +48,12 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px}
 .dark .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
 
-/* 修改點：改為彈性寬度 flex: 0 0 auto，並設定 min-width 避免太窄 */
 .idx-card-box{flex:0 0 auto;min-width:175px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start}
 .dark .idx-card-box{background:#161b22;border:1px solid #30363d;box-shadow:none}
 
 .idx-box-name{font-size:11px;color:#5f6368;font-weight:500}
 .dark .idx-box-name{color:#8b949e}
 .idx-box-price{font-size:16px;font-weight:700;margin:2px 0}
-/* 修改點：字體放大至 16px，並加入 white-space: nowrap 強制不截斷換行 */
 .idx-box-change-row{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;white-space:nowrap}
 .idx-box-src{font-size:9px;color:#9aa0a6;text-align:right;margin-top:2px}
 .dark .idx-box-src{color:#5f6368}
@@ -66,7 +64,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
 .list-wrap{min-width:640px}
 .list-header{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:16px;color:#5f6368;font-weight:500;align-items:center}
-.dark .list-header{background:#0d1117;border-color:#30363d;color:#8b949e}
+.dark .list-header {background:#0d1117;border-color:#30363d;color:#8b949e}
 .srow{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:14px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
 .dark .srow{border-color:#30363d}
 .srow:last-child{border-bottom:none}
@@ -80,8 +78,17 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after{content:'';position:absolute;top:0;bottom:0;right:-6px;width:6px;background:linear-gradient(to right, rgba(0,0,0,0.06), transparent);pointer-events:none}
 .dark .list-header > div:nth-child(1)::after, .dark .srow > div:nth-child(1)::after{background:linear-gradient(to right, rgba(0,0,0,0.2), transparent)}
 
+/* 🎨 核心優化：個股代號垂直彈性排版與小字樣式 */
+.sym-container{display:flex !important;flex-direction:column !important;align-items:flex-start !important;justify-content:center !important;line-height:1.2 !important}
 .srow .sym{font-weight:700;color:#1a73e8;cursor:pointer;font-size:16px}
 .dark .srow .sym {color:#58a6ff}
+.sym-src{font-size:9px;color:#9aa0a6;font-weight:normal;margin-top:1px;white-space:nowrap}
+.dark .sym-src{color:#6e7681}
+.tech .sym-src{color:#8b949e;text-shadow:none}
+.blue-dark .sym-src{color:#5bc0be}
+.blue-light .sym-src{color:#718096}
+.pink .sym-src{color:#b83280}
+
 .srow .qty-cell{font-weight:500;color:#1a1a2e}
 .dark .srow .qty-cell{color:#e6edf3}
 .srow .price{font-weight:600}
@@ -179,7 +186,7 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .header { background: #111a33; border-bottom: 1px solid #3a506b; }
 .blue-dark h1, .blue-dark .qty-cell, .blue-dark .sum-row .lab, .blue-dark .hdate { color: #ffffff; }
 .blue-dark .card-title, .blue-dark .idx-box-name, .blue-dark .list-header > div { color: #5bc0be; }
-.blue-dark .idx-box-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
+.blue-dark .idx-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
 .blue-dark .up { color: #ff6b6b !important; } .blue-dark .down { color: #2ecc71 !important; }
 .blue-dark .srow .sym { color: #00b4d8 !important; }
 .blue-dark input, .blue-dark select { background: #0b132b; border: 1px solid #3a506b; color: #fff; }
@@ -221,7 +228,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .header { background: #fff0f6; border-bottom: 1px solid #fbb6ce; }
 .pink h1, .pink .qty-cell, .pink .sum-row .lab, .pink .hdate { color: #b83280; }
 .pink .card-title, .pink .idx-box-name, .pink .list-header > div { color: #9b2c2c; }
-.pink .idx-box-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
+.pink .idx-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
 .pink .up { color: #e53e3e !important; } .pink .down { color: #38a169 !important; }
 .pink .srow .sym { color: #d63384 !important; }
 .pink input, .pink select { background: #fffaf0; border: 1px solid #fbb6ce; color: #4a123a; }
@@ -315,7 +322,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
     </div>
     
     <div class="info-box">
-      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保任何手機與網路環境下，數據均能 100% 正常回報。
+      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保 any 手機與網路環境下，數據均能 100% 正常回報。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -445,7 +452,6 @@ function updateKeyStatus(){
   });
 }
 
-// 🌐 異步調用並解析 Google Sheets CSV 的背景引擎 (升級相容版)
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -475,7 +481,6 @@ async function fetchGlobalIndicesFromGoogle() {
 
       if (isNaN(price) || isNaN(pct)) continue;
 
-      // 🛠️ 智能核心升級：自動依據「當前價」與「漲跌幅%」逆向回推計算「漲跌點數金額」
       const originalClose = price / (1 + (pct / 100));
       const changeAmt = price - originalClose;
 
@@ -589,7 +594,15 @@ async function refreshPrices(){
     return {s,r};
   }));
   for(const {s,r} of results){
-    if(r){s.price=r.price;s.change=r.change;s.changePercent=r.changePercent;renderRow(s);}
+    if(r){
+      s.price=r.price;
+      s.change=r.change;
+      s.changePercent=r.changePercent;
+      // 🛠️ 核心記錄點：儲存個股的數據來源與時間戳記
+      s.source=r.source;
+      s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+      renderRow(s);
+    }
   }
   updateSummary();
 }
@@ -599,7 +612,19 @@ function renderRow(s){
   const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
   let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
   
-  el.querySelector('.sym').textContent=s.symbol;
+  // 🛠️ 動態刷新：更新代號格內的純文字與 Fugle 時間小字
+  const symCont = el.querySelector('.sym-container');
+  if(symCont){
+    symCont.querySelector('.sym').textContent=s.symbol;
+    let srcEl = symCont.querySelector('.sym-src');
+    if(!srcEl){
+      srcEl = document.createElement('div');
+      srcEl.className = 'sym-src';
+      symCont.appendChild(srcEl);
+    }
+    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
+  }
+  
   const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
   
   const pEl=el.querySelector('.price');
@@ -638,8 +663,11 @@ function renderAll(){
     const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
     const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
     
+    // 🛠️ 智能核心：動態過濾來源，只有富果資料才會回寫時間字串
+    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    
     div.innerHTML=
-      '<div class="sym">'+s.symbol+'</div>'+
+      '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
       '<div class="qty-cell">'+s.displayQty+' '+s.displayUnit+'</div>'+
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
@@ -680,15 +708,15 @@ function addStock(){
 
 function deleteStock(id){
   if(!confirm('確定刪除？'))return;
-  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('已刪除');
+  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('擺脫這檔股票');
 }
 
 function editStock(id){
   const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
-  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;}
+  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
   const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
-  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;}
+  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
   saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
 
