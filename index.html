@@ -48,13 +48,15 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px}
 .dark .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
 
-.idx-card-box{flex:0 0 160px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start}
+/* 修改點：改為彈性寬度 flex: 0 0 auto，並設定 min-width 避免太窄 */
+.idx-card-box{flex:0 0 auto;min-width:175px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start}
 .dark .idx-card-box{background:#161b22;border:1px solid #30363d;box-shadow:none}
 
 .idx-box-name{font-size:11px;color:#5f6368;font-weight:500}
 .dark .idx-box-name{color:#8b949e}
 .idx-box-price{font-size:16px;font-weight:700;margin:2px 0}
-.idx-box-change-row{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;flex-wrap:nowrap}
+/* 修改點：字體放大至 16px，並加入 white-space: nowrap 強制不截斷換行 */
+.idx-box-change-row{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;white-space:nowrap}
 .idx-box-src{font-size:9px;color:#9aa0a6;text-align:right;margin-top:2px}
 .dark .idx-box-src{color:#5f6368}
 
@@ -474,7 +476,6 @@ async function fetchGlobalIndicesFromGoogle() {
       if (isNaN(price) || isNaN(pct)) continue;
 
       // 🛠️ 智能核心升級：自動依據「當前價」與「漲跌幅%」逆向回推計算「漲跌點數金額」
-      // 計算公式：昨收 = 當前價 / (1 + 漲跌幅)，漲跌點數 = 當前價 - 昨收
       const originalClose = price / (1 + (pct / 100));
       const changeAmt = price - originalClose;
 
@@ -484,7 +485,6 @@ async function fetchGlobalIndicesFromGoogle() {
       const sign = pct >= 0 ? '+' : '';
       const cls = pct >= 0 ? 'up' : 'down';
 
-      // 🛠️ 完美呈現：同時包含金額漲跌、百分比漲跌幅
       card.innerHTML = `
         <div class="idx-box-name">${name}</div>
         <div class="idx-box-price">${price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
@@ -566,7 +566,6 @@ async function fetchWeightedIndex(){
 }
 
 async function refreshPrices(){
-  // 1. 抓取台股加權
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
@@ -581,10 +580,8 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
-  // 2. 抓取全球大盤
   fetchGlobalIndicesFromGoogle();
   
-  // 3. 持股數據更新
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
@@ -760,7 +757,7 @@ async function refresh(){await refreshPrices()}
 // Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000);
+pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
 
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
