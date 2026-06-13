@@ -18,6 +18,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
 .dark .btn-adv{border-color:#30363d;color:#58a6ff}
 
+/* --- 分頁切換列 --- */
 .tabs-bar{display:flex;background:#fff;padding:6px 14px;margin:10px 14px 0;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);gap:6px}
 .dark .tabs-bar{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .tab-btn{flex:1;padding:10px 8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:16px;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -39,6 +40,9 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row button:active{background:#1557b0}
 .form-row .sym-inp{flex:0 0 88px}
 
+/* ===================================================
+   🚀 全球大盤指數水平滑動區域
+   =================================================== */
 .idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .idx-scroll-container::-webkit-scrollbar{height:4px}
 .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px}
@@ -147,6 +151,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
+/* 深色模式下連結清晰度優化 */
 .dark .btn-link { color: #58a6ff !important; font-weight: bold; }
 
 /* =========================================
@@ -278,7 +283,9 @@ body.pink { background-color: #fff5f5; color: #702459; }
   </div>
 </div>
 
+<!-- 🌍 左右滑動全球指數大看板區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- 臺灣加權 (固定由 富果/Yahoo 抓取) -->
   <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
@@ -316,7 +323,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
     </div>
     
     <div class="info-box">
-      本系統整合富果安全個股輪詢技術與跨網域繞道引擎。若無設定富果金鑰或遭受手機安全阻擋時，將全自動切換公共數據端點，確保美股與台股均能 100% 正常回報。
+      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保任何手機與網路環境下，數據均能 100% 正常回報。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -327,13 +334,16 @@ body.pink { background-color: #fff5f5; color: #702459; }
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
 
-    <div class="v-box">核心版本：V3.3.0 (匯率雙幣終極版)</div>
+    <div class="v-box">核心版本：V3.1.0</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
   </div>
 </div>
 
 <script>
+// ===================================================
+// 📌 核心對接：已自動套用你分享的 Google CSV 雲端網址
+// ===================================================
 let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
 
 let currentTab = 0;
@@ -347,7 +357,6 @@ const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
 let cachedGlobalIndices = [];
-let exchangeRateUSDTWD = 32.5;
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
@@ -475,39 +484,6 @@ function renderGlobalIndices(indices) {
   });
 }
 
-// 🌐 跨網域防阻擋引擎 (CORS Proxy Bridge) - 確保任何手機瀏覽器都能順利拉取 Yahoo 資料
-async function fetchWithProxy(url) {
-  // 1. 先嘗試最快的直接連線 (針對沒被阻擋的環境)
-  try {
-    const r1 = await fetch(url, { signal: AbortSignal.timeout(2000) });
-    if(r1.ok) return r1;
-  } catch(e) {}
-  // 2. 被擋的話，瞬間切換到強效型 CorsProxy 繞道
-  try {
-    const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { signal: AbortSignal.timeout(4000) });
-    if(r2.ok) return r2;
-  } catch(e) {}
-  // 3. 第三道保險：國際開源 AllOrigins 備用節點
-  try {
-    const r3 = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), { signal: AbortSignal.timeout(4000) });
-    if(r3.ok) return r3;
-  } catch(e) {}
-  return null;
-}
-
-// 利用 Proxy 引擎抓取匯率
-async function fetchUSDTWD() {
-  try {
-    const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/USDTWD=X?interval=1d&range=1d&cb=${Date.now()}`;
-    const resp = await fetchWithProxy(targetUrl);
-    if (resp) {
-      const json = await resp.json();
-      const rate = json.chart.result[0].meta.regularMarketPrice;
-      if (rate) exchangeRateUSDTWD = rate;
-    }
-  } catch(e) {}
-}
-
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -558,42 +534,35 @@ async function fetchFugle(symbol){
     const resp = await fetch(FUGLE + encodeURIComponent(symbol), {headers: {'X-API-KEY': keys[0]}, signal: AbortSignal.timeout(4000)});
     if(resp.ok){
       const d = await resp.json();
-      if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle', currency: 'TWD'};
+      if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
     }
   } catch(e) {}
   return null;
 }
 
-// 🚀 搭配 Proxy 引擎抓取 Yahoo (美股解鎖核心)
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
-      const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}${suffix}?interval=1d&range=1d&cb=${Date.now()}`;
-      const resp = await fetchWithProxy(targetUrl);
-      if(!resp) return null;
-      const json = await resp.json();
-      const meta = json.chart.result[0].meta;
-      const price = meta.regularMarketPrice;
-      const prevClose = meta.previousClose;
+      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetch(url);
+      if(!resp.ok) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if(lines.length < 2) return null;
       
-      if(price == null || prevClose == null) return null;
+      const lastLine = lines[lines.length - 1];
+      const cols = lastLine.split(',');
+      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
       
-      const chg = +(price - prevClose).toFixed(2);
-      const pct = +((chg / prevClose) * 100).toFixed(2);
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
       return {price, change: chg, changePercent: pct, source: 'Yahoo'};
     } catch(e) { return null; }
   };
-  
-  let res = null;
-  let currency = 'TWD';
-  if (!/\d/.test(symbol)) {
-    res = await tryFetch('');
-    currency = 'USD';
-  } else {
-    res = await tryFetch('.TW');
-    if(!res) res = await tryFetch('.TWO');
-  }
-  if(res) res.currency = currency;
+  let res = await tryFetch('.TW');
+  if(!res) res = await tryFetch('.TWO');
   return res;
 }
 
@@ -609,25 +578,22 @@ async function fetchWeightedIndex(){
       }
     }catch(e){}
   }
-  try {
-    const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=1d&cb=${Date.now()}`;
-    const resp = await fetchWithProxy(targetUrl);
-    if(resp){
-      const json = await resp.json();
-      const meta = json.chart.result[0].meta;
-      const price = meta.regularMarketPrice;
-      const prevClose = meta.previousClose;
-      if(price != null && prevClose != null) {
-        return {price, change: price - prevClose, changePercent: ((price - prevClose)/prevClose)*100, source: 'Yahoo'};
-      }
+  try{
+    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetch(url);
+    if(resp.ok){
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      const cols = lines[lines.length - 1].split(',');
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
     }
   }catch(e){}
   return null;
 }
 
 async function refreshPrices(){
-  await fetchUSDTWD();
-
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
@@ -656,7 +622,6 @@ async function refreshPrices(){
       s.change=r.change;
       s.changePercent=r.changePercent;
       s.source=r.source;
-      s.currency=r.currency;
       s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
       renderRow(s);
     }
@@ -667,7 +632,7 @@ async function refreshPrices(){
 function renderRow(s){
   const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
   const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-  let p = s.price; let chg = s.change ?? 0;
+  let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
   
   const symCont = el.querySelector('.sym-container');
   if(symCont){
@@ -678,45 +643,23 @@ function renderRow(s){
       srcEl.className = 'sym-src';
       symCont.appendChild(srcEl);
     }
-    srcEl.textContent = ((s.source==='Fugle' || s.source==='Yahoo') && s.updateTime) ? 'via ' + s.source + ' ' + s.updateTime : '';
+    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
   }
   
   const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
   
-  let isUSD = (s.currency === 'USD');
-  let pStr = '—';
-  if(p!=null) pStr = isUSD ? '$' + formatPrice(p) : formatPrice(p);
-  const cpEl=el.querySelector('.chgp');
-  const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-  let cgStr = '—';
-  if(s.change!=null) cgStr = isUSD ? (chg>=0?'+$':'-$') + Math.abs(chg).toFixed(2) : (chg>=0?'+':'') + chg.toFixed(2);
-  
-  let totalHtml = '—';
-  let totalValForClass = 0;
-  if(s.price != null && s.change != null) {
-      if(isUSD) {
-          const usdTotal = +(shares * chg).toFixed(2);
-          const twdTotal = Math.round(usdTotal * exchangeRateUSDTWD);
-          totalValForClass = usdTotal;
-          totalHtml = `<div style="line-height:1.2">${usdTotal>=0?'+$':'-$'}${Math.abs(usdTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}<br><span style="font-size:11px;opacity:0.75">NT$${twdTotal>=0?'+':''}${twdTotal.toLocaleString()}</span></div>`;
-      } else {
-          const twdTotal = Math.round(shares * chg);
-          totalValForClass = twdTotal;
-          totalHtml = (twdTotal>=0?'+':'') + twdTotal.toLocaleString();
-      }
+  const pEl=el.querySelector('.price');
+  if(p!=null){
+    pEl.textContent=formatPrice(p);
+    pEl.className='price '+(chg>=0?'up':'down');
   }
+  const cp=el.querySelector('.chgp');
+  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  const cg=el.querySelector('.chg');
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
-  el.querySelector('.price').textContent=pStr;
-  if(p!=null) el.querySelector('.price').className='price '+(chg>=0?'up':'down');
-  
-  cpEl.textContent=cgp;
-  if(s.changePercent!=null) cpEl.className='chgp '+(s.changePercent>=0?'up':'down');
-  
-  el.querySelector('.chg').textContent=cgStr;
-  if(s.change!=null) el.querySelector('.chg').className='chg '+(chg>=0?'up':'down');
-  
-  el.querySelector('.total').innerHTML=totalHtml;
-  el.querySelector('.total').className='total '+(totalValForClass>=0?'up':'down');
+  el.querySelector('.total').textContent=(total>=0?'+':'')+total.toLocaleString();
+  el.querySelector('.total').className='total '+(total>=0?'up':'down');
 }
 
 function renderAll(){
@@ -736,31 +679,12 @@ function renderAll(){
   for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
     const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p = s.price; let chg = s.change ?? 0;
+    let p = s.price;let chg = s.change ?? 0;const total=+(shares*chg).toFixed(0);
+    let pStr='—';if(p!=null)pStr=formatPrice(p);
+    const cgp=s.changePercent!=null?(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%':'—';
+    const cgStr=s.change!=null?(chg>=0?'+':'')+chg.toFixed(2):'—';
     
-    let isUSD = (s.currency === 'USD');
-    let pStr = '—';
-    if(p!=null) pStr = isUSD ? '$' + formatPrice(p) : formatPrice(p);
-    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-    let cgStr = '—';
-    if(s.change!=null) cgStr = isUSD ? (chg>=0?'+$':'-$') + Math.abs(chg).toFixed(2) : (chg>=0?'+':'') + chg.toFixed(2);
-    
-    let totalHtml = '—';
-    let totalValForClass = 0;
-    if(s.price != null && s.change != null) {
-        if(isUSD) {
-            const usdTotal = +(shares * chg).toFixed(2);
-            const twdTotal = Math.round(usdTotal * exchangeRateUSDTWD);
-            totalValForClass = usdTotal;
-            totalHtml = `<div style="line-height:1.2">${usdTotal>=0?'+$':'-$'}${Math.abs(usdTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}<br><span style="font-size:11px;opacity:0.75">NT$${twdTotal>=0?'+':''}${twdTotal.toLocaleString()}</span></div>`;
-        } else {
-            const twdTotal = Math.round(shares * chg);
-            totalValForClass = twdTotal;
-            totalHtml = (twdTotal>=0?'+':'') + twdTotal.toLocaleString();
-        }
-    }
-    
-    let srcStr = ((s.source==='Fugle' || s.source==='Yahoo') && s.updateTime) ? '<div class="sym-src">via '+s.source+' '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
@@ -768,7 +692,7 @@ function renderAll(){
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
-      '<div class="total '+(totalValForClass>=0?'up':'down')+'">'+totalHtml+'</div>'+
+      '<div class="total '+(total>=0?'up':'down')+'">'+(total>=0?'+':'')+total.toLocaleString()+'</div>'+
       '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
     body.appendChild(div);
   }
@@ -781,9 +705,7 @@ function updateSummary(){
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    let rate = (s.currency === 'USD') ? exchangeRateUSDTWD : 1;
-    pnl += Math.round(sh * c * rate);
-    asset += Math.round(sh * p * rate);
+    pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
   }
   const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
   const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val'; 
@@ -806,15 +728,15 @@ function addStock(){
 
 function deleteStock(id){
   if(!confirm('確定刪除？'))return;
-  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
+  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('擺脫這檔股票');
 }
 
 function editStock(id){
   const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return;
   const ns=prompt('修改代號：',s.symbol);
-  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;s.currency=null;}
+  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
   const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
-  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;s.currency=null;}
+  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
   saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
 
@@ -824,9 +746,7 @@ function saveDailyPnl(){
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    let rate = (s.currency === 'USD') ? exchangeRateUSDTWD : 1;
-    pnl += Math.round(sh * c * rate);
-    asset += Math.round(sh * p * rate);
+    pnl+=+(sh*c).toFixed(0);asset+=+(sh*p).toFixed(0);
   }
   const n=new Date();
   const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
@@ -885,7 +805,7 @@ async function refresh(){await refreshPrices()}
 // Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000);
+pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
 
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
@@ -895,7 +815,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.3.0 已啟動 (包含 Proxy Bridge 防護網 - 美股完美解鎖)');
+console.log('股票庫存 V3.1.0 已啟動 (全球大盤指數 Google 雲端同步版)');
 </script>
 </body>
 </html>
