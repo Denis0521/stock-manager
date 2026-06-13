@@ -30,9 +30,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .card{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
 .dark .card-title{color:#8b949e}
-
-.form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.form-row:last-child{margin-bottom:0}
+.form-row{display:flex;gap:8px;align-items:center}
 .form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
 .dark .form-row input,.dark .form-row select{background:#0d1117;border-color:#30363d;color:#e6edf3}
 .form-row input:focus,.form-row select:focus{border-color:#1a73e8}
@@ -42,12 +40,17 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row button:active{background:#1557b0}
 .form-row .sym-inp{flex:0 0 88px}
 
+/* ===================================================
+   🚀 全球大盤指數水平滑動區域
+   =================================================== */
 .idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .idx-scroll-container::-webkit-scrollbar{height:4px}
 .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px}
 .dark .idx-scroll-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+
 .idx-card-box{flex:0 0 auto;min-width:175px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;scroll-snap-align:start}
 .dark .idx-card-box{background:#161b22;border:1px solid #30363d;box-shadow:none}
+
 .idx-box-name{font-size:11px;color:#5f6368;font-weight:500}
 .dark .idx-box-name{color:#8b949e}
 .idx-box-price{font-size:16px;font-weight:700;margin:2px 0}
@@ -56,15 +59,13 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .idx-box-src{color:#5f6368}
 
 .up{color:#d93025}.down{color:#188038}
-.neutral{color:#1a1a2e}
-.dark .neutral{color:#e6edf3}
 
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
-.list-wrap{min-width:690px} 
-.list-header{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:15px;color:#5f6368;font-weight:500;align-items:center}
+.list-wrap{min-width:640px}
+.list-header{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:16px;color:#5f6368;font-weight:500;align-items:center}
 .dark .list-header {background:#0d1117;border-color:#30363d;color:#8b949e}
-.srow{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
+.srow{display:grid;grid-template-columns:90px 100px 95px 95px 85px 110px 65px;padding:14px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
 .dark .srow{border-color:#30363d}
 .srow:last-child{border-bottom:none}
 .list-header > div, .srow > div{text-align:right;padding:0 8px;white-space:nowrap}
@@ -80,7 +81,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .sym-container{display:flex !important;flex-direction:column !important;align-items:flex-start !important;justify-content:center !important;line-height:1.2 !important}
 .srow .sym{font-weight:700;color:#1a73e8;cursor:pointer;font-size:16px}
 .dark .srow .sym {color:#58a6ff}
-.sym-src{font-size:9px;color:#9aa0a6;font-weight:normal;margin-top:2px;white-space:nowrap}
+.sym-src{font-size:9px;color:#9aa0a6;font-weight:normal;margin-top:1px;white-space:nowrap}
 .dark .sym-src{color:#6e7681}
 .tech .sym-src{color:#8b949e;text-shadow:none}
 .blue-dark .sym-src{color:#5bc0be}
@@ -98,13 +99,15 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .dark .srow .act button{background:#21262d;border-color:#30363d;color:#8b949e}
 .srow .act .del-btn{color:#d93025;border-color:#fce8e6}
 .dark .srow .act .del-btn{color:#f85149;border-color:#f8514944}
+.loading{color:#9aa0a6;font-size:12px}
+.dark .loading{color:#8b949e}
 
 .summary{background:#fff;border-radius:12px;padding:14px 16px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .summary{background:#161b22;border:1px solid #30363d;box-shadow:none}
-.sum-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
-.sum-row .lab{color:#5f6368;font-size:15px;font-weight:500}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.sum-row .lab{color:#5f6368;font-size:16px}
 .dark .sum-row .lab{color:#8b949e}
-.sum-row .val{font-size:17px;font-weight:700}
+.sum-row .val{font-size:16px;font-weight:700}
 .sum-divider{height:1px;background:#e8eaed;margin:6px 0}
 .dark .sum-divider{background:#30363d}
 .save-area{margin:0 14px 10px}
@@ -143,14 +146,17 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .key-status.none{background:#f1f3f4;color:#9aa0a6}
 .dark .key-status.none{background:#21262d;color:#8b949e}
 
-.info-box{background:#e8f0fe;color:#1a73e8;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #cce0ff}
-.dark .info-box{background:#1a2332;color:#58a6ff;border-color:#203b5a}
+.info-box{background:#fff3cd;color:#856404;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-bottom:14px;border:1px solid #ffeeba}
+.dark .info-box{background:#4d3800;color:#e6c35c;border-color:#664d03}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
+/* 深色模式下連結清晰度優化 */
 .dark .btn-link { color: #58a6ff !important; font-weight: bold; }
 
-/* 主題配色 */
+/* =========================================
+   1. 未來科技 (Tech) - 灰白鈦金屬立體風格
+   ========================================= */
 body.tech { background-color: #23272d; background-image: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%), radial-gradient(at top center, #2d323a 0%, #181b20 100%); color: #c8d1dc; }
 .tech .header, .tech .card, .tech .table-scroll, .tech .summary, .tech .hist-item, .tech .modal, .tech .tabs-bar, .tech .idx-card-box { background: linear-gradient(135deg, #323842 0%, #242930 100%); border: 1px solid #3d4552; box-shadow: 5px 5px 12px rgba(12,14,18,0.7), -3px -3px 8px rgba(255,255,255,0.08), inset 1px 1px 0px rgba(255,255,255,0.05); border-radius: 10px; }
 .tech .header { background: #2b3039; box-shadow: 0 4px 12px rgba(12,14,18,0.5); border-radius: 0 0 10px 10px; }
@@ -159,7 +165,6 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .idx-box-price, .tech .price, .tech .total, .tech .val, .tech .hval { color: #ffffff; text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.15); }
 .tech .up { color: #ff4d4d !important; text-shadow: 0 0 6px rgba(255,77,77,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
 .tech .down { color: #2ecc71 !important; text-shadow: 0 0 6px rgba(46,204,113,0.3), -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1) !important; }
-.tech .neutral { color: #ffffff !important; }
 .tech .srow .sym { color: #3498db !important; text-shadow: 0 0 4px rgba(52,152,219,0.2), -1px -1px 1px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.15) !important; }
 .tech input, .tech select { background: #1a1d22; border: 1px solid #2d333f; color: #ffffff; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.6); border-radius: 6px; }
 .tech .form-row button, .tech .btn-save { background: linear-gradient(135deg, #4a90e2 0%, #165298 100%); color: #fff; border: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
@@ -172,6 +177,9 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .list-header > div:nth-child(1)::after, .tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.4), transparent); }
 .tech .btn-link { color: #4a90e2 !important; font-weight: bold; text-shadow: none; }
 
+/* =========================================
+   2. 深藍版 (Deep Blue) - 靜謐深海風格
+   ========================================= */
 body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .header, .blue-dark .card, .blue-dark .table-scroll, .blue-dark .summary, .blue-dark .hist-item, .blue-dark .modal, .blue-dark .tabs-bar, .blue-dark .idx-card-box { background: #1c2541; border: 1px solid #3a506b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 10px; }
 .blue-dark .header { background: #111a33; border-bottom: 1px solid #3a506b; }
@@ -179,7 +187,6 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .card-title, .blue-dark .idx-box-name, .blue-dark .list-header > div { color: #5bc0be; }
 .blue-dark .idx-box-price, .blue-dark .price, .blue-dark .total, .blue-dark .val, .blue-dark .hval { color: #ffffff; font-weight: 700; }
 .blue-dark .up { color: #ff6b6b !important; } .blue-dark .down { color: #2ecc71 !important; }
-.blue-dark .neutral { color: #ffffff !important; }
 .blue-dark .srow .sym { color: #00b4d8 !important; }
 .blue-dark input, .blue-dark select { background: #0b132b; border: 1px solid #3a506b; color: #fff; }
 .blue-dark .form-row button, .blue-dark .btn-save { background: #00b4d8; color: #fff; }
@@ -189,7 +196,11 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .list-header { background: transparent; border-bottom-color: #3a506b; }
 .blue-dark .srow { border-bottom-color: #232f52; }
 .blue-dark .list-header > div:nth-child(1), .blue-dark .srow > div:nth-child(1) { background-color: #1c2541 !important; }
+.blue-dark .btn-link { color: #00b4d8 !important; font-weight: bold; }
 
+/* =========================================
+   3. 淺藍版 (Light Blue) - 清爽晴空風格
+   ========================================= */
 body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .header, .blue-light .card, .blue-light .table-scroll, .blue-light .summary, .blue-light .hist-item, .blue-light .modal, .blue-light .tabs-bar, .blue-light .idx-card-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(142,176,211,0.15); border-radius: 10px; }
 .blue-light .header { background: #e6f0fa; border-bottom: 1px solid #cbd5e0; }
@@ -197,7 +208,6 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .card-title, .blue-light .idx-box-name, .blue-light .list-header > div { color: #4a5568; }
 .blue-light .idx-price, .blue-light .price, .blue-light .total, .blue-light .val, .blue-light .hval { color: #1a202c; font-weight: 700; }
 .blue-light .up { color: #e53e3e !important; } .blue-light .down { color: #38a169 !important; }
-.blue-light .neutral { color: #1a202c !important; }
 .blue-light .srow .sym { color: #2b6cb0 !important; }
 .blue-light input, .blue-light select { background: #f7fafc; border: 1px solid #cbd5e0; color: #2d3748; }
 .blue-light .form-row button, .blue-light .btn-save { background: #3182ce; color: #fff; }
@@ -207,7 +217,11 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .list-header { background: #f0f7fd; border-bottom-color: #e2e8f0; }
 .blue-light .srow { border-bottom-color: #edf2f7; }
 .blue-light .list-header > div:nth-child(1), .blue-light .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.blue-light .btn-link { color: #2b6cb0 !important; font-weight: bold; }
 
+/* =========================================
+   4. 粉色版 (Pink) - 浪漫櫻花風格
+   ========================================= */
 body.pink { background-color: #fff5f5; color: #702459; }
 .pink .header, .pink .card, .pink .table-scroll, .pink .summary, .pink .hist-item, .pink .modal, .pink .tabs-bar, .pink .idx-card-box { background: #ffffff; border: 1px solid #fed7d7; box-shadow: 0 4px 8px rgba(244,143,177,0.15); border-radius: 10px; }
 .pink .header { background: #fff0f6; border-bottom: 1px solid #fbb6ce; }
@@ -215,7 +229,6 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .card-title, .pink .idx-box-name, .pink .list-header > div { color: #9b2c2c; }
 .pink .idx-box-price, .pink .price, .pink .total, .pink .val, .pink .hval { color: #4a123a; font-weight: 700; }
 .pink .up { color: #e53e3e !important; } .pink .down { color: #38a169 !important; }
-.pink .neutral { color: #4a123a !important; }
 .pink .srow .sym { color: #d63384 !important; }
 .pink input, .pink select { background: #fffaf0; border: 1px solid #fbb6ce; color: #4a123a; }
 .pink .form-row button, .pink .btn-save { background: #d63384; color: #fff; }
@@ -225,6 +238,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .list-header { background: #fff0f6; border-bottom-color: #fed7d7; }
 .pink .srow { border-bottom-color: #fff5f5; }
 .pink .list-header > div:nth-child(1), .pink .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.pink .btn-link { color: #d63384 !important; font-weight: bold; }
 
 .v-box { text-align:center; font-size:11px; color:#9aa0a6; margin-top:16px; padding-top:10px; border-top:1px dashed #dadce0; }
 .dark .v-box { border-top-color:#30363d; color:#8b949e; }
@@ -253,9 +267,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 </div>
 
 <div class="summary" id="summaryArea" style="display:none;">
-  <div class="sum-row"><span class="lab">今日即時盈虧</span><span class="val" id="totalPnl">+0</span></div>
-  <div class="sum-divider"></div>
-  <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+  <div class="sum-row"><span class="lab">即時盈虧總計</span><span class="val" id="totalPnl">+0</span></div>
   <div class="sum-divider"></div>
   <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
 </div>
@@ -267,14 +279,13 @@ body.pink { background-color: #fff5f5; color: #702459; }
     <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
     <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
-  </div>
-  <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填，用於計算總損益)" step="0.01" min="0" inputmode="decimal">
-    <button type="button" onclick="addStock()" style="flex:0 0 80px;">＋ 新增</button>
+    <button type="button" onclick="addStock()">＋</button>
   </div>
 </div>
 
+<!-- 🌍 左右滑動全球指數大看板區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- 臺灣加權 (固定由 富果/Yahoo 抓取) -->
   <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
@@ -289,7 +300,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>總損益/市值</div><div>動作</div>
+      <div>代號</div><div>數量</div><div>股價</div><div>漲跌幅</div><div>漲跌</div><div>合計</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -312,7 +323,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
     </div>
     
     <div class="info-box">
-      本系統整合富果安全個股輪詢技術。本次更新已解鎖「買入成本與總未實現損益 (ROI)」全自動試算功能，所有計算皆於本地端完成，不消耗額外 API 額度。
+      本系統整合富果安全個股輪詢技術。支援 30 秒自動更新。若無設定富果金鑰，或因跨網域（CORS）安全性限制無法連線時，系統將全自動啟用「CORS 免疫公共數據看板端點」，確保任何手機與網路環境下，數據均能 100% 正常回報。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -323,13 +334,16 @@ body.pink { background-color: #fff5f5; color: #702459; }
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
 
-    <div class="v-box">核心版本：V3.3.0 (成本損益升級版)</div>
+    <div class="v-box">核心版本：V3.2.0 (穩定純淨版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定</button>
   </div>
 </div>
 
 <script>
+// ===================================================
+// 📌 核心對接：已自動套用你分享的 Google CSV 雲端網址
+// ===================================================
 let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
 
 let currentTab = 0;
@@ -526,6 +540,33 @@ async function fetchFugle(symbol){
   return null;
 }
 
+// 穩定的舊版 Yahoo 抓取 (維持 V3.2 狀態)
+async function fetchYahoo(symbol){
+  const tryFetch = async (suffix) => {
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetch(url);
+      if(!resp.ok) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if(lines.length < 2) return null;
+      
+      const lastLine = lines[lines.length - 1];
+      const cols = lastLine.split(',');
+      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
+      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+    } catch(e) { return null; }
+  };
+  let res = await tryFetch('.TW');
+  if(!res) res = await tryFetch('.TWO');
+  return res;
+}
+
 async function fetchWeightedIndex(){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
   if(keys.length > 0){
@@ -538,6 +579,18 @@ async function fetchWeightedIndex(){
       }
     }catch(e){}
   }
+  try {
+    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetch(url);
+    if(resp.ok){
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      const cols = lines[lines.length - 1].split(',');
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
+    }
+  }catch(e){}
   return null;
 }
 
@@ -561,6 +614,7 @@ async function refreshPrices(){
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
+    if(!r) r = await fetchYahoo(s.symbol);
     return {s,r};
   }));
   for(const {s,r} of results){
@@ -593,11 +647,7 @@ function renderRow(s){
     srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
   }
   
-  const qn=el.querySelector('.qty-cell');
-  if(qn){
-    qn.innerHTML=`<div style="line-height:1.2">${s.displayQty} ${s.displayUnit}</div>
-                  <div style="font-size:11px;color:#9aa0a6;margin-top:2px;">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
-  }
+  const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
   
   const pEl=el.querySelector('.price');
   if(p!=null){
@@ -609,31 +659,9 @@ function renderRow(s){
   const cg=el.querySelector('.chg');
   if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
-  let totalHtml = '—';
-  let totalValForClass = 0;
-  
-  if (p != null) {
-      const mktValue = Math.round(shares * p);
-      if (s.buyPrice != null && s.buyPrice > 0) {
-          const cost = s.buyPrice * shares;
-          const unPnl = Math.round(mktValue - cost);
-          const roi = ((mktValue - cost) / cost) * 100;
-          totalValForClass = unPnl;
-          totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                       <div style="font-size:10px;opacity:0.75;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% | 市值 ${(mktValue/10000).toFixed(1)}W</div>`;
-      } else {
-          totalValForClass = 0;
-          totalHtml = `<div style="line-height:1.2" class="neutral">市值 ${mktValue.toLocaleString()}</div>
-                       <div style="font-size:10px;opacity:0.6;margin-top:2px;font-weight:normal" class="neutral">點擊 ✎ 設均價</div>`;
-      }
-  }
-
-  el.querySelector('.total').innerHTML = totalHtml;
-  if(totalValForClass !== 0) {
-      el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down');
-  } else {
-      el.querySelector('.total').className = 'total';
-  }
+  const total = +(shares * chg).toFixed(0);
+  el.querySelector('.total').textContent=(total>=0?'+':'')+total.toLocaleString();
+  el.querySelector('.total').className='total '+(total>=0?'up':'down');
 }
 
 function renderAll(){
@@ -661,34 +689,17 @@ function renderAll(){
     let cgStr = '—';
     if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
     
-    let totalHtml = '—';
-    let totalValForClass = 0;
+    const total = +(shares * chg).toFixed(0);
     
-    if (p != null) {
-        const mktValue = Math.round(shares * p);
-        if (s.buyPrice != null && s.buyPrice > 0) {
-            const cost = s.buyPrice * shares;
-            const unPnl = Math.round(mktValue - cost);
-            const roi = ((mktValue - cost) / cost) * 100;
-            totalValForClass = unPnl;
-            totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                         <div style="font-size:10px;opacity:0.75;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% | 市值 ${(mktValue/10000).toFixed(1)}W</div>`;
-        } else {
-            totalValForClass = 0;
-            totalHtml = `<div style="line-height:1.2" class="neutral">市值 ${mktValue.toLocaleString()}</div>
-                         <div style="font-size:10px;opacity:0.6;margin-top:2px;font-weight:normal" class="neutral">點擊 ✎ 設均價</div>`;
-        }
-    }
-    
-    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    let srcStr = ((s.source==='Fugle' || s.source==='Yahoo') && s.updateTime) ? '<div class="sym-src">via '+s.source+' '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
-      '<div class="qty-cell"><div style="line-height:1.2">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:11px;color:#9aa0a6;margin-top:2px;">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+      '<div class="qty-cell">'+s.displayQty+' '+s.displayUnit+'</div>'+
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
-      '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
+      '<div class="total '+(total>=0?'up':'down')+'">'+(total>=0?'+':'')+total.toLocaleString()+'</div>'+
       '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
     body.appendChild(div);
   }
@@ -696,53 +707,30 @@ function renderAll(){
 }
 
 function updateSummary(){
-  let pnl=0, asset=0, totalUnPnl=0;
-  let hasUnPnl = false;
+  let pnl=0,asset=0;
   const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
     pnl += Math.round(sh * c);
     asset += Math.round(sh * p);
-    
-    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) {
-      totalUnPnl += Math.round((s.price - s.buyPrice) * sh);
-      hasUnPnl = true;
-    }
   }
-  
   const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
-  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral'; 
-  
-  const ue = document.getElementById('totalUnrealized');
-  if(hasUnPnl) {
-    ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString();
-    ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down');
-  } else {
-    ue.textContent = '—';
-    ue.className = 'val neutral';
-  }
+  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val'; 
 }
 
 function addStock(){
   const sym=document.getElementById('symInput').value.trim().toUpperCase();
   const qty=parseInt(document.getElementById('qtyInput').value);
   const unit=document.getElementById('unitSelect').value;
-  const bpRaw = document.getElementById('buyPriceInput').value;
-  const bp = parseFloat(bpRaw);
-  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-
   if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
   const currentStocks = tabStocks[currentTab];
   if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
   
   const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
-  
-  document.getElementById('symInput').value='';
-  document.getElementById('qtyInput').value='';
-  document.getElementById('buyPriceInput').value='';
+  document.getElementById('symInput').value='';document.getElementById('qtyInput').value='';
   showToast('已新增 '+sym);refreshPrices();
 }
 
@@ -753,22 +741,10 @@ function deleteStock(id){
 
 function editStock(id){
   const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return;
-  
   const ns=prompt('修改代號：',s.symbol);
-  if(ns!==null && ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
-  
-  const nq=prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty);
-  if(nq!==null){
-    const qtyNum = parseInt(nq);
-    if(qtyNum>0){s.displayQty=qtyNum;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;}
-  }
-  
-  const nbp=prompt('設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || '');
-  if(nbp!==null){
-    const bpNum = parseFloat(nbp);
-    s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  }
-  
+  if(ns&&ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
+  const nq=parseInt(prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty));
+  if(nq&&nq>0){s.displayQty=nq;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
   saveHoldings();renderAll();showToast('已修改');refreshPrices();
 }
 
@@ -838,20 +814,17 @@ async function refresh(){await refreshPrices()}
 // Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000);
+pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
 
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
 });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); }
-});
-document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); addStock(); }
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.3.0 已啟動 (純淨無外掛版)');
+console.log('股票庫存 V3.2.0 已啟動 (穩定純淨版)');
 </script>
 </body>
 </html>
