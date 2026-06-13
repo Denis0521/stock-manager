@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存">
+<meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2933/2933116.png">
 
 <style>
@@ -68,7 +69,6 @@ body.pink {
   --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15);
   --accent: #d63384;
 }
-/* 🧱 新增：水泥灰色主題 */
 body.cement {
   --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93;
   --t-main: #22252a; --t-muted: #4a5059;
@@ -170,18 +170,18 @@ button:active, .tab-btn.active {
 
 .sum-toggle-btn { 
   text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px; padding-top: 4px;
-  background: transparent; box-shadow: none; /* 無凸出 */
+  background: transparent; box-shadow: none;
   color: var(--t-muted); 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); /* 刻入效果 */
+  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d);
 }
 
-/* 其他小組件 */
+/* 📜 歷史紀錄區 (壓縮高度 + 刪除鍵靠右) */
 .history { margin: 0 14px; }
-.hist-item { padding: 14px; margin-top: 10px; font-size: 16px; }
+.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; }
 .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
 .hist-item .hdate { color: var(--t-muted); font-size: 13px; font-weight: 600; }
-.hist-item .hval { font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.del-hist-btn { padding: 6px 10px; font-size: 12px; }
+.hist-item .hval { font-weight: 800; font-size: 15px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.del-hist-btn { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 14px; text-align: center; padding: 20px; font-weight: 600; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(3px); }
@@ -319,7 +319,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.0 (全3D擬物化 + 水泥灰)</div>
+    <div class="v-box">核心版本：V3.5.1 (細節與狀態列優化版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -371,15 +371,16 @@ function loadState(){
 function applyThemeText(t){
   const body=document.body;
   const themeBtn=document.getElementById('themeBtn');
+  const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
   
-  if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; }
-  else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; }
-  else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; }
-  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; }
-  else { themeBtn.textContent='🌙'; }
+  if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; metaTheme.content='#1a1e24'; }
+  else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
+  else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; metaTheme.content='#101929'; }
+  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#d9e2ec'; }
+  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
+  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
+  else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
@@ -979,7 +980,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.5.0 (全3D擬物化 + 水泥灰) 已啟動');
+console.log('股票庫存 V3.5.1 已啟動 (細節與狀態列優化版)');
 </script>
 </body>
 </html>
