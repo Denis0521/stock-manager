@@ -31,7 +31,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
 .dark .card-title{color:#8b949e}
 
-/* 包含均價的雙層表單排版 */
 .form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .form-row:last-child{margin-bottom:0}
 .form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
@@ -41,7 +40,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
-.form-row .sym-inp{flex:0 0 88px}
 
 .idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .idx-scroll-container::-webkit-scrollbar{height:4px}
@@ -60,7 +58,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .neutral{color:#1a1a2e}
 .dark .neutral{color:#e6edf3}
 
-/* 列表區域加寬與重配欄位 */
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
 .list-wrap{min-width:760px} 
@@ -97,7 +94,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .srow .act .del-btn{color:#d93025;border-color:#fce8e6}
 .dark .srow .act .del-btn{color:#f85149;border-color:#f8514944}
 
-/* 統計區域 (包含未實現損益) */
 .summary{background:#fff;border-radius:12px;padding:14px 16px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .summary{background:#161b22;border:1px solid #30363d;box-shadow:none}
 .sum-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
@@ -148,9 +144,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
-.dark .btn-link { color: #58a6ff !important; font-weight: bold; }
-
-/* 備份按鈕區塊 */
 .backup-box { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px; padding: 12px; margin-top: 14px; }
 .dark .backup-box { background: #0d1117; border-color: #30363d; }
 .backup-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
@@ -315,7 +308,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
     </div>
     
     <div class="info-box">
-      本系統整合富果安全個股輪詢技術。本次更新已解鎖「買入成本與總未實現損益 (ROI)」以及「一鍵資料備份與還原」強大功能！
+      本系統整合富果安全個股輪詢技術。本次更新已解鎖「買入成本與總未實現損益 (ROI)」全自動試算功能，以及「一鍵資料備份與還原」功能。
     </div>
 
     <label>Fugle API Key（主要）</label>
@@ -331,11 +324,11 @@ body.pink { background-color: #fff5f5; color: #702459; }
       <div class="backup-btns">
         <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
         <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.4.0 (完整旗艦版：成本損益 + 備份還原)</div>
+    <div class="v-box">核心版本：V3.4.2 (終極純淨旗艦版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -538,7 +531,7 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 穩定的舊版 Yahoo 抓取 (無代理版)
+// 穩定的舊版 Yahoo 抓取 (無跨網域問題的單純版)
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
@@ -885,7 +878,7 @@ function showToast(msg){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// 💾 ================== 備份與還原核心功能 ================== 💾
+// 💾 ================== 備份與還原核心功能 (標準 Blob 升級版) ================== 💾
 function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))],
@@ -896,17 +889,20 @@ function exportData() {
     theme: localStorage.getItem(TK)
   };
   
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
+  // 使用標準 Blob 確保 Android 下載相容性
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
   const downloadAnchorElement = document.createElement('a');
   
   const d = new Date();
   const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
   
-  downloadAnchorElement.setAttribute("href", dataStr);
+  downloadAnchorElement.setAttribute("href", url);
   downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
   document.body.appendChild(downloadAnchorElement);
   downloadAnchorElement.click();
-  downloadAnchorElement.remove();
+  document.body.removeChild(downloadAnchorElement);
+  URL.revokeObjectURL(url);
   
   showToast('✅ 備份檔案已成功下載');
 }
@@ -965,7 +961,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.4.0 已啟動 (完整旗艦版：成本損益 + 備份還原)');
+console.log('股票庫存 V3.4.2 已啟動 (核彈級修復版)');
 </script>
 </body>
 </html>
