@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存</title>
 
-<!-- 🍎 Apple iOS 專屬優化標籤：讓它變成真正的桌面 App -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存">
@@ -47,6 +46,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
+.form-row .sym-inp{flex:0 0 88px}
 
 .idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .idx-scroll-container::-webkit-scrollbar{height:4px}
@@ -65,17 +65,18 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .neutral{color:#1a1a2e}
 .dark .neutral{color:#e6edf3}
 
+/* 列表區域加寬，包含新的「今日損益」欄位 (共8欄) */
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
-.list-wrap{min-width:760px} 
-.list-header{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:15px;color:#5f6368;font-weight:500;align-items:center}
+.list-wrap{min-width:780px} 
+.list-header{display:grid;grid-template-columns:90px 105px 95px 95px 85px 95px 135px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:15px;color:#5f6368;font-weight:500;align-items:center}
 .dark .list-header {background:#0d1117;border-color:#30363d;color:#8b949e}
-.srow{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
+.srow{display:grid;grid-template-columns:90px 105px 95px 95px 85px 95px 135px 65px;padding:12px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
 .dark .srow{border-color:#30363d}
 .srow:last-child{border-bottom:none}
 .list-header > div, .srow > div{text-align:right;padding:0 8px;white-space:nowrap}
 .list-header > div:nth-child(1), .srow > div:nth-child(1){text-align:left;position:sticky;left:0;z-index:2}
-.list-header > div:nth-child(7), .srow > div:nth-child(7){text-align:center;padding:0}
+.list-header > div:nth-child(8), .srow > div:nth-child(8){text-align:center;padding:0} /* 第8欄為動作按鈕 */
 .list-header > div:nth-child(1){background:#f8f9fa;z-index:3}
 .srow > div:nth-child(1){background:#fff;z-index:2}
 .dark .list-header > div:nth-child(1){background:#0d1117}
@@ -94,6 +95,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .srow .price{font-weight:600}
 .srow .chgp{font-size:16px}
 .srow .chg{font-weight:600}
+.srow .today-pnl{font-weight:600} /* 今日損益獨立欄位樣式 */
 .srow .total{font-weight:600;overflow:hidden;}
 .srow .act{display:flex;gap:4px;justify-content:center}
 .srow .act button{background:#f1f3f4;border:1px solid #e8eaed;color:#5f6368;border-radius:5px;padding:5px 8px;font-size:13px;cursor:pointer;line-height:1.3}
@@ -161,6 +163,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 a.btn-link { color: #1a73e8; text-decoration: none; font-weight: bold; }
 .dark a.btn-link { color: #58a6ff; }
 
+/* 備份按鈕區塊 */
 .backup-box { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px; padding: 12px; margin-top: 14px; }
 .dark .backup-box { background: #0d1117; border-color: #30363d; }
 .backup-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
@@ -315,7 +318,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>總損益</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -324,22 +327,19 @@ body.pink { background-color: #fff5f5; color: #702459; }
 <div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:#9aa0a6;font-size:16px">尚無持股，請在上方新增</div>
 
 <div class="summary" id="summaryArea" style="display:none;">
-  <!-- 永遠顯示的今日盈虧 + 下拉選單 -->
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
-      <span class="lab">今日即時盈虧</span>
+      <span class="lab">今日損益總計</span>
       <span class="val" id="totalPnl">+0</span>
     </div>
     <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
   </div>
   
-  <!-- 隱藏明細區塊 -->
   <div id="summaryDetails" style="display:none;">
     <div class="sum-divider" style="margin-top:6px;"></div>
     <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
     <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <!-- 收起按鈕 -->
     <div class="sum-toggle-btn" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
@@ -377,7 +377,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.4.8 (選單排版最佳化)</div>
+    <div class="v-box">核心版本：V3.4.9 (今日損益獨立版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -580,7 +580,6 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 穩定的舊版 Yahoo 抓取
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
@@ -703,6 +702,13 @@ function renderRow(s){
   const cg=el.querySelector('.chg');
   if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
+  const tp = el.querySelector('.today-pnl');
+  if(s.change!=null){
+    const todayPnl = Math.round(shares * chg);
+    tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+    tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down');
+  }
+  
   let totalHtml = '—';
   let totalValForClass = 0;
   
@@ -755,6 +761,14 @@ function renderAll(){
     let cgStr = '—';
     if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
     
+    let tpStr = '—';
+    let tpClass = '';
+    if (s.change != null) {
+      const todayPnl = Math.round(shares * chg);
+      tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+      tpClass = todayPnl >= 0 ? 'up' : 'down';
+    }
+    
     let totalHtml = '—';
     let totalValForClass = 0;
     
@@ -774,7 +788,7 @@ function renderAll(){
         }
     }
     
-    let srcStr = ((s.source==='Fugle' || s.source==='Yahoo') && s.updateTime) ? '<div class="sym-src">via '+s.source+' '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
@@ -782,6 +796,7 @@ function renderAll(){
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
+      '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
       '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
       '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
     body.appendChild(div);
@@ -818,7 +833,6 @@ function updateSummary(){
   }
 }
 
-// 摺疊/展開總計區塊
 function toggleSummary(e) {
   if(e) e.stopPropagation();
   const details = document.getElementById('summaryDetails');
@@ -1021,7 +1035,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.4.8 已啟動 (選單排版最佳化)');
+console.log('股票庫存 V3.4.9 已啟動 (今日損益獨立版)');
 </script>
 </body>
 </html>
