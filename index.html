@@ -18,6 +18,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
 .dark .btn-adv{border-color:#30363d;color:#58a6ff}
 
+/* --- 分頁切換列 --- */
 .tabs-bar{display:flex;background:#fff;padding:6px 14px;margin:10px 14px 0;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);gap:6px}
 .dark .tabs-bar{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .tab-btn{flex:1;padding:10px 8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:16px;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -30,7 +31,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .card-title{font-size:12px;color:#5f6368;margin-bottom:8px;font-weight:500}
 .dark .card-title{color:#8b949e}
 
-/* 🎨 調整：新增持股表單改為兩列，容納均價輸入框 */
 .form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .form-row:last-child{margin-bottom:0}
 .form-row input,.form-row select{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:10px 12px;color:#1a1a2e;flex:1;min-width:0}
@@ -61,7 +61,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
-.list-wrap{min-width:760px} /* 稍微加寬以容納新欄位 */
+.list-wrap{min-width:690px} 
 .list-header{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;background:#f8f9fa;border-bottom:1px solid #e8eaed;font-size:15px;color:#5f6368;font-weight:500;align-items:center}
 .dark .list-header {background:#0d1117;border-color:#30363d;color:#8b949e}
 .srow{display:grid;grid-template-columns:90px 105px 95px 95px 85px 135px 65px;padding:12px 0;border-bottom:1px solid #e8eaed;font-size:16px;align-items:center}
@@ -526,33 +526,6 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 穩定的舊版 Yahoo 抓取 (維持 V3.2 狀態)
-async function fetchYahoo(symbol){
-  const tryFetch = async (suffix) => {
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const resp = await fetch(url);
-      if(!resp.ok) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if(lines.length < 2) return null;
-      
-      const lastLine = lines[lines.length - 1];
-      const cols = lastLine.split(',');
-      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
-    } catch(e) { return null; }
-  };
-  let res = await tryFetch('.TW');
-  if(!res) res = await tryFetch('.TWO');
-  return res;
-}
-
 async function fetchWeightedIndex(){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
   if(keys.length > 0){
@@ -565,18 +538,6 @@ async function fetchWeightedIndex(){
       }
     }catch(e){}
   }
-  try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetch(url);
-    if(resp.ok){
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
-    }
-  }catch(e){}
   return null;
 }
 
@@ -600,7 +561,6 @@ async function refreshPrices(){
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
-    if(!r) r = await fetchYahoo(s.symbol);
     return {s,r};
   }));
   for(const {s,r} of results){
@@ -633,7 +593,6 @@ function renderRow(s){
     srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
   }
   
-  // 顯示數量與均價
   const qn=el.querySelector('.qty-cell');
   if(qn){
     qn.innerHTML=`<div style="line-height:1.2">${s.displayQty} ${s.displayUnit}</div>
@@ -650,7 +609,6 @@ function renderRow(s){
   const cg=el.querySelector('.chg');
   if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
-  // 計算總損益或市值
   let totalHtml = '—';
   let totalValForClass = 0;
   
@@ -664,7 +622,7 @@ function renderRow(s){
           totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
                        <div style="font-size:10px;opacity:0.75;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% | 市值 ${(mktValue/10000).toFixed(1)}W</div>`;
       } else {
-          totalValForClass = 0; // neutral
+          totalValForClass = 0;
           totalHtml = `<div style="line-height:1.2" class="neutral">市值 ${mktValue.toLocaleString()}</div>
                        <div style="font-size:10px;opacity:0.6;margin-top:2px;font-weight:normal" class="neutral">點擊 ✎ 設均價</div>`;
       }
@@ -880,7 +838,7 @@ async function refresh(){await refreshPrices()}
 // Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000); // 🚀 穩定維持 30 秒更新
+pollTimer=setInterval(refresh,30000);
 
 document.getElementById('symInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
@@ -893,7 +851,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.3.0 已啟動 (成本損益升級版)');
+console.log('股票庫存 V3.3.0 已啟動 (純淨無外掛版)');
 </script>
 </body>
 </html>
