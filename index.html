@@ -65,7 +65,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .neutral{color:#1a1a2e}
 .dark .neutral{color:#e6edf3}
 
-/* 列表區域加寬與重配欄位 */
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
 .list-wrap{min-width:760px} 
@@ -102,15 +101,23 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .srow .act .del-btn{color:#d93025;border-color:#fce8e6}
 .dark .srow .act .del-btn{color:#f85149;border-color:#f8514944}
 
-/* 統計區域 */
+/* ================= 統計摺疊區塊樣式 ================= */
 .summary{background:#fff;border-radius:12px;padding:14px 16px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .summary{background:#161b22;border:1px solid #30363d;box-shadow:none}
+.sum-header-row{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:4px 0;}
+.sum-toggle-icon{font-size:13px;color:#9aa0a6;margin-left:12px;transition:transform 0.2s;}
+.dark .sum-toggle-icon{color:#8b949e;}
+.sum-collapse-btn{text-align:center;font-size:13px;font-weight:600;color:#9aa0a6;margin-top:12px;cursor:pointer;padding-top:10px;border-top:1px dashed #e8eaed;}
+.dark .sum-collapse-btn{color:#8b949e;border-top-color:#30363d;}
+
 .sum-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
 .sum-row .lab{color:#5f6368;font-size:15px;font-weight:500}
 .dark .sum-row .lab{color:#8b949e}
 .sum-row .val{font-size:17px;font-weight:700}
 .sum-divider{height:1px;background:#e8eaed;margin:6px 0}
 .dark .sum-divider{background:#30363d}
+/* ================================================= */
+
 .save-area{margin:0 14px 10px}
 .btn-save{width:100%;padding:13px;background:#1a73e8;border:none;color:#fff;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
 .btn-save:active{background:#1557b0}
@@ -192,6 +199,8 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .backup-title { color: #a0aec0; }
 .tech .btn-backup { background: linear-gradient(135deg, #3d4552 0%, #2b313a 100%); border-color: #4a5464; color: #e2e8f0; }
 .tech .btn-backup:active { background: #2b313a; }
+.tech .sum-toggle-icon, .tech .sum-collapse-btn { color: #a0aec0; }
+.tech .sum-collapse-btn { border-top-color: #3d4552; }
 
 body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .header, .blue-dark .card, .blue-dark .table-scroll, .blue-dark .summary, .blue-dark .hist-item, .blue-dark .modal, .blue-dark .tabs-bar, .blue-dark .idx-card-box { background: #1c2541; border: 1px solid #3a506b; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 10px; }
@@ -215,6 +224,8 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .backup-title { color: #5bc0be; }
 .blue-dark .btn-backup { background: rgba(255,255,255,0.05); border-color: #3a506b; color: #fff; }
 .blue-dark .btn-backup:active { background: rgba(255,255,255,0.1); }
+.blue-dark .sum-toggle-icon, .blue-dark .sum-collapse-btn { color: #5bc0be; }
+.blue-dark .sum-collapse-btn { border-top-color: #3a506b; }
 
 body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .header, .blue-light .card, .blue-light .table-scroll, .blue-light .summary, .blue-light .hist-item, .blue-light .modal, .blue-light .tabs-bar, .blue-light .idx-card-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(142,176,211,0.15); border-radius: 10px; }
@@ -237,6 +248,8 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .backup-box { background: #f0f7fd; border-color: #cbd5e0; }
 .blue-light .backup-title { color: #4a5568; }
 .blue-light .btn-backup { background: #fff; border-color: #cbd5e0; color: #2b6cb0; }
+.blue-light .sum-toggle-icon, .blue-light .sum-collapse-btn { color: #4a5568; }
+.blue-light .sum-collapse-btn { border-top-color: #cbd5e0; }
 
 body.pink { background-color: #fff5f5; color: #702459; }
 .pink .header, .pink .card, .pink .table-scroll, .pink .summary, .pink .hist-item, .pink .modal, .pink .tabs-bar, .pink .idx-card-box { background: #ffffff; border: 1px solid #fed7d7; box-shadow: 0 4px 8px rgba(244,143,177,0.15); border-radius: 10px; }
@@ -259,6 +272,8 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .backup-box { background: #fff0f6; border-color: #fbb6ce; }
 .pink .backup-title { color: #9b2c2c; }
 .pink .btn-backup { background: #fff; border-color: #fbb6ce; color: #d63384; }
+.pink .sum-toggle-icon, .pink .sum-collapse-btn { color: #b83280; }
+.pink .sum-collapse-btn { border-top-color: #fed7d7; }
 
 @media(min-width:480px){body{max-width:480px;margin:0 auto}}
 </style>
@@ -316,12 +331,23 @@ body.pink { background-color: #fff5f5; color: #702459; }
 <div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:#9aa0a6;font-size:16px">尚無持股，請在上方新增</div>
 
 <div class="summary" id="summaryArea" style="display:none;">
-  <div class="sum-row"><span class="lab">今日即時盈虧</span><span class="val" id="totalPnl">+0</span></div>
-  <div class="sum-divider"></div>
-  <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
-  <div class="sum-divider"></div>
-  <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+  <div class="sum-header-row" onclick="toggleSummary()">
+    <div style="flex:1; display:flex; justify-content:space-between; align-items:center;">
+      <span class="lab">今日即時盈虧</span>
+      <span class="val" id="totalPnl">+0</span>
+    </div>
+    <div class="sum-toggle-icon" id="sumToggleIcon">▼</div>
+  </div>
+  
+  <div id="summaryDetails" style="display:none;">
+    <div class="sum-divider" style="margin-top:8px;"></div>
+    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-divider"></div>
+    <div class="sum-row"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+    <div class="sum-collapse-btn" onclick="toggleSummary(event)">▲ 收起選單</div>
+  </div>
 </div>
+
 <div class="save-area" id="saveArea" style="display:none;"><button type="button" class="btn-save" onclick="saveDailyPnl()">儲存今日收盤盈虧總計</button></div>
 
 <div class="history">
@@ -351,11 +377,11 @@ body.pink { background-color: #fff5f5; color: #702459; }
       <div class="backup-btns">
         <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
         <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.4.6 (版面細節最佳化)</div>
+    <div class="v-box">核心版本：V3.4.7 (互動摺疊面板版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -558,7 +584,7 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 穩定的舊版 Yahoo 抓取 (無代理版)
+// 穩定的舊版 Yahoo 抓取
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
@@ -796,6 +822,20 @@ function updateSummary(){
   }
 }
 
+// 摺疊/展開總計區塊
+function toggleSummary(e) {
+  if(e) e.stopPropagation();
+  const details = document.getElementById('summaryDetails');
+  const icon = document.getElementById('sumToggleIcon');
+  if (details.style.display === 'none') {
+    details.style.display = 'block';
+    icon.textContent = '▲';
+  } else {
+    details.style.display = 'none';
+    icon.textContent = '▼';
+  }
+}
+
 function addStock(){
   const sym=document.getElementById('symInput').value.trim().toUpperCase();
   const qty=parseInt(document.getElementById('qtyInput').value);
@@ -905,7 +945,7 @@ function showToast(msg){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// 💾 ================== 備份與還原核心功能 (標準 Blob 升級版) ================== 💾
+// 💾 ================== 備份與還原核心功能 ================== 💾
 function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))],
@@ -916,7 +956,6 @@ function exportData() {
     theme: localStorage.getItem(TK)
   };
   
-  // 使用標準 Blob 確保 Android 下載相容性
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const downloadAnchorElement = document.createElement('a');
@@ -988,7 +1027,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.4.6 已啟動 (版面細節最佳化)');
+console.log('股票庫存 V3.4.7 已啟動 (互動摺疊面板版)');
 </script>
 </body>
 </html>
