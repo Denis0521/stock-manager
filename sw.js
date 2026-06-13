@@ -36,6 +36,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
+        // 快取有命中就回傳快取，否則去網路抓取
         if (response) {
           return response;
         }
