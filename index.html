@@ -24,6 +24,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .btn-adv{background:transparent;border:1px solid #dadce0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:#1a73e8}
 .dark .btn-adv{border-color:#30363d;color:#58a6ff}
 
+/* --- 分頁切換列 --- */
 .tabs-bar{display:flex;background:#fff;padding:6px 14px;margin:10px 14px 0;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);gap:6px}
 .dark .tabs-bar{background:#161b22;box-shadow:none;border:1px solid #30363d}
 .tab-btn{flex:1;padding:10px 8px;border:none;background:#f1f3f4;color:#5f6368;border-radius:6px;cursor:pointer;font-weight:600;font-size:16px;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -45,6 +46,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .form-row select{cursor:pointer;flex:0 0 64px;padding:10px 4px}
 .form-row button{background:#1a73e8;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 .form-row button:active{background:#1557b0}
+.form-row .sym-inp{flex:0 0 88px}
 
 .idx-scroll-container{margin:0 14px 8px;overflow-x:auto;display:flex;gap:10px;padding:4px 2px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .idx-scroll-container::-webkit-scrollbar{height:4px}
@@ -63,6 +65,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .neutral{color:#1a1a2e}
 .dark .neutral{color:#e6edf3}
 
+/* 列表區域加寬與重配欄位 */
 .table-scroll{margin:0 14px;overflow-x:auto;border:1px solid #e8eaed;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
 .dark .table-scroll{background:#161b22;border-color:#30363d}
 .list-wrap{min-width:760px} 
@@ -87,18 +90,19 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 .sym-src{font-size:9px;color:#9aa0a6;font-weight:normal;margin-top:2px;white-space:nowrap}
 .dark .sym-src{color:#6e7681}
 
-.srow .qty-cell{font-weight:500;color:#1a1a2e}
+.srow .qty-cell{font-weight:500;color:#1a1a2e;overflow:hidden;}
 .dark .srow .qty-cell{color:#e6edf3}
 .srow .price{font-weight:600}
 .srow .chgp{font-size:16px}
 .srow .chg{font-weight:600}
-.srow .total{font-weight:600}
+.srow .total{font-weight:600;overflow:hidden;}
 .srow .act{display:flex;gap:4px;justify-content:center}
 .srow .act button{background:#f1f3f4;border:1px solid #e8eaed;color:#5f6368;border-radius:5px;padding:5px 8px;font-size:13px;cursor:pointer;line-height:1.3}
 .dark .srow .act button{background:#21262d;border-color:#30363d;color:#8b949e}
 .srow .act .del-btn{color:#d93025;border-color:#fce8e6}
 .dark .srow .act .del-btn{color:#f85149;border-color:#f8514944}
 
+/* 統計區域 */
 .summary{background:#fff;border-radius:12px;padding:14px 16px;margin:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .dark .summary{background:#161b22;border:1px solid #30363d;box-shadow:none}
 .sum-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
@@ -163,7 +167,7 @@ a.btn-link { color: #1a73e8; text-decoration: none; font-weight: bold; }
 .btn-backup:active { background: #f1f3f4; }
 .dark .btn-backup:active { background: #21262d; }
 
-/* 主題配色 - 包含所有區塊的適配 */
+/* 主題配色 */
 body.tech { background-color: #23272d; background-image: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%), radial-gradient(at top center, #2d323a 0%, #181b20 100%); color: #c8d1dc; }
 .tech .header, .tech .card, .tech .table-scroll, .tech .summary, .tech .hist-item, .tech .modal, .tech .tabs-bar, .tech .idx-card-box { background: linear-gradient(135deg, #323842 0%, #242930 100%); border: 1px solid #3d4552; box-shadow: 5px 5px 12px rgba(12,14,18,0.7), -3px -3px 8px rgba(255,255,255,0.08), inset 1px 1px 0px rgba(255,255,255,0.05); border-radius: 10px; }
 .tech .header { background: #2b3039; box-shadow: 0 4px 12px rgba(12,14,18,0.5); border-radius: 0 0 10px 10px; }
@@ -182,6 +186,7 @@ body.tech { background-color: #23272d; background-image: linear-gradient(180deg,
 .tech .list-header { background: transparent; border-bottom-color: #3d4552; }
 .tech .srow { border-bottom-color: #2d333f; }
 .tech .list-header > div:nth-child(1), .tech .srow > div:nth-child(1) { background-color: #2b3039 !important; border-radius: 4px 0 0 4px; }
+.tech .list-header > div:nth-child(1)::after, .tech .srow > div:nth-child(1)::after { background: linear-gradient(to right, rgba(0,0,0,0.4), transparent); }
 .tech a.btn-link { color: #58a6ff !important; }
 .tech .backup-box { background: rgba(0,0,0,0.2); border-color: #3d4552; }
 .tech .backup-title { color: #a0aec0; }
@@ -205,7 +210,7 @@ body.blue-dark { background-color: #0b132b; color: #95a5a6; }
 .blue-dark .list-header { background: transparent; border-bottom-color: #3a506b; }
 .blue-dark .srow { border-bottom-color: #232f52; }
 .blue-dark .list-header > div:nth-child(1), .blue-dark .srow > div:nth-child(1) { background-color: #1c2541 !important; }
-.blue-dark a.btn-link { color: #58a6ff !important; }
+.blue-dark a.btn-link { color: #00b4d8 !important; }
 .blue-dark .backup-box { background: rgba(0,0,0,0.2); border-color: #3a506b; }
 .blue-dark .backup-title { color: #5bc0be; }
 .blue-dark .btn-backup { background: rgba(255,255,255,0.05); border-color: #3a506b; color: #fff; }
@@ -228,6 +233,7 @@ body.blue-light { background-color: #edf2f7; color: #4a5568; }
 .blue-light .list-header { background: #f0f7fd; border-bottom-color: #e2e8f0; }
 .blue-light .srow { border-bottom-color: #edf2f7; }
 .blue-light .list-header > div:nth-child(1), .blue-light .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.blue-light a.btn-link { color: #2b6cb0 !important; }
 .blue-light .backup-box { background: #f0f7fd; border-color: #cbd5e0; }
 .blue-light .backup-title { color: #4a5568; }
 .blue-light .btn-backup { background: #fff; border-color: #cbd5e0; color: #2b6cb0; }
@@ -249,6 +255,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 .pink .list-header { background: #fff0f6; border-bottom-color: #fed7d7; }
 .pink .srow { border-bottom-color: #fff5f5; }
 .pink .list-header > div:nth-child(1), .pink .srow > div:nth-child(1) { background-color: #ffffff !important; }
+.pink a.btn-link { color: #d63384 !important; }
 .pink .backup-box { background: #fff0f6; border-color: #fbb6ce; }
 .pink .backup-title { color: #9b2c2c; }
 .pink .btn-backup { background: #fff; border-color: #fbb6ce; color: #d63384; }
@@ -300,7 +307,7 @@ body.pink { background-color: #fff5f5; color: #702459; }
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>總損益/市值</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>總損益</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -344,11 +351,11 @@ body.pink { background-color: #fff5f5; color: #702459; }
       <div class="backup-btns">
         <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
         <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.4.5 (主題視覺優化版)</div>
+    <div class="v-box">核心版本：V3.4.6 (版面細節最佳化)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -551,7 +558,7 @@ async function fetchFugle(symbol){
   return null;
 }
 
-// 穩定的舊版 Yahoo 抓取
+// 穩定的舊版 Yahoo 抓取 (無代理版)
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
@@ -661,7 +668,7 @@ function renderRow(s){
   const qn=el.querySelector('.qty-cell');
   if(qn){
     qn.innerHTML=`<div style="line-height:1.2">${s.displayQty} ${s.displayUnit}</div>
-                  <div style="font-size:11px;color:#9aa0a6;margin-top:2px;">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
+                  <div style="font-size:13px;color:#9aa0a6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
   }
   
   const pEl=el.querySelector('.price');
@@ -685,11 +692,11 @@ function renderRow(s){
           const roi = ((mktValue - cost) / cost) * 100;
           totalValForClass = unPnl;
           totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                       <div style="font-size:10px;opacity:0.75;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% | 市值 ${(mktValue/10000).toFixed(1)}W</div>`;
+                       <div style="font-size:13px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
       } else {
           totalValForClass = 0;
-          totalHtml = `<div style="line-height:1.2" class="neutral">市值 ${mktValue.toLocaleString()}</div>
-                       <div style="font-size:10px;opacity:0.6;margin-top:2px;font-weight:normal" class="neutral">點擊 ✎ 設均價</div>`;
+          totalHtml = `<div style="line-height:1.2" class="neutral">—</div>
+                       <div style="font-size:11px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
   }
 
@@ -737,11 +744,11 @@ function renderAll(){
             const roi = ((mktValue - cost) / cost) * 100;
             totalValForClass = unPnl;
             totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                         <div style="font-size:10px;opacity:0.75;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% | 市值 ${(mktValue/10000).toFixed(1)}W</div>`;
+                         <div style="font-size:13px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
         } else {
             totalValForClass = 0;
-            totalHtml = `<div style="line-height:1.2" class="neutral">市值 ${mktValue.toLocaleString()}</div>
-                         <div style="font-size:10px;opacity:0.6;margin-top:2px;font-weight:normal" class="neutral">點擊 ✎ 設均價</div>`;
+            totalHtml = `<div style="line-height:1.2" class="neutral">—</div>
+                         <div style="font-size:11px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
         }
     }
     
@@ -749,7 +756,7 @@ function renderAll(){
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
-      '<div class="qty-cell"><div style="line-height:1.2">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:11px;color:#9aa0a6;margin-top:2px;">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+      '<div class="qty-cell"><div style="line-height:1.2">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:13px;color:#9aa0a6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
@@ -898,6 +905,7 @@ function showToast(msg){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
+// 💾 ================== 備份與還原核心功能 (標準 Blob 升級版) ================== 💾
 function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))],
@@ -908,6 +916,7 @@ function exportData() {
     theme: localStorage.getItem(TK)
   };
   
+  // 使用標準 Blob 確保 Android 下載相容性
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const downloadAnchorElement = document.createElement('a');
@@ -963,6 +972,7 @@ function importData(event) {
 
 async function refresh(){await refreshPrices()}
 
+// Init
 loadState();renderAll();renderHistory();
 setTimeout(refresh,300);
 pollTimer=setInterval(refresh,30000);
@@ -978,7 +988,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.4.5 已啟動 (主題視覺優化版)');
+console.log('股票庫存 V3.4.6 已啟動 (版面細節最佳化)');
 </script>
 </body>
 </html>
