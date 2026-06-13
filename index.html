@@ -347,7 +347,7 @@ const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
 let cachedGlobalIndices = [];
-let exchangeRateUSDTWD = 32.5; // 🚀 預設美金匯率防呆值
+let exchangeRateUSDTWD = 32.5;
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
@@ -475,10 +475,10 @@ function renderGlobalIndices(indices) {
   });
 }
 
-// 🚀 核心升級：Yahoo 匯率抓取引擎
+// 🌐 升級點 1：匯率端點無痛換裝 query2 核心快取主機
 async function fetchUSDTWD() {
   try {
-    const resp = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/USDTWD=X?interval=1d&range=1d', { signal: AbortSignal.timeout(3000) });
+    const resp = await fetch('https://query2.finance.yahoo.com/v8/finance/chart/USDTWD=X?interval=1d&range=1d', { signal: AbortSignal.timeout(3000) });
     if (resp.ok) {
       const json = await resp.json();
       const rate = json.chart.result[0].meta.regularMarketPrice;
@@ -543,10 +543,11 @@ async function fetchFugle(symbol){
   return null;
 }
 
+// 🌐 升級點 2：美股/備用端點無痛換裝 query2 核心主機 (CORS 全面通關，完美解鎖 VT)
 async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}${suffix}?interval=1d&range=1d`;
+      const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}${suffix}?interval=1d&range=1d`;
       const resp = await fetch(url);
       if(!resp.ok) return null;
       const json = await resp.json();
@@ -566,7 +567,7 @@ async function fetchYahoo(symbol){
   let currency = 'TWD';
   if (!/\d/.test(symbol)) {
     res = await tryFetch('');
-    currency = 'USD'; // 智慧判定：純英文就是美金
+    currency = 'USD';
   } else {
     res = await tryFetch('.TW');
     if(!res) res = await tryFetch('.TWO');
@@ -575,6 +576,7 @@ async function fetchYahoo(symbol){
   return res;
 }
 
+// 🌐 升級點 3：大盤備用端點同步換裝 query2 主機
 async function fetchWeightedIndex(){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
   if(keys.length > 0){
@@ -587,8 +589,8 @@ async function fetchWeightedIndex(){
       }
     }catch(e){}
   }
-  try{
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=1d`;
+  try {
+    const url = `https://query2.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=1d`;
     const resp = await fetch(url);
     if(resp.ok){
       const json = await resp.json();
@@ -604,7 +606,7 @@ async function fetchWeightedIndex(){
 }
 
 async function refreshPrices(){
-  await fetchUSDTWD(); // 每次更新優先拉取最新匯率
+  await fetchUSDTWD();
 
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
@@ -634,7 +636,7 @@ async function refreshPrices(){
       s.change=r.change;
       s.changePercent=r.changePercent;
       s.source=r.source;
-      s.currency=r.currency; // 記錄專屬幣別
+      s.currency=r.currency;
       s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
       renderRow(s);
     }
@@ -661,7 +663,6 @@ function renderRow(s){
   
   const qn=el.querySelector('.qty-cell');if(qn)qn.textContent=s.displayQty+' '+s.displayUnit;
   
-  // 🚀 核心升級：雙幣別智慧渲染
   let isUSD = (s.currency === 'USD');
   let pStr = '—';
   if(p!=null) pStr = isUSD ? '$' + formatPrice(p) : formatPrice(p);
@@ -760,7 +761,6 @@ function updateSummary(){
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    // 🚀 總計核心：遇到美股自動套用匯率轉換為台幣再加總
     let rate = (s.currency === 'USD') ? exchangeRateUSDTWD : 1;
     pnl += Math.round(sh * c * rate);
     asset += Math.round(sh * p * rate);
@@ -875,7 +875,7 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存 V3.3.0 已啟動 (包含匯率自動換算與美股雙幣顯示)');
+console.log('股票庫存 V3.3.0 已啟動 (Yahoo V8 JSON 引擎 - 美股全面解鎖)');
 </script>
 </body>
 </html>
