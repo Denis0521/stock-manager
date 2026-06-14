@@ -130,14 +130,14 @@ button:active, .tab-btn.active {
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
 .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 0 14px 14px; width: calc(100% - 28px); }
 
-/* 🌍 滑動大盤區 */
-.idx-scroll-container { margin: 0 14px 10px; overflow-x: auto; display: flex; gap: 14px; padding: 8px 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+/* 🌍 滑動大盤區 (高度壓縮版) */
+.idx-scroll-container { margin: 0 14px 8px; overflow-x: auto; display: flex; gap: 12px; padding: 4px 2px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { min-width: 175px; padding: 14px; scroll-snap-align: start; }
+.idx-card-box { min-width: 175px; padding: 8px 14px; scroll-snap-align: start; }
 .idx-box-name { font-size: 12px; color: var(--t-muted); font-weight: 600; }
-.idx-box-price { font-size: 18px; font-weight: 700; margin: 4px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 4px; opacity: 0.7; }
+.idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* 📊 列表區域 */
 .table-scroll { margin: 0 14px; overflow-x: auto; padding: 4px; -webkit-overflow-scrolling: touch; }
@@ -287,7 +287,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 
-<button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">儲存今日收盤盈虧總計</button>
+<button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
 
 <div class="history">
   <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
@@ -320,7 +320,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.2 (正式定名版)</div>
+    <div class="v-box">核心版本：V3.5.3 (版面微調版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -857,7 +857,7 @@ function saveDailyPnl(){
   currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
   if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
   saveRecords();renderHistory();
-  showToast('已儲存今日盈虧：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
 
 function deleteHistory(timestamp) {
@@ -981,7 +981,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.2 已啟動 (正式定名版)');
+console.log('股票庫存管理 V3.5.3 已啟動 (版面微調版)');
 </script>
 </body>
 </html>
