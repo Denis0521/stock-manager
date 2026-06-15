@@ -86,18 +86,20 @@ body.cement {
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 80px; min-height:100vh; font-size:14px; overflow-x:hidden; transition:background-color 0.3s, color 0.3s}
 input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
-/* 1. 立體凸出板塊 (Cards) */
-.header, .tabs-bar, .card, .idx-card-box, .table-scroll, .summary, .hist-item, .modal, .backup-box {
+/* 1. 立體凸出板塊 (Cards) - 統一 14px 外縫隙 */
+.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .modal, .backup-box {
   background: var(--bg);
   border: none;
   box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light);
   border-radius: 12px;
 }
-.header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; margin-bottom: 10px; }
+
+.header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; margin-bottom: 0px; }
 .header h1 { font-size: 17px; font-weight: 700; color: var(--t-main); }
 .header .hdr-right { display: flex; gap: 8px; }
 
-.tabs-bar { padding: 8px 10px; margin: 10px 14px 0; gap: 8px; display: flex; }
+/* 統一各區塊上下左右間距為 14px */
+.tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
 .card { padding: 16px; margin: 14px; }
 .card-title { font-size: 13px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -128,38 +130,53 @@ button:active, .tab-btn.active {
 }
 .tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
-.btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 0 14px 14px; width: calc(100% - 28px); }
+.btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
-/* 🌍 滑動大盤區 (高度壓縮版) */
-.idx-scroll-container { margin: 0 14px 8px; overflow-x: auto; display: flex; gap: 12px; padding: 4px 2px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+/* 🌍 滑動大盤區 (高度壓縮，寬度縮小，字體保持) */
+.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 12px; padding: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { min-width: 175px; padding: 8px 14px; scroll-snap-align: start; }
+.idx-card-box { min-width: 145px; padding: 10px 12px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; }
+.idx-card-box:last-child { border-right: none; }
 .idx-box-name { font-size: 12px; color: var(--t-muted); font-weight: 600; }
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 📊 列表區域 */
-.table-scroll { margin: 0 14px; overflow-x: auto; padding: 4px; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 780px; }
-.list-header { display: grid; grid-template-columns: 90px 105px 95px 95px 85px 95px 135px 65px; padding: 12px 0; font-size: 14px; color: var(--t-muted); font-weight: 600; align-items: center; border-bottom: 2px solid var(--s-dark); }
-.srow { display: grid; grid-template-columns: 90px 105px 95px 95px 85px 95px 135px 65px; padding: 14px 0; font-size: 16px; align-items: center; border-bottom: 1px solid var(--s-dark); }
+/* 📊 列表區域 (重新分配各欄寬度與高度填充) */
+.table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+.list-wrap { min-width: 710px; } 
+/* 欄位配比: 代號100 數量95 價85 幅度85 漲跌75 今損益85 總損110 動作85 = 720px */
+.list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); }
+.srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { text-align: right; padding: 0 8px; white-space: nowrap; }
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); }
-.list-header > div:nth-child(8), .srow > div:nth-child(8) { text-align: center; padding: 0; }
-.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 
-.sym-container { display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; line-height: 1.2 !important; }
+/* 儲存格滿版設計：確保代號欄的底色能完全擋住字 */
+.list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+
+/* 第 1 欄 (代號) 黏貼定位與滿版底色 */
+.list-header > div:nth-child(1), .srow > div:nth-child(1) { 
+  align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; 
+  background: var(--bg); padding-left: 14px; 
+}
+.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { 
+  content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; 
+  background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; 
+}
+
+/* 第 8 欄 (動作按鈕) 距離拉開 */
+.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
+.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
+
+/* 內部字體與容器對齊 */
+.sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .sym-src { font-size: 9px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
 
-.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; }
+.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 16px; font-weight: 700; }
 .srow .chg, .srow .today-pnl { font-weight: 700; }
-.srow .total { font-weight: 700; overflow: hidden; }
-.srow .act { display: flex; gap: 6px; justify-content: center; }
+.srow .total { font-weight: 700; overflow: hidden; width: 100%; }
 .srow .act button { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
 
 /* 4. 統計區與下拉選單 (無凸出，文字刻入) */
@@ -177,7 +194,7 @@ button:active, .tab-btn.active {
 }
 
 /* 📜 歷史紀錄區 */
-.history { margin: 0 14px; }
+.history { margin: 14px; }
 .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; }
 .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
 .hist-item .hdate { color: var(--t-muted); font-size: 13px; font-weight: 600; }
@@ -320,7 +337,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.4 (雙渦輪智慧引擎版)</div>
+    <div class="v-box">核心版本：V3.5.5 (版面間距與排版優化版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -335,7 +352,6 @@ let tabRecords = [[], [], []];
 let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
 
 let fugleKey='',secondFugleKey='',pollTimer=null;
-// === 智慧報價引擎專用全域變數 ===
 let fugleKeyIndex = 0;
 
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
@@ -516,16 +532,13 @@ async function fetchGlobalIndicesFromGoogle() {
   }
 }
 
-// === 智慧報價引擎：具備負載平衡 (Load Balancing) 與容錯切換 (Failover) ===
 async function fetchFugle(symbol){
   const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
   if(keys.length === 0) return null;
 
-  // 1. 分配任務：每次呼叫都換下一把 Key，完美分散頻率
   const startIndex = fugleKeyIndex % keys.length;
   fugleKeyIndex++; 
 
-  // 2. 容錯機制：如果第一把 Key 失敗或超載，馬上切換備用 Key 嘗試
   for(let i = 0; i < keys.length; i++){
     const attemptIndex = (startIndex + i) % keys.length;
     const currentKey = keys[attemptIndex];
@@ -538,15 +551,13 @@ async function fetchFugle(symbol){
         const d = await resp.json();
         if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
       } else if (resp.status === 429) {
-        // API 請求超載，立刻切換下一把 Key
         continue;
       }
     } catch(e) {
-      // 網路逾時或其他錯誤，立刻切換下一把 Key
       continue;
     }
   }
-  return null; // 富果引擎全部失效，回傳 null 讓系統啟動 Yahoo 備援
+  return null;
 }
 
 async function fetchYahoo(symbol){
@@ -575,7 +586,6 @@ async function fetchYahoo(symbol){
   return res;
 }
 
-// === 大盤指數同樣享有智慧負載平衡 ===
 async function fetchWeightedIndex(){
   const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
   if(keys.length > 0){
@@ -593,7 +603,6 @@ async function fetchWeightedIndex(){
       }catch(e){}
     }
   }
-  // Yahoo 備援
   try {
     const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
     const resp = await fetch(url);
@@ -1011,7 +1020,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.4 (雙渦輪智慧引擎版) 已啟動');
+console.log('股票庫存管理 V3.5.5 已啟動 (版面間距與排版優化版)');
 </script>
 </body>
 </html>
