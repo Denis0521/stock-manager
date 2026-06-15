@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存管理</title>
 
+<!-- 🍎 Apple iOS 與 PWA 專屬優化標籤 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
+<!-- 📱 動態狀態列顏色 -->
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -132,14 +134,14 @@ button:active, .tab-btn.active {
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
 .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
-/* 🌍 滑動大盤區 (高度壓縮，寬度縮小，字體保持) */
-.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 12px; padding: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+/* 🌍 滑動大盤區 (移除 gap 修正邊線不置中錯覺，強制字體靠左對齊) */
+.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { min-width: 145px; padding: 10px 12px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; }
+.idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 6px 16px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; text-align: left; }
 .idx-card-box:last-child { border-right: none; }
 .idx-box-name { font-size: 12px; color: var(--t-muted); font-weight: 600; }
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.idx-box-change-row { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* 📊 列表區域 (重新分配各欄寬度與高度填充) */
@@ -337,7 +339,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.5 (版面間距與排版優化版)</div>
+    <div class="v-box">核心版本：V3.5.6 (大盤指數置中與左對齊修正版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -1020,7 +1022,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.5 已啟動 (版面間距與排版優化版)');
+console.log('股票庫存管理 V3.5.6 (大盤指數置中與左對齊修正版) 已啟動');
 </script>
 </body>
 </html>
