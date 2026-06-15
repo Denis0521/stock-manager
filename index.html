@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存管理</title>
 
-<!-- 🍎 Apple iOS 與 PWA 專屬優化標籤 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<!-- 📱 動態狀態列顏色 -->
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -103,7 +101,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
 /* 統一各區塊上下左右間距為 14px */
 .tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
 .card { padding: 16px; margin: 14px; }
-.card-title { font-size: 13px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+/* 標題字體統一 15px */
+.card-title { font-size: 15px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
 /* 2. 挖空輸入框 (Recessed) + 凸出文字 (Protruding Text) */
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
@@ -132,24 +131,28 @@ button:active, .tab-btn.active {
 }
 .tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
+/* 新增按鈕統一 15px */
+.form-row button { font-size: 15px; }
 .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
-/* 🌍 滑動大盤區 (移除 gap 修正邊線不置中錯覺，強制字體靠左對齊) */
+/* 🌍 滑動大盤區 (高度壓縮，名稱字體統一為 15px) */
 .idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 6px 16px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; text-align: left; }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 12px; color: var(--t-muted); font-weight: 600; }
+/* 大盤標題字體統一 15px */
+.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; }
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 📊 列表區域 (重新分配各欄寬度與高度填充) */
+/* 📊 列表區域 (標題統一為 15px，內容核心數字統一為 17px) */
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; } 
-/* 欄位配比: 代號100 數量95 價85 幅度85 漲跌75 今損益85 總損110 動作85 = 720px */
-.list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); }
-.srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); }
+/* 明細標題字體統一 15px */
+.list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
+/* 明細核心數字統一放大至 17px */
+.srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 
 /* 儲存格滿版設計：確保代號欄的底色能完全擋住字 */
@@ -169,19 +172,19 @@ button:active, .tab-btn.active {
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
 
-/* 內部字體與容器對齊 */
+/* 內部字體與容器對齊 (統一 17px) */
 .sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .sym-src { font-size: 9px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
 
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
-.srow .chgp { font-size: 16px; font-weight: 700; }
+.srow .chgp { font-size: 17px; font-weight: 700; }
 .srow .chg, .srow .today-pnl { font-weight: 700; }
 .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
 .srow .act button { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
 
-/* 4. 統計區與下拉選單 (無凸出，文字刻入) */
+/* 4. 統計區與下拉選單 (無凸出，文字刻入，標題統一 15px) */
 .summary { padding: 16px; margin: 14px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
 .sum-row .lab { color: var(--t-muted); font-size: 15px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
@@ -221,8 +224,8 @@ button:active, .tab-btn.active {
 
 a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 
-.backup-box { padding: 16px; margin-top: 16px; }
-.backup-title { font-size: 14px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.backup-box { padding: 16px; margin: 14px 0 0; }
+.backup-title { font-size: 15px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .backup-btns { display: flex; gap: 12px; }
 .btn-backup { flex: 1; padding: 12px; font-size: 14px; }
 
@@ -339,7 +342,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.6 (大盤指數置中與左對齊修正版)</div>
+    <div class="v-box">核心版本：V3.5.7 (全域字體與排版統一版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -675,7 +678,7 @@ function renderRow(s){
   
   const qn=el.querySelector('.qty-cell');
   if(qn){
-    qn.innerHTML=`<div style="line-height:1.2;font-size:16px;">${s.displayQty} ${s.displayUnit}</div>
+    qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div>
                   <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
   }
   
@@ -706,12 +709,12 @@ function renderRow(s){
           const unPnl = Math.round(mktValue - cost);
           const roi = ((mktValue - cost) / cost) * 100;
           totalValForClass = unPnl;
-          totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+          totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
                        <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
       } else {
           totalValForClass = 0;
-          totalHtml = `<div style="line-height:1.2" class="neutral">—</div>
-                       <div style="font-size:13px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+          totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
+                       <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
   }
 
@@ -766,12 +769,12 @@ function renderAll(){
             const unPnl = Math.round(mktValue - cost);
             const roi = ((mktValue - cost) / cost) * 100;
             totalValForClass = unPnl;
-            totalHtml = `<div style="line-height:1.2">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+            totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
                          <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
         } else {
             totalValForClass = 0;
-            totalHtml = `<div style="line-height:1.2" class="neutral">—</div>
-                         <div style="font-size:13px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+            totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
+                         <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
         }
     }
     
@@ -779,7 +782,7 @@ function renderAll(){
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
-      '<div class="qty-cell"><div style="line-height:1.2;font-size:16px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+      '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
       '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
@@ -1022,7 +1025,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.6 (大盤指數置中與左對齊修正版) 已啟動');
+console.log('股票庫存管理 V3.5.7 已啟動 (全域字體與排版統一版)');
 </script>
 </body>
 </html>
