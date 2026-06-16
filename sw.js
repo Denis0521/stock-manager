@@ -1,8 +1,9 @@
-const CACHE_NAME = 'stock-portfolio-v3.5.8';
+const CACHE_NAME = 'stock-portfolio-v3.7.2';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -33,13 +34,24 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  const requestUrl = new URL(event.request.url);
+  const isApiRequest = 
+    requestUrl.hostname.includes('api.fugle.tw') || 
+    requestUrl.hostname.includes('finance.yahoo.com') || 
+    requestUrl.hostname.includes('allorigins.win') ||
+    requestUrl.hostname.includes('docs.google.com');
+  
+  if (isApiRequest) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
+        if (response) return response;
         return fetch(event.request);
       })
   );
 });
+
