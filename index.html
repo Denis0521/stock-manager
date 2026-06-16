@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存管理</title>
 
+<!-- 🍎 Apple iOS 與 PWA 專屬優化標籤 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
+<!-- 📱 動態狀態列顏色 -->
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -132,28 +134,33 @@ button:active, .tab-btn.active {
 .tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
 /* 新增按鈕統一 15px */
-.form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; }
+.form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; /* 補齊因間距造成的視覺微偏 */ }
 .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
-/* 🌍 滑動大盤區 */
+/* 🌍 滑動大盤區 (移除 gap 修正邊線不置中錯覺，強制字體靠左對齊) */
 .idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 6px 16px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; text-align: left; }
 .idx-card-box:last-child { border-right: none; }
+/* 大盤標題字體統一 15px */
 .idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; }
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 📊 列表區域 */
+/* 📊 列表區域 (標題統一為 15px，內容核心數字統一為 17px) */
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; } 
+/* 欄位配比: 代號100 數量95 價85 幅度85 漲跌75 今損益85 總損110 動作85 = 720px */
 .list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
+/* 明細核心數字統一放大至 17px */
 .srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 
+/* 儲存格滿版設計：確保代號欄的底色能完全擋住字 */
 .list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
 
+/* 第 1 欄 (代號) 黏貼定位與滿版底色 */
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { 
   align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; 
   background: var(--bg); padding-left: 14px; 
@@ -163,9 +170,11 @@ button:active, .tab-btn.active {
   background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; 
 }
 
+/* 第 8 欄 (動作按鈕) 距離拉開 */
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
 
+/* 內部字體與容器對齊 (統一 17px) */
 .sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .sym-src { font-size: 9px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
@@ -177,7 +186,7 @@ button:active, .tab-btn.active {
 .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
 .srow .act button { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
 
-/* 4. 統計區與下拉選單 */
+/* 4. 統計區與下拉選單 (無凸出，文字刻入，標題統一 15px) */
 .summary { padding: 16px; margin: 14px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
 .sum-row .lab { color: var(--t-muted); font-size: 15px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
@@ -249,14 +258,14 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <div class="card">
-  <div class="card-title">新增持股 <span style="font-size:11px;text-transform:none;opacity:0.7">(純英文字母自動判定為美股)</span></div>
+  <div class="card-title">新增持股</div>
   <div class="form-row">
     <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
-    <select id="unitSelect"><option value="股">股</option><option value="張">張</option></select>
+    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
   </div>
   <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (美股請輸入美金)" step="0.01" min="0" inputmode="decimal">
+    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
     <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
   </div>
 </div>
@@ -287,7 +296,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
-      <span class="lab">今日損益總計 (NT$)</span>
+      <span class="lab">今日損益總計</span>
       <span class="val" id="totalPnl">+0</span>
     </div>
     <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
@@ -295,11 +304,9 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   
   <div id="summaryDetails" style="display:none;">
     <div class="sum-divider" style="margin-top:10px;"></div>
-    <div class="sum-row"><span class="lab">總未實現損益 (NT$)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
-    <div class="sum-row"><span class="lab">持股資產總計 (NT$)</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-divider"></div>
-    <div class="sum-row" style="padding-bottom:0;"><span class="lab">即時 USD/TWD 匯率</span><span class="val neutral" id="fxRateDisplay">—</span></div>
+    <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
     <div class="sum-toggle-btn" style="margin-top:12px;" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
@@ -327,10 +334,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <label>Fugle API Key 2（備用）</label>
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-    
-    <label>Finnhub API Key（美股與國際指數用）</label>
-    <input type="text" id="finnhubKeyInput" placeholder="輸入 Finnhub Key" autocomplete="off">
-    <div><span class="key-status none" id="finnhubKeyStatus">未設定</span></div>
 
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
@@ -341,50 +344,35 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.6.0 (美股支援與雙幣即時匯率版)</div>
+    <div class="v-box">核心版本：V3.5.8 (極簡按鈕優化版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
 
 <script>
+let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+
 let currentTab = 0;
 let tabStocks = [[], [], []];
 let tabRecords = [[], [], []];
 let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
 
-let fugleKey='',secondFugleKey='',finnhubKey='',pollTimer=null;
+let fugleKey='',secondFugleKey='',pollTimer=null;
 let fugleKeyIndex = 0;
 
-// 全域即時匯率變數 (預設 32.0，將由 API 動態更新)
-let currentUsdTwd = localStorage.getItem('tw_usd_twd') ? parseFloat(localStorage.getItem('tw_usd_twd')) : 32.0;
-
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',FHK='tw_finnhub_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
 let cachedGlobalIndices = [];
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
-let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
-
-const usIndicesList = [
-  { name: '道瓊 (DIA)', symbol: 'DIA' },
-  { name: 'S&P 500 (SPY)', symbol: 'SPY' },
-  { name: '那斯達克 (QQQ)', symbol: 'QQQ' },
-  { name: '費半 (SOXX)', symbol: 'SOXX' }
-];
-
-// === 美股辨識引擎 (只要沒有數字就判定為美股) ===
-function isUSStock(symbol) {
-  return !/\d/.test(symbol);
-}
 
 function loadState(){
   try{
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const fh=localStorage.getItem(FHK);if(fh)finnhubKey=fh;
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
 
@@ -400,11 +388,9 @@ function loadState(){
       cachedGlobalIndices = JSON.parse(cachedIdx);
       if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices);
     }
-    document.getElementById('fxRateDisplay').textContent = currentUsdTwd.toFixed(2);
   }catch(e){console.error(e);}
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('finnhubKeyInput').value=finnhubKey;
   updateKeyStatus();
   updateTabUI();
 }
@@ -428,12 +414,7 @@ function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.st
 function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
-  finnhubKey=document.getElementById('finnhubKeyInput').value.trim();
-  try{
-    localStorage.setItem(FK,fugleKey);
-    localStorage.setItem(SFK,secondFugleKey);
-    localStorage.setItem(FHK,finnhubKey);
-  }catch(e){}
+  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
   updateKeyStatus();
 }
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -484,13 +465,9 @@ function updateTabUI(){
 }
 
 function updateKeyStatus(){
-  ['fugleKey','secondFugleKey','finnhubKey'].forEach((id)=>{
+  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
     const el=document.getElementById(id+'Status');if(!el)return;
-    let val='';
-    if(id==='fugleKey') val=fugleKey;
-    if(id==='secondFugleKey') val=secondFugleKey;
-    if(id==='finnhubKey') val=finnhubKey;
-    
+    const val=i===0?fugleKey:secondFugleKey;
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
@@ -513,127 +490,55 @@ function renderGlobalIndices(indices) {
         <span>${sign}${item.changeAmt.toFixed(2)}</span>
         <span>(${sign}${item.pct.toFixed(2)}%)</span>
       </div>
-      <div class="idx-box-src">via ${item.source || 'Unknown'}</div>
+      <div class="idx-box-src">via Google</div>
     `;
     container.appendChild(card);
   });
 }
 
-// === 抓取即時 USD/TWD 匯率 ===
-async function fetchUsdTwd() {
-  try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/download/TWD=X?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetch(url);
-    if(resp.ok) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const rate = parseFloat(cols[4]);
-      if(!isNaN(rate) && rate > 20 && rate < 40) {
-        currentUsdTwd = rate;
-        try { localStorage.setItem('tw_usd_twd', rate); } catch(e){}
-        document.getElementById('fxRateDisplay').textContent = currentUsdTwd.toFixed(2);
-        return rate;
-      }
-    }
-  } catch(e){}
-  return currentUsdTwd;
-}
-
-async function refreshAllGlobalIndices() {
-  let finalIndices = [];
-
-  if (finnhubKey) {
-    try {
-      const usPromises = usIndicesList.map(async (item) => {
-        try {
-          const resp = await fetch(`https://finnhub.io/api/v1/quote?symbol=${item.symbol}&token=${finnhubKey}`, { signal: AbortSignal.timeout(4000) });
-          if (resp.ok) {
-            const d = await resp.json();
-            if (d && d.c != null && d.c !== 0) {
-              return { name: item.name, price: d.c, changeAmt: d.d, pct: d.dp, source: 'Finnhub' };
-            }
-          }
-        } catch(e) {}
-        return null;
-      });
-      const resolvedUs = await Promise.all(usPromises);
-      resolvedUs.forEach(r => { if(r) finalIndices.push(r); });
-    } catch(e) {}
-  }
-
-  if (finalIndices.length === 0) {
-    const googleData = await fetchAllFromGoogle();
-    finalIndices = googleData;
-  } else {
-    const googleData = await fetchAllFromGoogle();
-    const googleAsia = googleData.filter(x => x.name.includes('日經') || x.name.includes('韓國'));
-    finalIndices = finalIndices.concat(googleAsia);
-  }
-
-  if (finalIndices.length > 0) {
-    cachedGlobalIndices = finalIndices;
-    try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-    renderGlobalIndices(cachedGlobalIndices);
-  }
-}
-
-async function fetchAllFromGoogle() {
-  if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return [];
+async function fetchGlobalIndicesFromGoogle() {
+  if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
     const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) return [];
+    if (!response.ok) return;
     const text = await response.text();
     const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
     
-    const parsed = [];
+    const parsedIndices = [];
+
     for(let i = 1; i < rows.length; i++) {
       const columns = rows[i].split(',');
       if (columns.length < 3) continue;
 
       const name = columns[0].replace(/"/g, '').trim();
       const price = parseFloat(columns[1]);
+      
       let rawPctStr = columns[2].replace(/"/g, '').trim();
-      let pct = rawPctStr.includes('%') ? parseFloat(rawPctStr.replace('%', '')) : parseFloat(rawPctStr) * 100;
+      let pct = 0;
+      if (rawPctStr.includes('%')) {
+        pct = parseFloat(rawPctStr.replace('%', ''));
+      } else {
+        pct = parseFloat(rawPctStr) * 100;
+      }
 
       if (isNaN(price) || isNaN(pct)) continue;
+
       const originalClose = price / (1 + (pct / 100));
-      parsed.push({ name, price, pct, changeAmt: price - originalClose, source: 'Google' });
+      const changeAmt = price - originalClose;
+
+      parsedIndices.push({ name, price, pct, changeAmt });
     }
-    return parsed;
-  } catch (e) {
-    return [];
+
+    if (parsedIndices.length > 0) {
+      cachedGlobalIndices = parsedIndices;
+      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+      renderGlobalIndices(cachedGlobalIndices);
+    }
+  } catch (e) { 
+    console.error("Google Index Fetch Error:", e); 
   }
 }
 
-// === 美股專用報價引擎 ===
-async function fetchUSStock(symbol) {
-  if (finnhubKey) {
-    try {
-      const resp = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${finnhubKey}`, { signal: AbortSignal.timeout(4000) });
-      if (resp.ok) {
-        const d = await resp.json();
-        if (d && d.c != null && d.c !== 0) return {price: d.c, change: d.d, changePercent: d.dp, source: 'Finnhub'};
-      }
-    } catch(e) {}
-  }
-  // Yahoo 美股備援
-  try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetch(url);
-    if(resp.ok) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      if(!isNaN(price)) return {price, change: price - open, changePercent: ((price-open)/open)*100, source: 'Yahoo'};
-    }
-  } catch(e) {}
-  return null;
-}
-
-// === 台股專用報價引擎 ===
 async function fetchFugle(symbol){
   const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
   if(keys.length === 0) return null;
@@ -662,7 +567,7 @@ async function fetchFugle(symbol){
   return null;
 }
 
-async function fetchYahooTW(symbol){
+async function fetchYahoo(symbol){
   const tryFetch = async (suffix) => {
     try {
       const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
@@ -721,8 +626,6 @@ async function fetchWeightedIndex(){
 }
 
 async function refreshPrices(){
-  await fetchUsdTwd(); // 背景更新即時匯率
-
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
   const idxChgEl = document.getElementById('idxChange');
@@ -737,42 +640,30 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
-  await refreshAllGlobalIndices();
+  fetchGlobalIndicesFromGoogle();
   
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
-    let r = null;
-    const isUS = isUSStock(s.symbol);
-    if(isUS) {
-      r = await fetchUSStock(s.symbol);
-    } else {
-      r = await fetchFugle(s.symbol);
-      if(!r) r = await fetchYahooTW(s.symbol);
-    }
-    return {s, r, isUS};
+    let r = await fetchFugle(s.symbol);
+    if(!r) r = await fetchYahoo(s.symbol);
+    return {s,r};
   }));
-
-  for(const {s,r,isUS} of results){
+  for(const {s,r} of results){
     if(r){
       s.price=r.price;
       s.change=r.change;
       s.changePercent=r.changePercent;
       s.source=r.source;
       s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-      renderRow(s, isUS);
+      renderRow(s);
     }
   }
   updateSummary();
 }
 
-// 支援雙幣顯示的重新渲染函式
-function renderRow(s, isUS = null){
+function renderRow(s){
   const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  if(isUS === null) isUS = isUSStock(s.symbol);
-
   const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-  const rate = isUS ? currentUsdTwd : 1;
-
   let p = s.price; let chg = s.change ?? 0;
   
   const symCont = el.querySelector('.sym-container');
@@ -784,68 +675,48 @@ function renderRow(s, isUS = null){
       srcEl.className = 'sym-src';
       symCont.appendChild(srcEl);
     }
-    srcEl.textContent = (s.source ? 'via '+s.source+' '+(s.updateTime||'') : '');
+    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
   }
   
   const qn=el.querySelector('.qty-cell');
   if(qn){
-    let bpStr = s.buyPrice ? '均價 '+(isUS ? '$'+s.buyPrice : s.buyPrice) : '未設均價';
     qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div>
-                  <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${bpStr}">${bpStr}</div>`;
+                  <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
   }
   
   const pEl=el.querySelector('.price');
   if(p!=null){
-    pEl.textContent = isUS ? '$' + p.toFixed(2) : formatPrice(p);
+    pEl.textContent=formatPrice(p);
     pEl.className='price '+(chg>=0?'up':'down');
   }
   const cp=el.querySelector('.chgp');
   if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
   const cg=el.querySelector('.chg');
-  if(s.change!=null){
-    let cgStr = (chg>=0?'+':'') + (isUS ? '$'+chg.toFixed(2) : chg.toFixed(2));
-    cg.textContent = cgStr;
-    cg.className='chg '+(chg>=0?'up':'down');
-  }
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   
   const tp = el.querySelector('.today-pnl');
   if(s.change!=null){
-    const todayPnlLocal = shares * chg;
-    const todayPnlTWD = Math.round(todayPnlLocal * rate);
-    const tpClass = todayPnlLocal >= 0 ? 'up' : 'down';
-    
-    if (isUS) {
-      tp.innerHTML = `<div style="line-height:1.2;font-size:17px;">${todayPnlLocal >= 0 ? '+' : ''}$${todayPnlLocal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-                      <div style="font-size:13px;opacity:0.85;margin-top:2px;font-weight:600">NT$ ${todayPnlTWD.toLocaleString()}</div>`;
-    } else {
-      tp.innerHTML = `<div style="line-height:1.2;font-size:17px;">${todayPnlLocal >= 0 ? '+' : ''}${todayPnlLocal.toLocaleString()}</div>`;
-    }
-    tp.className = 'today-pnl ' + tpClass;
+    const todayPnl = Math.round(shares * chg);
+    tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+    tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down');
   }
   
   let totalHtml = '—';
   let totalValForClass = 0;
   
   if (p != null) {
-      const mktValueLocal = p * shares;
+      const mktValue = Math.round(shares * p);
       if (s.buyPrice != null && s.buyPrice > 0) {
-          const costLocal = s.buyPrice * shares;
-          const unPnlLocal = mktValueLocal - costLocal;
-          const unPnlTWD = Math.round(unPnlLocal * rate);
-          const roi = (unPnlLocal / costLocal) * 100;
-          totalValForClass = unPnlLocal;
-
-          if(isUS) {
-             totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnlTWD >= 0 ? '+' : ''}${unPnlTWD.toLocaleString()}</div>
-                          <div style="font-size:13px;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}% ($${Math.abs(unPnlLocal).toFixed(2)})</div>`;
-          } else {
-             totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnlTWD >= 0 ? '+' : ''}${unPnlTWD.toLocaleString()}</div>
-                          <div style="font-size:14px;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-          }
+          const cost = s.buyPrice * shares;
+          const unPnl = Math.round(mktValue - cost);
+          const roi = ((mktValue - cost) / cost) * 100;
+          totalValForClass = unPnl;
+          totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+                       <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
       } else {
           totalValForClass = 0;
           totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
-                       <div style="font-size:13px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+                       <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
   }
 
@@ -873,48 +744,81 @@ function renderAll(){
   
   for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    body.appendChild(div);
+    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p = s.price; let chg = s.change ?? 0;
+    
+    let pStr = '—';
+    if(p!=null) pStr = formatPrice(p);
+    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
+    let cgStr = '—';
+    if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
+    
+    let tpStr = '—';
+    let tpClass = '';
+    if (s.change != null) {
+      const todayPnl = Math.round(shares * chg);
+      tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+      tpClass = todayPnl >= 0 ? 'up' : 'down';
+    }
+    
+    let totalHtml = '—';
+    let totalValForClass = 0;
+    
+    if (p != null) {
+        const mktValue = Math.round(shares * p);
+        if (s.buyPrice != null && s.buyPrice > 0) {
+            const cost = s.buyPrice * shares;
+            const unPnl = Math.round(mktValue - cost);
+            const roi = ((mktValue - cost) / cost) * 100;
+            totalValForClass = unPnl;
+            totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+                         <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+        } else {
+            totalValForClass = 0;
+            totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
+                         <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+        }
+    }
+    
+    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    
     div.innerHTML=
-      '<div class="sym-container"><div class="sym"></div><div class="sym-src"></div></div>'+
-      '<div class="qty-cell"></div>'+
-      '<div class="price"></div>'+
-      '<div class="chgp"></div>'+
-      '<div class="chg"></div>'+
-      '<div class="today-pnl"></div>'+
-      '<div class="total"></div>'+
+      '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
+      '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+      '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
+      '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
+      '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
+      '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
+      '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
       '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
-    renderRow(s); // 利用 renderRow 一次性渲染
+    body.appendChild(div);
   }
   updateSummary();
 }
 
 function updateSummary(){
-  let pnlTWD=0, assetTWD=0, totalUnPnlTWD=0;
+  let pnl=0, asset=0, totalUnPnl=0;
   let hasUnPnl = false;
   const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    
-    const isUS = isUSStock(s.symbol);
-    const rate = isUS ? currentUsdTwd : 1;
-
-    pnlTWD += Math.round(sh * c * rate);
-    assetTWD += Math.round(sh * p * rate);
+    pnl += Math.round(sh * c);
+    asset += Math.round(sh * p);
     
     if (s.buyPrice != null && s.price != null && s.buyPrice > 0) {
-      totalUnPnlTWD += Math.round((s.price - s.buyPrice) * sh * rate);
+      totalUnPnl += Math.round((s.price - s.buyPrice) * sh);
       hasUnPnl = true;
     }
   }
   
-  const pe=document.getElementById('totalPnl');pe.textContent=(pnlTWD>=0?'+':'')+pnlTWD.toLocaleString();pe.className='val '+(pnlTWD>=0?'up':'down');
-  const ae = document.getElementById('totalAsset');ae.textContent = (assetTWD>=0?'+':'')+assetTWD.toLocaleString();ae.className = 'val neutral'; 
+  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
+  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral'; 
   
   const ue = document.getElementById('totalUnrealized');
   if(hasUnPnl) {
-    ue.textContent = (totalUnPnlTWD >= 0 ? '+' : '') + totalUnPnlTWD.toLocaleString();
-    ue.className = 'val ' + (totalUnPnlTWD >= 0 ? 'up' : 'down');
+    ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString();
+    ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down');
   } else {
     ue.textContent = '—';
     ue.className = 'val neutral';
@@ -973,8 +877,7 @@ function editStock(id){
     if(qtyNum>0){s.displayQty=qtyNum;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;}
   }
   
-  const isUS = isUSStock(s.symbol);
-  const nbp=prompt(`設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)\n${isUS ? '⚠️ 此為美股，請輸入美金單價' : ''}`, s.buyPrice || '');
+  const nbp=prompt('設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || '');
   if(nbp!==null){
     const bpNum = parseFloat(nbp);
     s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
@@ -989,11 +892,8 @@ function saveDailyPnl(){
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0;
-    const isUS = isUSStock(s.symbol);
-    const rate = isUS ? currentUsdTwd : 1;
-    
-    pnl += Math.round(sh * c * rate);
-    asset += Math.round(sh * p * rate);
+    pnl += Math.round(sh * c);
+    asset += Math.round(sh * p);
   }
   const n=new Date();
   const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
@@ -1003,7 +903,7 @@ function saveDailyPnl(){
   currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
   if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
   saveRecords();renderHistory();
-  showToast('已存儲今日台幣總損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
 
 function deleteHistory(timestamp) {
@@ -1027,7 +927,6 @@ function renderHistory(){
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('finnhubKeyInput').value=finnhubKey;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -1055,7 +954,6 @@ function exportData() {
     tabNames: localStorage.getItem(TN_KEY),
     fugleKey: localStorage.getItem(FK),
     secondFugleKey: localStorage.getItem(SFK),
-    finnhubKey: localStorage.getItem(FHK),
     theme: localStorage.getItem(TK)
   };
   
@@ -1099,7 +997,6 @@ function importData(event) {
         if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
         if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
-        if (data.finnhubKey) localStorage.setItem(FHK, data.finnhubKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         
         alert('🎉 備份還原成功！系統將為您重新載入頁面。');
@@ -1130,7 +1027,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.6.0 (美股支援與雙幣即時匯率版) 已啟動');
+console.log('股票庫存管理 V3.5.8 已啟動 (極簡按鈕優化版)');
 </script>
 </body>
 </html>
