@@ -346,7 +346,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.10 (Finnhub 優先與 Google 備援雙擎版)</div>
+    <div class="v-box">核心版本：V3.5.11 (加入日韓指數版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -370,11 +370,14 @@ let cachedGlobalIndices = [];
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
 
+// === 加入日韓追蹤 ETF ===
 const foreignIndicesList = [
   { name: '道瓊 (DIA)', symbol: 'DIA' },
   { name: 'S&P 500 (SPY)', symbol: 'SPY' },
   { name: '那斯達克 (QQQ)', symbol: 'QQQ' },
-  { name: '費半 (SOXX)', symbol: 'SOXX' }
+  { name: '費半 (SOXX)', symbol: 'SOXX' },
+  { name: '日本 (EWJ)', symbol: 'EWJ' },
+  { name: '韓國 (EWY)', symbol: 'EWY' }
 ];
 
 function loadState(){
@@ -515,7 +518,6 @@ function renderGlobalIndices(indices) {
   });
 }
 
-// === Finnhub 為首選引擎 ===
 async function fetchForeignIndices() {
   if (!finnhubKey) return false;
   try {
@@ -546,15 +548,14 @@ async function fetchForeignIndices() {
       cachedGlobalIndices = results;
       try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
       renderGlobalIndices(cachedGlobalIndices);
-      return true; // 成功抓取
+      return true; 
     }
   } catch (e) {
     console.error("Finnhub Index Fetch Error:", e);
   }
-  return false; // 抓取失敗或無數據
+  return false; 
 }
 
-// === Google 試算表為備用救援引擎 ===
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -699,10 +700,8 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
-  // === 智慧雙引擎接力啟動 ===
   const foreignSuccess = await fetchForeignIndices();
   if (!foreignSuccess) {
-    // 如果 Finnhub 沒設 Key 或抓取失敗，自動啟動 Google 試算表救援
     await fetchGlobalIndicesFromGoogle();
   }
   
@@ -780,7 +779,7 @@ function renderRow(s){
       } else {
           totalValForClass = 0;
           totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
-                       <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+                       <div style="font-size:13px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
   }
 
@@ -1094,7 +1093,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.10 已啟動 (Finnhub 優先與 Google 備援雙擎版)');
+console.log('股票庫存管理 V3.5.11 已啟動 (加入日韓指數版)');
 </script>
 </body>
 </html>
