@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存管理</title>
 
-<!-- 🍎 Apple iOS 與 PWA 專屬優化標籤 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<!-- 📱 動態狀態列顏色 -->
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -134,7 +132,7 @@ button:active, .tab-btn.active {
 .tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
 /* 新增按鈕統一 15px */
-.form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; /* 補齊因間距造成的視覺微偏 */ }
+.form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
 /* 🌍 滑動大盤區 (移除 gap 修正邊線不置中錯覺，強制字體靠左對齊) */
@@ -334,6 +332,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <label>Fugle API Key 2（備用）</label>
     <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
     <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+    
+    <label>Finnhub API Key（國外指數用）</label>
+    <input type="text" id="finnhubKeyInput" placeholder="輸入 Finnhub Key" autocomplete="off">
+    <div><span class="key-status none" id="finnhubKeyStatus">未設定</span></div>
 
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
@@ -344,35 +346,42 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.8 (極簡按鈕優化版)</div>
+    <div class="v-box">核心版本：V3.5.10 (Finnhub 優先與 Google 備援雙擎版)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
 
 <script>
-let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
-
 let currentTab = 0;
 let tabStocks = [[], [], []];
 let tabRecords = [[], [], []];
 let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
 
-let fugleKey='',secondFugleKey='',pollTimer=null;
+let fugleKey='',secondFugleKey='',finnhubKey='',pollTimer=null;
 let fugleKeyIndex = 0;
 
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',FHK='tw_finnhub_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 
 let cachedGlobalIndices = [];
 
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+
+const foreignIndicesList = [
+  { name: '道瓊 (DIA)', symbol: 'DIA' },
+  { name: 'S&P 500 (SPY)', symbol: 'SPY' },
+  { name: '那斯達克 (QQQ)', symbol: 'QQQ' },
+  { name: '費半 (SOXX)', symbol: 'SOXX' }
+];
 
 function loadState(){
   try{
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
+    const fh=localStorage.getItem(FHK);if(fh)finnhubKey=fh;
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
 
@@ -391,6 +400,7 @@ function loadState(){
   }catch(e){console.error(e);}
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('finnhubKeyInput').value=finnhubKey;
   updateKeyStatus();
   updateTabUI();
 }
@@ -414,7 +424,12 @@ function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.st
 function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
-  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
+  finnhubKey=document.getElementById('finnhubKeyInput').value.trim();
+  try{
+    localStorage.setItem(FK,fugleKey);
+    localStorage.setItem(SFK,secondFugleKey);
+    localStorage.setItem(FHK,finnhubKey);
+  }catch(e){}
   updateKeyStatus();
 }
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -465,9 +480,13 @@ function updateTabUI(){
 }
 
 function updateKeyStatus(){
-  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
+  ['fugleKey','secondFugleKey','finnhubKey'].forEach((id)=>{
     const el=document.getElementById(id+'Status');if(!el)return;
-    const val=i===0?fugleKey:secondFugleKey;
+    let val='';
+    if(id==='fugleKey') val=fugleKey;
+    if(id==='secondFugleKey') val=secondFugleKey;
+    if(id==='finnhubKey') val=finnhubKey;
+    
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
@@ -490,12 +509,52 @@ function renderGlobalIndices(indices) {
         <span>${sign}${item.changeAmt.toFixed(2)}</span>
         <span>(${sign}${item.pct.toFixed(2)}%)</span>
       </div>
-      <div class="idx-box-src">via Google</div>
+      <div class="idx-box-src">via ${item.source || 'Unknown'}</div>
     `;
     container.appendChild(card);
   });
 }
 
+// === Finnhub 為首選引擎 ===
+async function fetchForeignIndices() {
+  if (!finnhubKey) return false;
+  try {
+    const results = [];
+    const fetchPromises = foreignIndicesList.map(async (item) => {
+      try {
+        const resp = await fetch(`https://finnhub.io/api/v1/quote?symbol=${item.symbol}&token=${finnhubKey}`, { signal: AbortSignal.timeout(5000) });
+        if (resp.ok) {
+          const d = await resp.json();
+          if (d && d.c != null && d.c !== 0) {
+            return {
+              name: item.name,
+              price: d.c,
+              changeAmt: d.d,
+              pct: d.dp,
+              source: 'Finnhub'
+            };
+          }
+        }
+      } catch(e) {}
+      return null;
+    });
+
+    const resolved = await Promise.all(fetchPromises);
+    resolved.forEach(r => { if(r) results.push(r); });
+
+    if (results.length > 0) {
+      cachedGlobalIndices = results;
+      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+      renderGlobalIndices(cachedGlobalIndices);
+      return true; // 成功抓取
+    }
+  } catch (e) {
+    console.error("Finnhub Index Fetch Error:", e);
+  }
+  return false; // 抓取失敗或無數據
+}
+
+// === Google 試算表為備用救援引擎 ===
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
   try {
@@ -526,7 +585,7 @@ async function fetchGlobalIndicesFromGoogle() {
       const originalClose = price / (1 + (pct / 100));
       const changeAmt = price - originalClose;
 
-      parsedIndices.push({ name, price, pct, changeAmt });
+      parsedIndices.push({ name, price, pct, changeAmt, source: 'Google' });
     }
 
     if (parsedIndices.length > 0) {
@@ -640,7 +699,12 @@ async function refreshPrices(){
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
   }
 
-  fetchGlobalIndicesFromGoogle();
+  // === 智慧雙引擎接力啟動 ===
+  const foreignSuccess = await fetchForeignIndices();
+  if (!foreignSuccess) {
+    // 如果 Finnhub 沒設 Key 或抓取失敗，自動啟動 Google 試算表救援
+    await fetchGlobalIndicesFromGoogle();
+  }
   
   const currentStocks = tabStocks[currentTab];
   const results = await Promise.all(currentStocks.map(async (s)=>{
@@ -776,7 +840,7 @@ function renderAll(){
         } else {
             totalValForClass = 0;
             totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
-                         <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+                         <div style="font-size:13px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
         }
     }
     
@@ -927,6 +991,7 @@ function renderHistory(){
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('finnhubKeyInput').value=finnhubKey;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -954,6 +1019,7 @@ function exportData() {
     tabNames: localStorage.getItem(TN_KEY),
     fugleKey: localStorage.getItem(FK),
     secondFugleKey: localStorage.getItem(SFK),
+    finnhubKey: localStorage.getItem(FHK),
     theme: localStorage.getItem(TK)
   };
   
@@ -997,6 +1063,7 @@ function importData(event) {
         if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
         if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
+        if (data.finnhubKey) localStorage.setItem(FHK, data.finnhubKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         
         alert('🎉 備份還原成功！系統將為您重新載入頁面。');
@@ -1027,7 +1094,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.8 已啟動 (極簡按鈕優化版)');
+console.log('股票庫存管理 V3.5.10 已啟動 (Finnhub 優先與 Google 備援雙擎版)');
 </script>
 </body>
 </html>
