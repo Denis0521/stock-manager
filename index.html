@@ -367,7 +367,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
-        <div id="apiStatsBox"><div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);"><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Fugle</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Yahoo</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Google</div></div></div></div>
+        <div id="apiStatsBox"><div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);"><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Fugle</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Yahoo</div></div></div></div>
       </div>
     </div>
 
@@ -389,7 +389,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.1.0 (Worker 內建國際指數版)</div>
+    <div class="v-box">核心版本：V4.1.1 (台股全走 Fugle + 移除 Google API)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -457,7 +457,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>為什麼不用 Fugle API？</strong> Fugle 的方案主要針對台股資料，國際指數需企業方案。使用 Cloudflare Worker 代理 Yahoo Finance 作為免費替代方案。</li>
         <li><strong>延遲有多低？</strong> Cloudflare Worker 在全球邊緣節點執行，延遲僅 <strong>50~200 毫秒</strong>。搭配快取機制，實際資料延遲約 <strong>5~13 秒</strong>。</li>
         <li><strong>更新頻率：</strong> 每 <strong>10 秒</strong>更新一次，達到接近即時的效果。</li>
-        <li><strong>支援指數：</strong> 道瓊工業指數（^DJI）、那斯達克指數（^IXIC）、S&P 500（^GSPC）、費城半導體指數（^SOX）、日經 225（^N225）、韓國 KOSPI（^KS11）。</li>
+        <li><strong>自訂指數：</strong> 您可以在「進階設定」中點擊「📈 管理國際指數」按鈕，自由新增或刪除要追蹤的國際指數。預設包含道瓊、那斯達克、S&P 500、費城半導體、日經 225、韓國 KOSPI。</li>
       </ul>
 
       <h3>七、常見問題</h3>
@@ -557,6 +557,7 @@ function recordApiSuccess() {
 }
 
 function trackApiUsage(source) {
+  if (source === 'Google') return 0; // Google 已移除
   const today = new Date().toISOString().split('T')[0];
   const key = `api_usage_${today}_${source}`;
   const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
@@ -568,8 +569,7 @@ function getApiUsageStats() {
   const today = new Date().toISOString().split('T')[0];
   return {
     fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
-    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0'),
-    google: parseInt(localStorage.getItem(`api_usage_${today}_Google`) || '0')
+    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
   };
 }
 
@@ -580,7 +580,6 @@ function renderApiStats() {
     el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.google}</div><div>Google</div></div>
     </div>`;
   }
 }
@@ -785,7 +784,7 @@ async function fetchGlobalIndicesFromWorker() {
         return { name, price, pct, changeAmt };
       });
       cachedGlobalIndices = parsedIndices;
-      trackApiUsage('Yahoo');
+      // 國際指數透過 Worker 代理，不計入 API 使用量
       try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); localStorage.setItem('tw_indices_cache_time', String(Date.now())); } catch(e){}
       renderGlobalIndices(cachedGlobalIndices);
     }
@@ -827,20 +826,18 @@ async function fetchYahoo(symbol){
   if (navigator.onLine === false) return null;
   const tryFetch = async (suffix) => {
     try {
-      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      // 使用 v7 quote 端點（JSON，更可靠）
+      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}${suffix}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketOpen,regularMarketPreviousClose`;
       const resp = await fetchWithProxy(yahooUrl);
       if (!resp) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if (lines.length < 2) return null;
-      const cols = lines[lines.length - 1].split(',');
-      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      trackApiUsage('Yahoo');
-      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+      const data = await resp.json();
+      const result = data.quoteResponse?.result?.[0];
+      if (!result || result.regularMarketPrice == null) return null;
+      const price = result.regularMarketPrice;
+      const change = result.regularMarketChange || (price - (result.regularMarketPreviousClose || result.regularMarketOpen));
+      const changePercent = result.regularMarketChangePercent || (change / (result.regularMarketPreviousClose || result.regularMarketOpen) * 100);
+      // 國際指數透過 Worker 代理，不計入 API 使用量
+      return {price, change: +change.toFixed(2), changePercent: +changePercent.toFixed(2), source: 'Yahoo'};
     } catch(e) { return null; }
   };
   let res = await tryFetch('.TW');
@@ -870,16 +867,15 @@ async function fetchWeightedIndex(){
     }
   }
   try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ETWII&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
     const resp = await fetchWithProxy(yahooUrl);
     if (resp) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      trackApiUsage('Yahoo');
-      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
+      const data = await resp.json();
+      const result = data.quoteResponse?.result?.[0];
+      if (result && result.regularMarketPrice != null) {
+        // 國際指數透過 Worker 代理，不計入 API 使用量
+        return {price: result.regularMarketPrice, change: result.regularMarketChange || 0, changePercent: result.regularMarketChangePercent || 0, source: 'Yahoo'};
+      }
     }
   } catch(e) {}
   return null;
@@ -1259,7 +1255,67 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.1.0 已啟動 (Worker 內建國際指數版)');
+
+// ========================================================= 📈 國際指數管理 =========================================================
+function openIndexModal() {
+  renderIndexList();
+  document.getElementById('indexModalOverlay').classList.add('show');
+}
+
+function closeIndexModal() {
+  document.getElementById('indexModalOverlay').classList.remove('show');
+}
+
+function renderIndexList() {
+  const body = document.getElementById('indexListBody');
+  const indices = cfWorkerIndices.split(',').filter(s => s.trim() !== '');
+
+  if (indices.length === 0) {
+    body.innerHTML = '<div style="text-align:center;color:var(--t-muted);padding:20px;font-weight:600;">尚無指數</div>';
+    return;
+  }
+
+  body.innerHTML = '';
+  for (const symbol of indices) {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:8px;background:var(--bg);border-radius:8px;box-shadow:3px 3px 6px var(--s-dark),-3px -3px 6px var(--s-light);';
+    div.innerHTML = '<span style="font-weight:700;font-size:16px;color:var(--t-main);">' + symbol + '</span><button type="button" onclick="removeIndex('' + symbol + '')" style="padding:6px 12px;font-size:14px;">✕</button>';
+    body.appendChild(div);
+  }
+}
+
+function addIndex() {
+  const input = document.getElementById('newIndexInput');
+  let symbol = input.value.trim().toUpperCase();
+  symbol = symbol.replace(/[^A-Z0-9^]/g, '');
+  if (!symbol) { showToast('請輸入指數代號'); return; }
+
+  const indices = cfWorkerIndices.split(',').filter(s => s.trim() !== '');
+  if (indices.includes(symbol)) { showToast('該指數已存在'); return; }
+
+  indices.push(symbol);
+  cfWorkerIndices = indices.join(',');
+  try { localStorage.setItem('tw_cf_worker_indices', cfWorkerIndices); } catch(e){}
+  input.value = '';
+  renderIndexList();
+  showToast('已新增 ' + symbol);
+}
+
+function removeIndex(symbol) {
+  if (!confirm('確定刪除 ' + symbol + '？')) return;
+  const indices = cfWorkerIndices.split(',').filter(s => s.trim() !== '' && s !== symbol);
+  cfWorkerIndices = indices.join(',');
+  try { localStorage.setItem('tw_cf_worker_indices', cfWorkerIndices); } catch(e){}
+  renderIndexList();
+  showToast('已刪除 ' + symbol);
+}
+
+// 國際指數 Modal 點擊外部關閉
+document.getElementById('indexModalOverlay').addEventListener('click', function(e){
+  if(e.target === this) this.classList.remove('show');
+});
+
+console.log('股票庫存管理 V4.1.1 已啟動 (台股全走 Fugle + 移除 Google API)');
 </script>
 </body>
 </html>
