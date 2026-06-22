@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.8 (臺積電ADR修復)</div>
+    <div class="v-box">核心版本：V4.4.0 (臺積電ADR獨立獲取)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -646,8 +646,6 @@ async function fetchGlobalIndicesFromWorker() {
     return;
   }
 
-  let parsedIndices = [];
-
   try {
     const workerSymbols = activeForeignIndices.join(',');
     const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
@@ -657,44 +655,73 @@ async function fetchGlobalIndicesFromWorker() {
     if (response.ok) {
       const data = await response.json();
       if (data.indices && data.indices.length > 0) {
-        parsedIndices = data.indices.map(item => {
+        const parsedIndices = data.indices.map(item => {
           const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
           const changeAmt = item.change ?? item.regularMarketChange ?? 0;
           const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
           const name = item.name || item.symbol;
           return { symbol: item.symbol, name, price, pct, changeAmt };
         });
+        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+        cachedGlobalIndices = parsedIndices;
+        trackApiUsage('Yahoo');
+        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+        renderGlobalIndices(cachedGlobalIndices, false);
       }
     }
   } catch (e) {
     console.error("Worker Index Fetch Error:", e);
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if(cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
+}
 
-  // 🆕 如果 Worker 沒有返回 TSM，單獨從 Yahoo Finance 獲取
-  const hasTSM = parsedIndices.some(i => i.symbol === 'TSM');
-  if (!hasTSM) {
-    const tsmData = await fetchYahooUS('TSM');
-    if (tsmData) {
-      parsedIndices.push({
-        symbol: 'TSM',
-        name: '臺積電ADR',
-        price: tsmData.price,
-        pct: tsmData.changePercent,
-        changeAmt: tsmData.change
-      });
+async function fetchTSMIndex() {
+  const tsmData = await fetchYahooUS('TSM');
+  if (!tsmData) { console.log('[TSM] fetchYahooUS returned null'); return; }
+
+  const container = document.getElementById('idxScrollContainer');
+  if (!container) { console.log('[TSM] container not found'); return; }
+
+  let existingCard = null;
+  const cards = container.querySelectorAll('.idx-card-box');
+  for (let i = 0; i < cards.length; i++) {
+    const nameEl = cards[i].querySelector('.idx-box-name');
+    if (nameEl && nameEl.textContent.includes('臺積電ADR')) {
+      existingCard = cards[i];
+      break;
     }
   }
 
-  if (parsedIndices.length > 0) {
-    parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-    cachedGlobalIndices = parsedIndices;
-    trackApiUsage('Yahoo');
-    try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-    renderGlobalIndices(cachedGlobalIndices, false);
+  const sign = tsmData.changePercent >= 0 ? '+' : '';
+  const cls = tsmData.changePercent >= 0 ? 'up' : 'down';
+  const cardHTML = `<div class="idx-box-name">臺積電ADR</div>
+    <div class="idx-box-price">${tsmData.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
+    <div class="idx-box-change-row ${cls}">
+      <span>${sign}${tsmData.change.toFixed(2)}</span>
+      <span>(${sign}${tsmData.changePercent.toFixed(2)}%)</span>
+    </div>
+    <div class="idx-box-src">via Yahoo</div>`;
+
+  if (existingCard) {
+    existingCard.innerHTML = cardHTML;
   } else {
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
+    const newCard = document.createElement('div');
+    newCard.className = 'idx-card-box';
+    newCard.innerHTML = cardHTML;
+
+    let inserted = false;
+    for (let i = 0; i < cards.length; i++) {
+      const nameEl = cards[i].querySelector('.idx-box-name');
+      if (nameEl && nameEl.textContent.includes('費城半導體')) {
+        cards[i].insertAdjacentElement('afterend', newCard);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) container.appendChild(newCard);
   }
+  console.log('[TSM] Card updated/inserted, price:', tsmData.price);
 }
 
 async function fetchFugle(symbol){
@@ -727,7 +754,6 @@ async function fetchFugle(symbol){
 }
 
 async function fetchYahooUS(symbol){
-  // 獲取美股（不加 .TW/.TWO 後綴）
   if (navigator.onLine === false) return null;
   try {
     const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
@@ -837,6 +863,7 @@ async function refreshPrices(){
     });
   }
   fetchGlobalIndicesFromWorker();
+  fetchTSMIndex();
   
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
@@ -1131,7 +1158,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.8 已啟動 (臺積電ADR修復)');
+console.log('股票庫存管理 V4.4.0 已啟動 (臺積電ADR獨立獲取)');
 </script>
 </body>
 </html>
