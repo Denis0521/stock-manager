@@ -287,7 +287,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.6.0 (Google Sheets 國際指數)</div>
+    <div class="v-box">核心版本：V4.6.1 (Google Sheets CSV 國際指數)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -607,8 +607,7 @@ function renderGlobalIndices(indices, isOffline = false) {
 
 async function fetchGoogleIndices() {
   // 從 Google Sheets CSV 獲取國際指數
-  const sheetId = '1hkwQTU0J1djJGUgEbb1qIVxb-kXDOFx65I7v-Xj1Znw';
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&_=${Date.now()}`;
+  const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv&_=${Date.now()}`;
 
   if (navigator.onLine === false) {
     const cachedIdx = localStorage.getItem('tw_cached_indices');
@@ -1041,7 +1040,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.6.0 已啟動 (Google Sheets 國際指數)');
+console.log('股票庫存管理 V4.6.1 已啟動 (Google Sheets CSV 國際指數)');
 </script>
 </body>
 </html>
