@@ -10,6 +10,15 @@
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
+<script>
+// 🚨 終極快取殺手：確保 PWA 絕對讀取最新版 V4.5.0
+const APP_VER = '4.5.0';
+if(localStorage.getItem('tw_app_version') !== APP_VER) {
+  localStorage.setItem('tw_app_version', APP_VER);
+  if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
+  setTimeout(() => location.reload(true), 200);
+}
+</script>
 <style>
 /* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root {
@@ -290,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.4.1 (無痕暴力解鎖版)</div>
+    <div class="v-box">核心版本：V4.5.0 (全域觸控電擊喚醒版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -366,7 +375,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.4.1 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.5.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -487,7 +496,6 @@ let tabRecords = [[], [], [], [], []];
 let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
 let tabCount = 3;
 let fugleKey='',secondFugleKey='';
-let fugleKeyIndex = 0;
 let pollTimer = null;
 let currentInterval = 30000;
 
@@ -587,7 +595,7 @@ function switchTab(tabIndex){
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
   renderTabs(); renderAll(); renderHistory(); 
   
-  // 💡 終極大絕招：切換分頁時執行無痕強制刷新
+  // 💡 聽你的！每次翻分頁，自動在背景做一次無痕強制解鎖與刷新
   forceRefresh(); 
 }
 
@@ -686,7 +694,6 @@ async function fetchGlobalIndicesFromWorker() {
       }
     }
   } catch (e) {
-    console.error("Worker Index Fetch Error:", e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
@@ -1059,8 +1066,6 @@ function saveAndCloseModal(){
   saveKeys(); saveTabCount(); 
   document.getElementById('modalOverlay').classList.remove('show'); 
   showToast('設定已儲存'); 
-  
-  // 💡 點擊按鈕時，也執行無痕強制刷新
   forceRefresh(); 
 }
 
@@ -1115,20 +1120,21 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-// 💡 核心引擎
+// ==========================================
+// 💣 核心引擎與全域觸控電擊喚醒機制 (V4.5.0)
+// ==========================================
 let lastRefreshTime = 0;
+let lastSuccessTime = 0;
 let isRefreshing = false;
 
-// 💣 終極大絕招：強制無痕刷新（模擬按儲存按鈕的底層行為）
+// 完全依照你的建議：在背景偷偷執行重置解鎖與刷新
 function forceRefresh() {
-  // 徹底清除所有可能阻礙更新的變數與鎖定
-  globalKeyRotator = null;
+  globalKeyRotator = null; // 暴力重置金鑰鎖定
   lastRefreshTime = 0;
   isRefreshing = false;
-  consecutiveErrors = 0; // 解除 API 連續錯誤鎖定
+  consecutiveErrors = 0;
   apiPauseUntil = 0;
-  
-  refresh(); // 暴力啟動更新
+  refresh();
 }
 
 async function refresh() {
@@ -1138,37 +1144,48 @@ async function refresh() {
   
   isRefreshing = true;
   lastRefreshTime = now;
-  try { await refreshPrices(); } 
+  try { 
+    await refreshPrices(); 
+    lastSuccessTime = Date.now(); // 記錄最後成功抓取報價的時間
+  } 
   catch(e) { console.error('Refresh Error:', e); } 
   finally { isRefreshing = false; }
 }
 
+// 💡 終極大絕招：全域觸控電擊 (Global Touch Defibrillator)
+// 只要你滑動螢幕、點擊分頁、或觸碰任何地方，只要超過 15 秒沒更新，系統就偷偷在背景「電擊心臟」強迫更新
+function handleTouchWakeup() {
+  const now = Date.now();
+  if (now - lastSuccessTime > 15000 && !isRefreshing) {
+    forceRefresh();
+  }
+}
+document.addEventListener('touchstart', handleTouchWakeup, { passive: true });
+document.addEventListener('click', handleTouchWakeup, { passive: true });
+
+
 // 初始化載入
 loadState(); renderAll(); renderHistory();
 
-// 💡 1. 開機時，執行無痕強制刷新
+// 1. 開機時強制無痕刷新
 setTimeout(forceRefresh, 500);  
 
 pollTimer = setInterval(refresh, currentInterval);
 
-// 💡 2. 手機切換回前景時，執行無痕強制刷新
+// 2. 切換回畫面時強制無痕刷新
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    forceRefresh();
-  }
+  if (document.visibilityState === 'visible') { forceRefresh(); }
 });
 
-// 監聽鍵盤輸入
+// 監聽鍵盤輸入與彈窗關閉
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
-
-// 點擊背景關閉彈窗
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.4.1 已啟動 (加入強制無痕解鎖機制)');
+console.log('股票庫存管理 V4.5.0 已啟動 (加入全域觸控電擊解鎖版)');
 </script>
 </body>
 </html>

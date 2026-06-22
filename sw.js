@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.4.1'; // ⚠️ 版本號升級至 4.4.1
+const CACHE_NAME = 'stock-portfolio-v4.5.0'; // ⚠️ 版本升級至 4.5.0
 const urlsToCache = [
   './',
   './index.html',
@@ -9,11 +9,7 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache v4.4.1');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
@@ -45,10 +41,9 @@ self.addEventListener('fetch', event => {
     return;
   }
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) return response;
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      if (response) return response;
+      return fetch(event.request);
+    })
   );
 });
