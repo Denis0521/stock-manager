@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.6 (新增臺積電ADR)</div>
+    <div class="v-box">核心版本：V4.3.7 (臺積電ADR修復)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -660,6 +660,8 @@ async function fetchGlobalIndicesFromWorker() {
     return;
   }
 
+  let parsedIndices = [];
+
   try {
     const workerSymbols = activeForeignIndices.join(',');
     const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
@@ -669,28 +671,46 @@ async function fetchGlobalIndicesFromWorker() {
     if (response.ok) {
       const data = await response.json();
       if (data.indices && data.indices.length > 0) {
-        const parsedIndices = data.indices.map(item => {
+        parsedIndices = data.indices.map(item => {
           const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
           const changeAmt = item.change ?? item.regularMarketChange ?? 0;
           const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
           const name = item.name || item.symbol;
           return { symbol: item.symbol, name, price, pct, changeAmt };
         });
-        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-        cachedGlobalIndices = parsedIndices;
-        trackApiUsage('Yahoo');
-        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-        renderGlobalIndices(cachedGlobalIndices, false);
       }
     }
   } catch (e) {
     console.error("Worker Index Fetch Error:", e);
+  }
+
+  // 🆕 如果 Worker 沒有返回 TSM，單獨從 Yahoo Finance 獲取
+  const hasTSM = parsedIndices.some(i => i.symbol === 'TSM');
+  if (!hasTSM) {
+    const tsmData = await fetchYahooUS('TSM');
+    if (tsmData) {
+      parsedIndices.push({
+        symbol: 'TSM',
+        name: '臺積電ADR',
+        price: tsmData.price,
+        pct: tsmData.changePercent,
+        changeAmt: tsmData.change
+      });
+    }
+  }
+
+  if (parsedIndices.length > 0) {
+    parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+    cachedGlobalIndices = parsedIndices;
+    trackApiUsage('Yahoo');
+    try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+    renderGlobalIndices(cachedGlobalIndices, false);
+  } else {
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
 }
 
-// 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -1139,7 +1159,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.6 已啟動 (新增臺積電ADR)');
+console.log('股票庫存管理 V4.3.7 已啟動 (臺積電ADR修復)');
 </script>
 </body>
 </html>
