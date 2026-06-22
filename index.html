@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.7 (臺積電ADR修復)</div>
+    <div class="v-box">核心版本：V4.3.8 (臺積電ADR修復)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -391,20 +391,6 @@ function getKeyRotator() {
     globalKeyRotator = new KeyRotator(keys);
   }
   return globalKeyRotator;
-}
-
-
-/* ========================================================= 💾 價格緩存工具（盤後/異常降級用） ========================================================= */
-const lastKnownPrices = {};
-function cacheLastPrice(symbol, price) {
-  if (price != null) lastKnownPrices[symbol] = { price: price, time: Date.now() };
-}
-function getCachedPrice(symbol) {
-  const cached = lastKnownPrices[symbol];
-  if (!cached) return null;
-  // 24 小時內的緩存視為有效
-  if (Date.now() - cached.time < 86400000) return cached.price;
-  return null;
 }
 
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
@@ -725,11 +711,9 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
-        // 💎 升級防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價 ?? 緩存價
-        let p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        if (p == null) p = getCachedPrice(symbol); // 盤後所有字段為 null 時使用緩存
+        // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
+        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
-          cacheLastPrice(symbol, p);
           trackApiUsage('Fugle');
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
@@ -740,6 +724,27 @@ async function fetchFugle(symbol){
   }
   if (hasError) return { error: true };
   return null;
+}
+
+async function fetchYahooUS(symbol){
+  // 獲取美股（不加 .TW/.TWO 後綴）
+  if (navigator.onLine === false) return null;
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetchWithProxy(yahooUrl);
+    if (!resp) return null;
+    const text = await resp.text();
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return null;
+    const cols = lines[lines.length - 1].split(',');
+    if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+    const price = parseFloat(cols[4]);
+    const open = parseFloat(cols[1]);
+    const chg = +(price - open).toFixed(2);
+    const pct = +((chg / open) * 100).toFixed(2);
+    trackApiUsage('Yahoo');
+    return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+  } catch(e) { return null; }
 }
 
 async function fetchYahoo(symbol){
@@ -768,29 +773,8 @@ async function fetchYahoo(symbol){
 }
 
 // 🛡️ 升級加權指數防呆鏈
-async function fetchYahooIndex(){
-  // 透過 Yahoo Finance 獲取台灣加權指數 (^TWII)
-  try {
-    const url = 'https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=' + (Math.floor(Date.now()/1000)-259200) + '&period2=' + (Math.floor(Date.now()/1000)) + '&interval=1d&events=history';
-    const resp = await fetchWithProxy(url);
-    if (!resp) return null;
-    const text = await resp.text();
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) return null;
-    const cols = lines[lines.length - 1].split(',');
-    if (cols.length < 6 || cols[4] === 'null') return null;
-    const price = parseFloat(cols[4]);
-    const prevClose = parseFloat(cols[cols.length - 2].split(',')[4]) || price;
-    const chg = price - prevClose;
-    const pct = prevClose ? (chg / prevClose) * 100 : 0;
-    trackApiUsage('Yahoo');
-    return {price, change: +chg.toFixed(2), changePercent: +pct.toFixed(2), source: 'Yahoo'};
-  } catch(e) { return null; }
-}
-
 async function fetchWeightedIndex(){
   if (navigator.onLine === false) return null;
-  // 優先嘗試 Fugle
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -801,10 +785,8 @@ async function fetchWeightedIndex(){
         });
         if (resp.ok) {
           const d = await resp.json();
-          let p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-          if (p == null) p = getCachedPrice('IX0001');
+          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
           if (p != null) {
-            cacheLastPrice('IX0001', p);
             trackApiUsage('Fugle');
             return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
           }
@@ -812,15 +794,6 @@ async function fetchWeightedIndex(){
       } catch(e) {}
     }
   }
-  // 🆕 Fugle 失敗時，fallback 到 Yahoo Finance
-  const yahooResult = await fetchYahooIndex();
-  if (yahooResult) {
-    cacheLastPrice('IX0001', yahooResult.price);
-    return yahooResult;
-  }
-  // 最後嘗試緩存
-  const cached = getCachedPrice('IX0001');
-  if (cached) return {price: cached, change: 0, changePercent: 0, source: 'Cache'};
   return null;
 }
 
@@ -884,7 +857,6 @@ async function refreshPrices(){
         if (r) {
           currentStocks.filter(s => s.symbol === sym).forEach(s => {
             s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-            cacheLastPrice(s.symbol, r.price); // 🆕 緩存成功價格供盤後使用
             const now = new Date();
             s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
             renderRow(s);
@@ -1159,7 +1131,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.7 已啟動 (臺積電ADR修復)');
+console.log('股票庫存管理 V4.3.8 已啟動 (臺積電ADR修復)');
 </script>
 </body>
 </html>
