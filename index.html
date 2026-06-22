@@ -287,7 +287,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.6.1 (Google Sheets CSV 國際指數)</div>
+    <div class="v-box">核心版本：V4.6.2 (Google Sheets 調試版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -616,23 +616,30 @@ async function fetchGoogleIndices() {
   }
 
   try {
+    console.log('[Google CSV] Fetching:', csvUrl);
     const resp = await fetchWithProxy(csvUrl);
-    if (!resp) return;
+    if (!resp) { console.log('[Google CSV] Proxy returned null'); return; }
+
     const text = await resp.text();
+    console.log('[Google CSV] Response length:', text.length);
+    console.log('[Google CSV] First 200 chars:', text.substring(0, 200));
+
     const lines = text.trim().split('\n');
-    if (lines.length < 2) return;
+    console.log('[Google CSV] Lines count:', lines.length);
+    if (lines.length < 2) { console.log('[Google CSV] Not enough lines'); return; }
 
     const parsedIndices = [];
     // 解析 CSV：假設格式為 symbol,name,price,change,changePercent
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',');
-      if (cols.length < 5) continue;
+      if (cols.length < 5) { console.log('[Google CSV] Skipping line', i, '- not enough columns:', cols); continue; }
       const symbol = cols[0].trim().replace(/"/g, '');
       const name = cols[1].trim().replace(/"/g, '');
       const price = parseFloat(cols[2]);
       const changeAmt = parseFloat(cols[3]);
       const pct = parseFloat(cols[4]);
-      if (isNaN(price) || isNaN(pct)) continue;
+      console.log('[Google CSV] Parsing:', symbol, 'price=', price, 'pct=', pct);
+      if (isNaN(price) || isNaN(pct)) { console.log('[Google CSV] Invalid number for', symbol); continue; }
 
       const matched = AVAILABLE_INDICES.find(idx => idx.symbol === symbol);
       parsedIndices.push({
@@ -644,13 +651,16 @@ async function fetchGoogleIndices() {
       });
     }
 
+    console.log('[Google CSV] Parsed indices:', parsedIndices.length);
     if (parsedIndices.length > 0) {
       cachedGlobalIndices = parsedIndices;
       try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
       renderGlobalIndices(cachedGlobalIndices, false);
+    } else {
+      console.log('[Google CSV] No valid indices parsed');
     }
   } catch (e) {
-    console.error('Google CSV fetch error:', e);
+    console.error('[Google CSV] Error:', e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
@@ -1040,7 +1050,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.6.1 已啟動 (Google Sheets CSV 國際指數)');
+console.log('股票庫存管理 V4.6.2 已啟動 (Google Sheets 調試版)');
 </script>
 </body>
 </html>

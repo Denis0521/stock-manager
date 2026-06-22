@@ -1,4 +1,4 @@
-/* ========================================================= 🛡️ Service Worker V4.6.1 ========================================================= */
+/* ========================================================= 🛡️ Service Worker V4.6.2 ========================================================= */
 
 const STATIC_CACHE = 'stock-static-v4';
 const DYNAMIC_CACHE = 'stock-dynamic-v4';
@@ -28,7 +28,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating V4.6.1...');
+  console.log('[SW] Activating V4.6.2...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
