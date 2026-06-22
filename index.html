@@ -675,9 +675,7 @@ async function fetchGlobalIndicesFromWorker() {
   }
 }
 
-// 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
 async function fetchFugle(symbol){
-  if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   let hasError = false;
@@ -690,7 +688,6 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
-        // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
           trackApiUsage('Fugle');
@@ -706,7 +703,6 @@ async function fetchFugle(symbol){
 }
 
 async function fetchYahoo(symbol){
-  if (navigator.onLine === false) return null;
   const tryFetch = async (suffix) => {
     try {
       const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
@@ -730,9 +726,7 @@ async function fetchYahoo(symbol){
   return res;
 }
 
-// 🛡️ 升級加權指數防呆鏈
 async function fetchWeightedIndex(){
-  if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -808,17 +802,22 @@ async function refreshPrices(){
       if (!r) r = await fetchYahoo(sym);
       return { sym, r };
     });
+    
+    // 💡 修正 1：掃描所有分頁 (0~4)，同步更新所有出現過該代號的持股報價
     const results = await Promise.allSettled(promises);
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
         const { sym, r } = result.value;
         if (r) {
-          currentStocks.filter(s => s.symbol === sym).forEach(s => {
-            s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-            const now = new Date();
-            s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-            renderRow(s);
-          });
+          const now = new Date();
+          const uTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+          for (let idx = 0; idx < 5; idx++) {
+            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
+              s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
+              s.updateTime = uTime;
+              if (idx === currentTab) renderRow(s);
+            });
+          }
         }
       }
     });
@@ -1076,11 +1075,28 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-async function refresh(){await refreshPrices()}
+// 💡 修正 2：加入執行鎖定機制與可見度變化偵測
+let isRefreshing = false;
+async function refresh() {
+  if (isRefreshing) return;
+  isRefreshing = true;
+  try {
+    await refreshPrices();
+  } finally {
+    isRefreshing = false;
+  }
+}
 
-loadState();renderAll();renderHistory();
-setTimeout(refresh,300);
-pollTimer=setInterval(refresh, currentInterval);
+loadState(); renderAll(); renderHistory();
+setTimeout(refresh, 300);
+pollTimer = setInterval(refresh, currentInterval);
+
+// 💡 手機切換回前景時，自動強迫刷新
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    refresh();
+  }
+});
 
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
@@ -1089,7 +1105,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.4 已啟動 (最終整合版)');
+console.log('股票庫存管理 V4.3.4 已啟動 (包含跨頁同步與喚醒修正版)');
 </script>
 </body>
 </html>
