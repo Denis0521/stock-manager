@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.4.0 (防卡死極速啟動版)</div>
+    <div class="v-box">核心版本：V4.4.1 (無痕暴力解鎖版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -366,7 +366,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.4.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.4.1 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -516,11 +516,9 @@ function loadState(){
 
     const t=localStorage.getItem(TK); applyThemeText(t);
     
-    // 💡 讀取：國際指數快取
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
     
-    // 💡 讀取：台灣加權指數快取 (避免一打開就變成 --- 和 Loading...)
     const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
     if (cachedTwiiStr) {
       const res = JSON.parse(cachedTwiiStr);
@@ -587,7 +585,10 @@ function toggleTheme(){
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  renderTabs(); renderAll(); renderHistory(); refreshPrices();
+  renderTabs(); renderAll(); renderHistory(); 
+  
+  // 💡 終極大絕招：切換分頁時執行無痕強制刷新
+  forceRefresh(); 
 }
 
 function renameTab(tabIndex) {
@@ -742,9 +743,7 @@ async function fetchYahoo(symbol){
   return res;
 }
 
-// 🛡️ 升級加權指數防呆鏈：加入 Yahoo 備援機制
 async function fetchWeightedIndex(){
-  // 1. 先嘗試主要的 Fugle API
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -765,7 +764,6 @@ async function fetchWeightedIndex(){
     }
   }
   
-  // 2. 💡 備援啟動：如果 Fugle 失敗或未設定 Key，自動切換至 Yahoo 抓取台灣加權指數 (^TWII)
   try {
     const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
     const resp = await fetchWithProxy(yahooUrl);
@@ -823,7 +821,6 @@ async function refreshPrices(){
         idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
         idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
         idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
-        // 💡 存入：將最新報價存入本地快取
         try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
       }
     });
@@ -991,7 +988,7 @@ function addStock(){
   currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym);refreshPrices();
+  showToast('已新增 '+sym); forceRefresh();
 }
 
 function deleteStock(id){
@@ -1025,7 +1022,7 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
   s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refreshPrices();
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
 }
 
 function saveDailyPnl(){
@@ -1059,14 +1056,12 @@ function openModal(){
 function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
-  saveKeys(); saveTabCount(); globalKeyRotator = null; 
+  saveKeys(); saveTabCount(); 
   document.getElementById('modalOverlay').classList.remove('show'); 
   showToast('設定已儲存'); 
   
-  // 💡 強制解除所有鎖定並立刻更新
-  lastRefreshTime = 0; 
-  isRefreshing = false; 
-  refresh(); 
+  // 💡 點擊按鈕時，也執行無痕強制刷新
+  forceRefresh(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1120,46 +1115,46 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-// 💡 升級版防卡死與智慧刷新引擎
+// 💡 核心引擎
 let lastRefreshTime = 0;
 let isRefreshing = false;
 
+// 💣 終極大絕招：強制無痕刷新（模擬按儲存按鈕的底層行為）
+function forceRefresh() {
+  // 徹底清除所有可能阻礙更新的變數與鎖定
+  globalKeyRotator = null;
+  lastRefreshTime = 0;
+  isRefreshing = false;
+  consecutiveErrors = 0; // 解除 API 連續錯誤鎖定
+  apiPauseUntil = 0;
+  
+  refresh(); // 暴力啟動更新
+}
+
 async function refresh() {
   const now = Date.now();
-  
-  // 【安全鎖 1】如果更新卡住超過 8 秒，強制把鎖砸爛解開，避免永久當機
-  if (isRefreshing && now - lastRefreshTime > 8000) {
-    isRefreshing = false; 
-  }
-  
-  // 【安全鎖 2】防連點機制，2 秒內不允許重複觸發
+  if (isRefreshing && now - lastRefreshTime > 8000) { isRefreshing = false; }
   if (isRefreshing || now - lastRefreshTime < 2000) return;
   
   isRefreshing = true;
   lastRefreshTime = now;
-  
-  try {
-    await refreshPrices();
-  } catch(e) {
-    console.error('Refresh Error:', e);
-  } finally {
-    isRefreshing = false;
-  }
+  try { await refreshPrices(); } 
+  catch(e) { console.error('Refresh Error:', e); } 
+  finally { isRefreshing = false; }
 }
 
 // 初始化載入
 loadState(); renderAll(); renderHistory();
 
-// 💡 【雙重啟動機制】解決開啟 APP 時網路還沒睡醒的問題
-setTimeout(refresh, 800);  // 給手機 0.8 秒連上網路後抓第一次
-setTimeout(refresh, 3500); // 買雙重保險：3.5 秒後再補抓一次，確保報價絕對會出來
+// 💡 1. 開機時，執行無痕強制刷新
+setTimeout(forceRefresh, 500);  
 
 pollTimer = setInterval(refresh, currentInterval);
 
-// 手機切換回前景時，自動強迫刷新
+// 💡 2. 手機切換回前景時，執行無痕強制刷新
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    refresh();
+    forceRefresh();
   }
 });
 
@@ -1173,7 +1168,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.4.0 已啟動 (包含開機防卡死與雙重喚醒修正版)');
+console.log('股票庫存管理 V4.4.1 已啟動 (加入強制無痕解鎖機制)');
 </script>
 </body>
 </html>
