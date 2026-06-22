@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.4.0 (臺積電ADR獨立獲取)</div>
+    <div class="v-box">核心版本：V4.5.0 (Yahoo Chart API 重構)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -639,89 +639,36 @@ function renderGlobalIndices(indices, isOffline = false) {
 }
 
 async function fetchGlobalIndicesFromWorker() {
-  if (!cfWorkerUrl || cfWorkerUrl === '') return;
   if (navigator.onLine === false) {
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
     return;
   }
 
-  try {
-    const workerSymbols = activeForeignIndices.join(',');
-    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
-      signal: AbortSignal.timeout(API_TIMEOUT),
-      headers: { 'Accept': 'application/json' }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.indices && data.indices.length > 0) {
-        const parsedIndices = data.indices.map(item => {
-          const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
-          const changeAmt = item.change ?? item.regularMarketChange ?? 0;
-          const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
-          const name = item.name || item.symbol;
-          return { symbol: item.symbol, name, price, pct, changeAmt };
-        });
-        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-        cachedGlobalIndices = parsedIndices;
-        trackApiUsage('Yahoo');
-        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-        renderGlobalIndices(cachedGlobalIndices, false);
-      }
-    }
-  } catch (e) {
-    console.error("Worker Index Fetch Error:", e);
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if(cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
-  }
-}
+  const parsedIndices = [];
 
-async function fetchTSMIndex() {
-  const tsmData = await fetchYahooUS('TSM');
-  if (!tsmData) { console.log('[TSM] fetchYahooUS returned null'); return; }
-
-  const container = document.getElementById('idxScrollContainer');
-  if (!container) { console.log('[TSM] container not found'); return; }
-
-  let existingCard = null;
-  const cards = container.querySelectorAll('.idx-card-box');
-  for (let i = 0; i < cards.length; i++) {
-    const nameEl = cards[i].querySelector('.idx-box-name');
-    if (nameEl && nameEl.textContent.includes('臺積電ADR')) {
-      existingCard = cards[i];
-      break;
+  // 逐個獲取國際指數（使用 Yahoo Finance v8 chart API）
+  for (const idx of AVAILABLE_INDICES) {
+    const data = await fetchYahooChart(idx.symbol);
+    if (data) {
+      parsedIndices.push({
+        symbol: idx.symbol,
+        name: idx.name,
+        price: data.price,
+        pct: data.changePercent,
+        changeAmt: data.change
+      });
     }
   }
 
-  const sign = tsmData.changePercent >= 0 ? '+' : '';
-  const cls = tsmData.changePercent >= 0 ? 'up' : 'down';
-  const cardHTML = `<div class="idx-box-name">臺積電ADR</div>
-    <div class="idx-box-price">${tsmData.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
-    <div class="idx-box-change-row ${cls}">
-      <span>${sign}${tsmData.change.toFixed(2)}</span>
-      <span>(${sign}${tsmData.changePercent.toFixed(2)}%)</span>
-    </div>
-    <div class="idx-box-src">via Yahoo</div>`;
-
-  if (existingCard) {
-    existingCard.innerHTML = cardHTML;
+  if (parsedIndices.length > 0) {
+    cachedGlobalIndices = parsedIndices;
+    try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+    renderGlobalIndices(cachedGlobalIndices, false);
   } else {
-    const newCard = document.createElement('div');
-    newCard.className = 'idx-card-box';
-    newCard.innerHTML = cardHTML;
-
-    let inserted = false;
-    for (let i = 0; i < cards.length; i++) {
-      const nameEl = cards[i].querySelector('.idx-box-name');
-      if (nameEl && nameEl.textContent.includes('費城半導體')) {
-        cards[i].insertAdjacentElement('afterend', newCard);
-        inserted = true;
-        break;
-      }
-    }
-    if (!inserted) container.appendChild(newCard);
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
-  console.log('[TSM] Card updated/inserted, price:', tsmData.price);
 }
 
 async function fetchFugle(symbol){
@@ -753,24 +700,34 @@ async function fetchFugle(symbol){
   return null;
 }
 
-async function fetchYahooUS(symbol){
+async function fetchYahooChart(symbol){
+  // 使用 Yahoo Finance v8 chart API (JSON格式，更稳定)
   if (navigator.onLine === false) return null;
   try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetchWithProxy(yahooUrl);
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+    const resp = await fetchWithProxy(url);
     if (!resp) return null;
-    const text = await resp.text();
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) return null;
-    const cols = lines[lines.length - 1].split(',');
-    if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-    const price = parseFloat(cols[4]);
-    const open = parseFloat(cols[1]);
-    const chg = +(price - open).toFixed(2);
-    const pct = +((chg / open) * 100).toFixed(2);
+    const data = await resp.json();
+    if (!data.chart || !data.chart.result || data.chart.result.length === 0) return null;
+
+    const result = data.chart.result[0];
+    const meta = result.meta;
+    const timestamps = result.timestamp;
+    const quotes = result.indicators.quote[0];
+
+    // 找到最新有效收盤價
+    let lastIdx = timestamps.length - 1;
+    while (lastIdx >= 0 && quotes.close[lastIdx] === null) lastIdx--;
+    if (lastIdx < 0) return null;
+
+    const price = quotes.close[lastIdx];
+    const prevClose = meta.previousClose || meta.chartPreviousClose || price;
+    const chg = price - prevClose;
+    const pct = prevClose ? (chg / prevClose) * 100 : 0;
+
     trackApiUsage('Yahoo');
-    return {price, change: chg, changePercent: pct, source: 'Yahoo'};
-  } catch(e) { return null; }
+    return {price, change: +chg.toFixed(2), changePercent: +pct.toFixed(2), source: 'Yahoo'};
+  } catch(e) { console.error('YahooChart error:', e); return null; }
 }
 
 async function fetchYahoo(symbol){
@@ -863,7 +820,6 @@ async function refreshPrices(){
     });
   }
   fetchGlobalIndicesFromWorker();
-  fetchTSMIndex();
   
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
@@ -1158,7 +1114,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.4.0 已啟動 (臺積電ADR獨立獲取)');
+console.log('股票庫存管理 V4.5.0 已啟動 (Yahoo Chart API 重構)');
 </script>
 </body>
 </html>
