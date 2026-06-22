@@ -340,8 +340,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>五、補充注意事項與日常維護</h3>
       <ul>
         <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
+        <li><strong>強烈建議加入主畫面：</strong>為了避免在通訊軟體內建瀏覽器或無痕模式中流失庫存，請將本網頁「加入主畫面」當作獨立 APP 使用。</li>
         <li><strong>定期匯出備份：</strong>當瀏覽器清除快取（或手機重置）時資料可能會遺失。建議每週或在有重大庫存變更後，至進階設定中點擊「📥 匯出備份」下載 json 檔案至電腦或雲端硬碟。</li>
-        <li><strong>智慧降頻省電：</strong>當系統偵測到全球市場皆處於休市時段（如台灣半夜且週末），輪詢計時器會自動放慢至 <strong>60 秒</strong>，以節省您的手機電力與流量。</li>
       </ul>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
@@ -515,8 +515,24 @@ function loadState(){
     if(currentTab >= tabCount) currentTab = 0;
 
     const t=localStorage.getItem(TK); applyThemeText(t);
+    
+    // 💡 讀取：國際指數快取
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
+    
+    // 💡 讀取：台灣加權指數快取 (避免一打開就變成 --- 和 Loading...)
+    const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
+    if (cachedTwiiStr) {
+      const res = JSON.parse(cachedTwiiStr);
+      const idxEl = document.getElementById('idxPrice');
+      const idxChgEl = document.getElementById('idxChange');
+      const idxPctEl = document.getElementById('idxPct');
+      const idxSrcEl = document.getElementById('idxSource');
+      if(idxEl) idxEl.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+      if(idxChgEl) { idxChgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className = (res.change>=0?'up':'down'); }
+      if(idxPctEl) { idxPctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className = (res.changePercent>=0?'up':'down'); }
+      if(idxSrcEl) { idxSrcEl.textContent = 'via ' + res.source + ' (快取)'; }
+    }
   }catch(e){console.error(e);}
 
   document.getElementById('fugleKeyInput').value=fugleKey;
@@ -726,7 +742,9 @@ async function fetchYahoo(symbol){
   return res;
 }
 
+// 🛡️ 升級加權指數防呆鏈：加入 Yahoo 備援機制
 async function fetchWeightedIndex(){
+  // 1. 先嘗試主要的 Fugle API
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -746,6 +764,28 @@ async function fetchWeightedIndex(){
       } catch(e) {}
     }
   }
+  
+  // 2. 💡 備援啟動：如果 Fugle 失敗或未設定 Key，自動切換至 Yahoo 抓取台灣加權指數 (^TWII)
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetchWithProxy(yahooUrl);
+    if (resp) {
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if (lines.length >= 2) {
+        const cols = lines[lines.length - 1].split(',');
+        if (cols.length >= 6 && cols[4] !== 'null' && cols[1] !== 'null') {
+          const price = parseFloat(cols[4]);
+          const open = parseFloat(cols[1]);
+          const chg = +(price - open).toFixed(2);
+          const pct = +((chg / open) * 100).toFixed(2);
+          trackApiUsage('Yahoo');
+          return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+        }
+      }
+    }
+  } catch(e) {}
+
   return null;
 }
 
@@ -785,6 +825,8 @@ async function refreshPrices(){
         idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
         idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
         idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+        // 💡 存入：將最新報價存入本地快取
+        try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
       }
     });
   }
@@ -803,7 +845,6 @@ async function refreshPrices(){
       return { sym, r };
     });
     
-    // 💡 修正 1：掃描所有分頁 (0~4)，同步更新所有出現過該代號的持股報價
     const results = await Promise.allSettled(promises);
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
@@ -1075,7 +1116,6 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-// 💡 修正 2：加入執行鎖定機制與可見度變化偵測
 let isRefreshing = false;
 async function refresh() {
   if (isRefreshing) return;
@@ -1091,7 +1131,6 @@ loadState(); renderAll(); renderHistory();
 setTimeout(refresh, 300);
 pollTimer = setInterval(refresh, currentInterval);
 
-// 💡 手機切換回前景時，自動強迫刷新
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     refresh();
