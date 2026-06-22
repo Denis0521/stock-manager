@@ -277,7 +277,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-
+      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
+        <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
+        <div id="apiStatsBox"></div>
+      </div>
     </div>
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
@@ -287,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.6.2 (Google Sheets 調試版)</div>
+    <div class="v-box">核心版本：V4.3.4 (最終整合版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -312,7 +315,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </ul>
 
       <h3>三、Fugle Key 報價更新原則與建議</h3>
-      <p>台灣個股與加權指數透過 Fugle API 獲取，系統會根據市場狀態<strong>自動進行智慧調頻</strong>：</p>
+      <p>為避免觸發 Fugle API 的每分鐘速率限制，系統會根據您的金鑰數量與市場狀態<strong>自動進行智慧分流與調頻</strong>：</p>
       <ul>
         <li><strong>僅填一組 API Key：</strong>
           <ul>
@@ -328,10 +331,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         </li>
       </ul>
 
-      <h3>四、國際指數報價原則</h3>
+      <h3>四、Yahoo Finance 國外指數報價原則</h3>
       <ul>
-        <li><strong>Google Sheets 資料源：</strong>全球國際指數透過 Google Sheets CSV 公開資料獲取，由用戶自行維護更新，確保數據即時可靠。</li>
-        <li><strong>全時段不化白（—）：</strong>系統內建強大的防呆鏈，當 Google Sheets 暫時無法連線時，會自動使用上次成功緩存的數據，保證畫面不壞死。</li>
+        <li><strong>多層容錯防呆：</strong>全球國際指數直接透過高效能的邊緣代理網道（Cloudflare Worker）介接 Yahoo 數據。</li>
+        <li><strong>全時段不化白（—）：</strong>新版程式碼內建強大的防呆鏈，就算國際市場遇到盤後或清晨資料清洗，系統也會自動抓取昨收價或常規市場參考價補位，保證畫面不壞死。</li>
       </ul>
 
       <h3>五、補充注意事項與日常維護</h3>
@@ -430,6 +433,33 @@ function recordApiSuccess() {
   }
 }
 
+function trackApiUsage(source) {
+  const today = new Date().toISOString().split('T')[0];
+  const key = `api_usage_${today}_${source}`;
+  const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
+  try { localStorage.setItem(key, String(count)); } catch(e){}
+  return count;
+}
+
+function getApiUsageStats() {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
+    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
+  };
+}
+
+function renderApiStats() {
+  const stats = getApiUsageStats();
+  const el = document.getElementById('apiStatsBox');
+  if (el) {
+    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
+    </div>`;
+  }
+}
+
 function toggleKeyVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
@@ -440,6 +470,7 @@ function toggleKeyVisibility(inputId, btnId) {
   }
 }
 
+let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const AVAILABLE_INDICES = [
   { symbol: '^DJI', name: '道瓊工業指數' },
   { symbol: '^IXIC', name: '那斯達克指數' },
@@ -491,8 +522,9 @@ function loadState(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus();
+  updateKeyStatus(); 
   renderTabs();
+  renderApiStats();
 }
 
 function applyThemeText(t){
@@ -577,7 +609,7 @@ function updateKeyStatus(){
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
-
+  renderApiStats();
 }
 
 function renderGlobalIndices(indices, isOffline = false) {
@@ -600,15 +632,13 @@ function renderGlobalIndices(indices, isOffline = false) {
         <span>${sign}${item.changeAmt.toFixed(2)}</span>
         <span>(${sign}${item.pct.toFixed(2)}%)</span>
       </div>
-      <div class="idx-box-src">via Google ${isOffline ? 'Cache' : ''}</div>`;
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
     container.appendChild(card);
   });
 }
 
-async function fetchGoogleIndices() {
-  // 從 Google Sheets CSV 獲取國際指數
-  const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv&_=${Date.now()}`;
-
+async function fetchGlobalIndicesFromWorker() {
+  if (!cfWorkerUrl || cfWorkerUrl === '') return;
   if (navigator.onLine === false) {
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
@@ -616,56 +646,36 @@ async function fetchGoogleIndices() {
   }
 
   try {
-    console.log('[Google CSV] Fetching:', csvUrl);
-    const resp = await fetchWithProxy(csvUrl);
-    if (!resp) { console.log('[Google CSV] Proxy returned null'); return; }
-
-    const text = await resp.text();
-    console.log('[Google CSV] Response length:', text.length);
-    console.log('[Google CSV] First 200 chars:', text.substring(0, 200));
-
-    const lines = text.trim().split('\n');
-    console.log('[Google CSV] Lines count:', lines.length);
-    if (lines.length < 2) { console.log('[Google CSV] Not enough lines'); return; }
-
-    const parsedIndices = [];
-    // 解析 CSV：假設格式為 symbol,name,price,change,changePercent
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',');
-      if (cols.length < 5) { console.log('[Google CSV] Skipping line', i, '- not enough columns:', cols); continue; }
-      const symbol = cols[0].trim().replace(/"/g, '');
-      const name = cols[1].trim().replace(/"/g, '');
-      const price = parseFloat(cols[2]);
-      const changeAmt = parseFloat(cols[3]);
-      const pct = parseFloat(cols[4]);
-      console.log('[Google CSV] Parsing:', symbol, 'price=', price, 'pct=', pct);
-      if (isNaN(price) || isNaN(pct)) { console.log('[Google CSV] Invalid number for', symbol); continue; }
-
-      const matched = AVAILABLE_INDICES.find(idx => idx.symbol === symbol);
-      parsedIndices.push({
-        symbol,
-        name: matched ? matched.name : name,
-        price,
-        pct,
-        changeAmt
-      });
-    }
-
-    console.log('[Google CSV] Parsed indices:', parsedIndices.length);
-    if (parsedIndices.length > 0) {
-      cachedGlobalIndices = parsedIndices;
-      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-      renderGlobalIndices(cachedGlobalIndices, false);
-    } else {
-      console.log('[Google CSV] No valid indices parsed');
+    const workerSymbols = activeForeignIndices.join(',');
+    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
+      signal: AbortSignal.timeout(API_TIMEOUT),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.indices && data.indices.length > 0) {
+        const parsedIndices = data.indices.map(item => {
+          const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
+          const changeAmt = item.change ?? item.regularMarketChange ?? 0;
+          const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
+          const name = item.name || item.symbol;
+          return { symbol: item.symbol, name, price, pct, changeAmt };
+        });
+        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+        cachedGlobalIndices = parsedIndices;
+        trackApiUsage('Yahoo');
+        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+        renderGlobalIndices(cachedGlobalIndices, false);
+      }
     }
   } catch (e) {
-    console.error('[Google CSV] Error:', e);
+    console.error("Worker Index Fetch Error:", e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
 }
 
+// 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -683,7 +693,8 @@ async function fetchFugle(symbol){
         // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
-                    return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
+          trackApiUsage('Fugle');
+          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
       } else if (resp.status === 429) {
         hasError = true; continue;
@@ -694,6 +705,32 @@ async function fetchFugle(symbol){
   return null;
 }
 
+async function fetchYahoo(symbol){
+  if (navigator.onLine === false) return null;
+  const tryFetch = async (suffix) => {
+    try {
+      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetchWithProxy(yahooUrl);
+      if (!resp) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return null;
+      const cols = lines[lines.length - 1].split(',');
+      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
+      trackApiUsage('Yahoo');
+      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+    } catch(e) { return null; }
+  };
+  let res = await tryFetch('.TW');
+  if (!res) res = await tryFetch('.TWO');
+  return res;
+}
+
+// 🛡️ 升級加權指數防呆鏈
 async function fetchWeightedIndex(){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -708,7 +745,8 @@ async function fetchWeightedIndex(){
           const d = await resp.json();
           const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
           if (p != null) {
-                        return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
+            trackApiUsage('Fugle');
+            return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
           }
         }
       } catch(e) {}
@@ -756,7 +794,7 @@ async function refreshPrices(){
       }
     });
   }
-  fetchGoogleIndices();
+  fetchGlobalIndicesFromWorker();
   
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
@@ -767,6 +805,7 @@ async function refreshPrices(){
     const promises = batch.map(async (sym) => {
       let r = await fetchFugle(sym);
       if (r && r.error) { apiErrorOccurred = true; r = null; }
+      if (!r) r = await fetchYahoo(sym);
       return { sym, r };
     });
     const results = await Promise.allSettled(promises);
@@ -787,7 +826,7 @@ async function refreshPrices(){
   updateSummary();
   if (apiErrorOccurred) recordApiError(); else recordApiSuccess();
   adjustPollingInterval(apiErrorOccurred);
-
+  renderApiStats();
 }
 
 function adjustPollingInterval(hasError) {
@@ -976,7 +1015,7 @@ function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus(); document.getElementById('modalOverlay').classList.add('show');
+  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
@@ -1050,7 +1089,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.6.2 已啟動 (Google Sheets 調試版)');
+console.log('股票庫存管理 V4.3.4 已啟動 (最終整合版)');
 </script>
 </body>
 </html>
