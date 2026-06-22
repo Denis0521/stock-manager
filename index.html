@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.5 (盤後價格修復版)</div>
+    <div class="v-box">核心版本：V4.3.6 (新增臺積電ADR)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -490,6 +490,7 @@ const AVAILABLE_INDICES = [
   { symbol: '^IXIC', name: '那斯達克指數' },
   { symbol: '^GSPC', name: '標普500指數' },
   { symbol: '^SOX', name: '費城半導體指數' },
+  { symbol: 'TSM', name: '臺積電ADR' },
   { symbol: '^N225', name: '日經225指數' },
   { symbol: '^KS11', name: '韓國綜合指數' }
 ];
@@ -1138,7 +1139,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.5 已啟動 (盤後價格修復版)');
+console.log('股票庫存管理 V4.3.6 已啟動 (新增臺積電ADR)');
 </script>
 </body>
 </html>

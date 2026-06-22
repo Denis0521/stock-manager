@@ -1,6 +1,5 @@
-/* ========================================================= 🛡️ Service Worker V4.3.4 ========================================================= */
+/* ========================================================= 🛡️ Service Worker V4.3.6 ========================================================= */
 
-const CACHE_NAME = 'stock-portfolio-v4';
 const STATIC_CACHE = 'stock-static-v4';
 const DYNAMIC_CACHE = 'stock-dynamic-v4';
 const IMAGE_CACHE = 'stock-images-v4';
@@ -14,7 +13,7 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing V4.3.4...');
+  console.log('[SW] Installing V4.3.6...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => {
@@ -29,7 +28,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating V4.3.4...');
+  console.log('[SW] Activating V4.3.6...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -173,4 +172,4 @@ self.addEventListener('message', (event) => {
   else if (event.data.type === 'CLEAR_CACHE') event.waitUntil(caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))));
 });
 
-console.log('[SW] Service Worker V4.3.4 loaded');
+console.log('[SW] Service Worker V4.3.6 loaded');
