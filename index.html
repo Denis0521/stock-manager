@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.12.2 (極限微調第一欄寬度，緊貼8字簡稱)
-const APP_VER = '4.12.2';
+// 強制刷新快取：升級至 V4.13.3 (新增持股按鈕移至頂部 Header，紅字顯示)
+const APP_VER = '4.13.3';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -47,9 +47,9 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   border-left: 1px solid var(--protrude-l);
 }
 
-.header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); user-select: none; }
-.header .hdr-right { display: flex; gap: 8px; }
+.header { border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
+.header .hdr-right { display: flex; gap: 6px; }
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
@@ -86,7 +86,11 @@ button:active, .tab-btn.active {
   border: none; border-bottom: 1px solid var(--protrude-l); border-right: 1px solid var(--protrude-l);
 }
 .tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.btn-theme, .btn-adv { padding: 8px 14px; font-size: 15px; }
+
+/* 頂部按鈕樣式 */
+.btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 14px; white-space: nowrap; }
+.btn-add-hdr { color: var(--up); font-weight: 800; text-shadow: none; } /* 紅字新增持股 */
+
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
@@ -140,7 +144,7 @@ button:active, .tab-btn.active {
   border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);
 }
 
-#manualOverlay, #editModalOverlay, #foreignIdxOverlay { z-index: 1100; }
+#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
 
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
@@ -185,6 +189,18 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
+/* 🛡️ 防密碼管理員遮罩樣式 */
+.pwd-mask {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
+@media (max-width: 360px) {
+  .header h1 { font-size: 17px; margin-left: 2px; }
+  .btn-theme, .btn-adv, .btn-add-hdr { padding: 6px 8px; font-size: 13px; }
+  .header .hdr-right { gap: 4px; }
+}
+
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
@@ -197,8 +213,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 @media (min-width: 768px) {
   body { font-size: 16px; }
-  .header h1 { font-size: 24px; }
-  .header .btn-theme, .header .btn-adv { font-size: 16px; padding: 10px 16px; }
+  .header h1 { font-size: 24px; margin-left: 10px; }
+  .header .btn-theme, .header .btn-adv, .header .btn-add-hdr { font-size: 16px; padding: 10px 16px; }
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
@@ -235,23 +251,14 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
+    <!-- 新增持股按鈕移至此處 -->
+    <button type="button" class="btn-add-hdr" onclick="openAddModal()">新增持股</button>
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
-<div class="card">
-  <div class="card-title">新增持股</div>
-  <div class="form-row">
-    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
-    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
-    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
-  </div>
-  <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
-    <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
-  </div>
-</div>
+
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
@@ -271,7 +278,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div id="listBody"></div>
   </div>
 </div>
-<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
+<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊上方「新增持股」</div>
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
@@ -297,6 +304,27 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- 🆕 新增的「新增持股」燈箱 -->
+<div class="modal-overlay" id="addModalOverlay">
+  <div class="modal">
+    <h2>新增持股</h2>
+    <label>股票代號</label>
+    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
+    
+    <label>數量</label>
+    <div style="display:flex; gap:10px; margin-bottom: 10px;">
+      <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
+      <select id="unitSelect" style="flex:0 0 80px;"><option value="張">張</option><option value="股">股</option></select>
+    </div>
+    
+    <label>買入均價 (選填計算損益)</label>
+    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 20px;">
+    
+    <button type="button" class="modal-close" onclick="addStock()" style="background:var(--accent); color:#fff; text-shadow:none; margin-top:0;">確認新增</button>
+    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-bottom:10px;">取消</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
@@ -320,13 +348,15 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="new-password" style="flex:1;">
+        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
+        <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="new-password" style="flex:1;">
+        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
+        <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
@@ -346,7 +376,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.12.2 (股票簡稱滿版無縫排版)</div>
+    <div class="v-box">核心版本：V4.13.3 (頂部新增持股按鈕)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -412,17 +442,17 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     
     <label>股票簡稱 (選填)</label>
-    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="nope">
+    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
 
     <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
   </div>
@@ -439,7 +469,7 @@ const STOCK_DICT = {
   '2330': '台積電', '2317': '鴻海', '2454': '聯發科', '2308': '台達電', '2382': '廣達', '2881': '富邦金', '2882': '國泰金'
 };
 
-/* ========================================================= 🔧 API 管理引擎 V4.12.2 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -506,8 +536,13 @@ function renderApiStats() {
 function toggleKeyVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
-  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; } 
-  else { input.type = 'password'; btn.textContent = '👁'; }
+  if (input.classList.contains('pwd-mask')) {
+    input.classList.remove('pwd-mask');
+    btn.textContent = '🙈';
+  } else {
+    input.classList.add('pwd-mask');
+    btn.textContent = '👁';
+  }
 }
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
@@ -1063,6 +1098,14 @@ function toggleSummary(e) {
   else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
 }
 
+function openAddModal() {
+  document.getElementById('addModalOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('symInput').focus(), 100);
+}
+function closeAddModal() {
+  document.getElementById('addModalOverlay').classList.remove('show');
+}
+
 function addStock(){
   let sym=document.getElementById('symInput').value.trim().toUpperCase();
   sym = sym.replace(/[^A-Z0-9]/g, '');
@@ -1081,7 +1124,9 @@ function addStock(){
   currentStocks.push({id,symbol:sym, name: stockName, displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym); forceRefresh();
+  showToast('已新增 '+sym); 
+  closeAddModal();
+  forceRefresh();
 }
 
 function deleteStock(id){
@@ -1325,7 +1370,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.12.2 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.13.3 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1400,6 +1445,9 @@ document.addEventListener('visibilitychange', () => {
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
+
+// 新增的燈箱關閉監聽
+document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
@@ -1413,7 +1461,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.12.2 已啟動');
+console.log('股票庫存管理 V4.13.3 已啟動');
 </script>
 </body>
 </html>
