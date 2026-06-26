@@ -152,16 +152,16 @@ button:active, .tab-btn.active {
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 727px; }
-.list-header, .srow { grid-template-columns: 112px 110px 90px 90px 80px 90px 120px 90px; }
+.list-wrap { min-width: 670px; } /* 縮減最小寬度使欄位能更靠近 */
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } /* 微調欄位寬度讓明細更靠近 */
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* 縮小左右 padding */
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
-.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
+.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
+.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding-left: 10px; }
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
@@ -269,7 +269,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.6fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
   .list-header { font-size: 18px; }
   .srow { font-size: 19px; }
   .srow .sym { font-size: 19px; }
@@ -323,7 +323,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
