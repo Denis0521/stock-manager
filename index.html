@@ -20,9 +20,10 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎（V4.14.0 配色全面升級） ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（加入拼色設計） ========================================================= */
 :root { 
   --bg: #E8ECF1;
+  --bg-card: #FFFFFF; /* 新增白色色塊 */
   --s-light: #FFFFFF;
   --s-dark: #B8C4D0;
   --t-main: #1A2332;
@@ -40,34 +41,78 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech { 
-  --bg: #1E2330; --s-light: #2D3344; --s-dark: #151820; --t-main: #F8FAFC; --t-muted: #94A3B8; 
-  --up: #FF5252; --down: #4ADE80; --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
-  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); --accent: #60A5FA;
-  --border-light: #3D4556; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #1E2330; 
+  --bg-card: #2D3344; /* 新增更淺的顏色色塊 */
+  --s-light: #2D3344; 
+  --s-dark: #151820; 
+  --t-main: #F8FAFC; 
+  --t-muted: #94A3B8; 
+  --up: #FF5252; 
+  --down: #4ADE80; 
+  --engrave-l: rgba(255,255,255,0.12); 
+  --engrave-d: rgba(0,0,0,0.5); 
+  --protrude-l: rgba(255,255,255,0.18); 
+  --protrude-d: rgba(0,0,0,0.35); 
+  --accent: #60A5FA;
+  --border-light: #3D4556; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.blue-light { 
-  --bg: #D0DEE8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; 
-  --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #1E40AF;
-  --border-light: #A8B8C8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #D0DEE8; 
+  --bg-card: #E8F0F8;
+  --s-light: #E8F0F8; 
+  --s-dark: #8CA0B8; 
+  --t-main: #061220; 
+  --t-muted: #3A5A7A; 
+  --up: #DC2626; 
+  --down: #16A34A; 
+  --engrave-l: rgba(255,255,255,0.95); 
+  --engrave-d: rgba(0,0,0,0.16); 
+  --protrude-l: rgba(255,255,255,1); 
+  --protrude-d: rgba(0,0,0,0.08); 
+  --accent: #1E40AF;
+  --border-light: #A8B8C8; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.purple-light { 
-  --bg: #EDE8F4; --s-light: #FAF7FF; --s-dark: #B8A8CC; --t-main: #1E0B3A; --t-muted: #6B5B8E; 
-  --up: #E11D48; --down: #10B981; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #7C3AED;
-  --border-light: #C8B8D8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #EDE8F4; 
+  --bg-card: #FAF7FF;
+  --s-light: #FAF7FF; 
+  --s-dark: #B8A8CC; 
+  --t-main: #1E0B3A; 
+  --t-muted: #6B5B8E; 
+  --up: #E11D48; 
+  --down: #10B981; 
+  --engrave-l: rgba(255,255,255,0.95); 
+  --engrave-d: rgba(0,0,0,0.14); 
+  --protrude-l: rgba(255,255,255,1); 
+  --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #7C3AED;
+  --border-light: #C8B8D8; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.pink { 
-  --bg: #F5E8EC; --s-light: #FFF5F7; --s-dark: #D4A8B8; --t-main: #3A0A2A; --t-muted: #8B5A6B; 
-  --up: #DC2626; --down: #059669; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,0.95); --protrude-d: rgba(0,0,0,0.06); --accent: #DB2777;
-  --border-light: #D8B8C4; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #F5E8EC; 
+  --bg-card: #FFF5F7;
+  --s-light: #FFF5F7; 
+  --s-dark: #D4A8B8; 
+  --t-main: #3A0A2A; 
+  --t-muted: #8B5A6B; 
+  --up: #DC2626; 
+  --down: #059669; 
+  --engrave-l: rgba(255,255,255,0.9); 
+  --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,0.95); 
+  --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #DB2777;
+  --border-light: #D8B8C4; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
@@ -80,9 +125,9 @@ body.pink {
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* 所有新擬態元件加上明顯邊框，強化層次 */
+/* 所有新擬態元件加上明顯邊框，強化層次，並改用色塊顏色 (--bg-card) 達到拼色效果 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
-  background: var(--bg); 
+  background: var(--bg-card); 
   box-shadow: var(--shadow-soft);
   border-radius: 12px; 
   transition: background-color 0.4s ease, box-shadow 0.4s ease;
@@ -109,9 +154,9 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-/* 輸入框：加強內陰影與邊框 */
+/* 輸入框：加強內陰影與邊框，使用色塊顏色 */
 input, select { 
-  flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px; 
+  flex: 1; min-width: 0; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; 
   box-shadow: var(--shadow-inset);
   color: var(--t-main); font-weight: 600; text-align: left; 
   text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); 
@@ -121,9 +166,9 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-/* 按鈕：加強邊框與陰影 */
+/* 按鈕：加強邊框與陰影，使用色塊顏色 */
 button, .tab-btn { 
-  background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; 
+  background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; 
   box-shadow: var(--shadow-soft);
   color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; 
   text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
@@ -158,7 +203,7 @@ button:active, .tab-btn.active {
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 .list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* 縮小左右 padding */
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 8px; }
+.list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding-left: 10px; }
@@ -189,7 +234,7 @@ button:active, .tab-btn.active {
 .modal-overlay.show { display: flex; }
 .modal { 
   position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; 
-  max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg); 
+  max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg-card); 
   box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-strong);
   border: 1px solid var(--border-light);
   margin-top: 20px;
@@ -201,10 +246,10 @@ button:active, .tab-btn.active {
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
 .modal-close { width: 100%; padding: 14px; font-size: 17px; }
 .key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
-.key-status.ok { background: var(--bg); box-shadow: var(--shadow-inset); color: var(--up); border: 1px solid var(--border-light); }
-.key-status.none { background: var(--bg); box-shadow: var(--shadow-inset); color: var(--t-muted); border: 1px solid var(--border-light); }
-.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); box-shadow: var(--shadow-inset); border-radius: 12px; border: 1px solid var(--border-light); }
-.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.key-status.ok { background: var(--bg-card); box-shadow: var(--shadow-inset); color: var(--up); border: 1px solid var(--border-light); }
+.key-status.none { background: var(--bg-card); box-shadow: var(--shadow-inset); color: var(--t-muted); border: 1px solid var(--border-light); }
+.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg-card); box-shadow: var(--shadow-inset); border-radius: 12px; border: 1px solid var(--border-light); }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
 a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .backup-box { padding: 16px; margin: 8px 0 0; }
@@ -226,7 +271,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
 .btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
 .tab-count-wrapper { 
-  flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px; 
+  flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; 
   box-shadow: var(--shadow-inset); padding: 4px 12px;
   border: 1px solid var(--border-light);
 }
@@ -234,7 +279,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; border: none; }
 
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
-.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
+.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
 
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; }
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
@@ -409,7 +454,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
+      <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
           <span>📊 今日 API 使用量</span>
           <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent);">⚙️ 設定國外指數</button>
@@ -1322,7 +1367,7 @@ function renderForeignIdxConfigList() {
 
   AVAILABLE_INDICES.forEach((idx, index) => {
     const row = document.createElement('div');
-    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);";
+    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);";
     
     row.innerHTML = `
       <div style="text-align:left; flex:1; min-width:0; padding-right:8px;">
