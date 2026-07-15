@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.19'; 
+const APP_VER = 'V7.20'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -198,16 +198,16 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 
-/* 🌟 智能伸縮寬度設定 */
-.list-wrap { min-width: 715px; transition: min-width 0.3s ease; }
+/* 🌟 智能伸縮寬度設定 (合併漲跌/幅度後，減少一欄) */
+.list-wrap { min-width: 640px; transition: min-width 0.3s ease; }
 
-/* 🌟 控制收放的 12/8 欄 Grid 配置 */
-/* 預設（收起狀態）： 8 欄配置，總寬度 715px */
-.list-header, .srow { grid-template-columns: 110px 95px 115px 75px 75px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
+/* 🌟 控制收放的 11/7 欄 Grid 配置 */
+/* 預設（收起狀態）： 7 欄配置，總寬度 640px */
+.list-header, .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
 
-/* 展開狀態： 12 欄配置，總寬度延展至 1055px */
-body.show-hist .list-wrap { min-width: 1055px; }
-body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 115px 75px 75px 95px 110px 75px 75px 75px 75px 80px; }
+/* 展開狀態： 11 欄配置，總寬度延展至 980px */
+body.show-hist .list-wrap { min-width: 980px; }
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 75px 75px 75px 75px 80px; }
 
 /* 區間欄位 CSS 定義：收合時完全隱藏 */
 .hist-col { display: none !important; }
@@ -221,7 +221,7 @@ body.show-hist .hist-col { display: flex !important; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 
 /* 總損益相關欄位向右對齊 */
-.list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-end; text-align: right; padding-right: 4px; }
+.list-header > div:nth-child(6), .srow > div:nth-child(6) { align-items: flex-end; text-align: right; padding-right: 4px; }
 
 /* 動作按鈕置中 */
 .list-header > div:last-child { align-items: center; justify-content: center; padding-left: 4px; }
@@ -232,14 +232,17 @@ body.show-hist .hist-col { display: flex !important; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .qty-main { line-height: 1.2; font-size: 17px; font-weight: 800; }
 
-/* 🌟 現價欄位雙行結構樣式 */
+/* 🌟 現價/總計 雙行樣式 */
 .price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
 .srow .price { font-weight: 800; font-size: 17px; }
 .price-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 600; }
-.price-sub.neutral { opacity: 0.6; font-weight: normal; }
 
-.srow .chgp { font-size: 17px; font-weight: 800; }
-.srow .chg, .srow .today-pnl { font-weight: 800; }
+/* 🌟 漲跌/幅度 雙行樣式 */
+.change-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
+.srow .chg { font-weight: 800; font-size: 17px; }
+.change-sub { font-size: 13.6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+.srow .today-pnl { font-weight: 800; }
 .srow .qty-cell, .srow .total { width: 100%; }
 
 .total-main { line-height: 1.2; font-size: 17px; width: 100%; overflow: hidden; text-align: right; font-weight: 800; }
@@ -302,7 +305,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .api-section { margin-bottom: 16px; } 
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
 
-/* 🌟 進階視窗極致瘦身：減少間距以適應單一畫面 */
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 12px 16px 16px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; overflow-y: auto;}
 .btn-close-icon { position: absolute; top: 10px; right: 10px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
@@ -325,14 +327,14 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
   
-  /* 🌟 電腦端 12/8 欄 Grid 配置 */
+  /* 🌟 電腦端 11/7 欄 Grid 配置 */
   .list-wrap { min-width: 100%; }
   
-  /* 預設 8 欄 */
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1fr 1fr 1.3fr 1.4fr 1fr; }
+  /* 預設 7 欄 */
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr; }
   
-  /* 展開 12 欄 */
-  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1fr 1fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
+  /* 展開 11 欄 */
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
@@ -400,7 +402,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價/總計</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div>
+      <div>代號</div><div>庫存/均價</div><div>現價/總計</div><div>漲跌/幅度</div><div>今日損益</div><div>總損益</div>
       <div class="hist-col">5日幅</div><div class="hist-col">20日幅</div><div class="hist-col">60日幅</div><div class="hist-col">120日幅</div>
       <div>動作</div>
     </div>
@@ -551,7 +553,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.19</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.20</div>
     </div>
   </div>
 </div>
@@ -798,12 +800,6 @@ function getStockHtmlInner(s) {
   const p = s.price; 
   const chg = s.change ?? 0;
   
-  let tpStr = '—', tpClass = '';
-  if (s.change != null) { 
-    tpStr = getSign(info.todayPnl) + info.todayPnl.toLocaleString(); 
-    tpClass = getColorCls(info.todayPnl); 
-  }
-  
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
     if (info.hasCost) {
@@ -827,9 +823,17 @@ function getStockHtmlInner(s) {
     </div>`;
   }
 
-  const cgp = s.changePercent != null ? `${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%` : '—';
-  const cgpClass = s.changePercent != null ? getColorCls(s.changePercent) : '';
-  const cgStr = s.change != null ? `${getSign(chg)}${chg.toFixed(2)}` : '—';
+  // 🌟 漲跌/幅度 欄位組合 (漲跌在上，幅度在下)
+  let changeHtml = '—';
+  if (s.change != null && s.changePercent != null) {
+    const cgStr = `${getSign(chg)}${chg.toFixed(2)}`;
+    const cgpStr = `(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)`;
+    changeHtml = `<div class="change-container">
+      <div class="chg ${pClass}">${cgStr}</div>
+      <div class="change-sub ${pClass}">${cgpStr}</div>
+    </div>`;
+  }
+
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
@@ -849,9 +853,8 @@ function getStockHtmlInner(s) {
       <div class="qty-sub" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>
     </div>
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${priceHtml}</div>
-    <div class="chgp ${cgpClass}">${cgp}</div>
-    <div class="chg ${pClass}">${cgStr}</div>
-    <div class="today-pnl ${tpClass}">${tpStr}</div>
+    <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
+    <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
     <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
     <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
