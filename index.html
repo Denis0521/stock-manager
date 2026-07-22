@@ -186,7 +186,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
-/* ========================================================= 📈 指數滑動卡片區調整 (三級結構與排版微調) ========================================================= */
+/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
@@ -209,8 +209,8 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
 
-/* 一級標題 */
-.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
+/* 一級標題：增大至 17px */
+.idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
 
 /* 二級與三級列容器 (數字向右靠) */
 .idx-data-row {
@@ -376,7 +376,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .v-box { font-size: 15px; }
 
   .idx-card-box { min-width: 200px; padding: 8px 14px; }
-  .idx-box-name { font-size: 16px; }
+  .idx-box-name { font-size: 17px; }
   .idx-box-price { font-size: 17px; } 
   .idx-box-change-row { font-size: 15px; }
   .idx-box-vol { font-size: 16px; }
@@ -414,7 +414,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     
-    <!-- 二級：大盤指數與今日成交量 (已移除標題，改用圓括號) -->
+    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
@@ -422,7 +422,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
     
-    <!-- 三級：今日指數 (最新價) 與漲跌幅 -->
+    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -653,7 +653,7 @@ const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
-/* 統一管理 LocalStorage 鍵值與存取方法 */
+/* LocalStorage 統一管理 */
 const LS = {
   KEYS: {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
@@ -670,19 +670,17 @@ const LS = {
 /* ========================================================= 📊 核心狀態 ========================================================= */
 let currentTab = 0, tabCount = 3, showTicker = true, currentInterval = 20000;
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
-let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [];
-let histCache = {}; 
-
+let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
-  next() { if (this.keys.length === 0) return null; return this.keys[this.index++ % this.keys.length]; }
+  next() { return this.keys.length ? this.keys[this.index++ % this.keys.length] : null; }
   get count() { return this.keys.length; }
 }
 let globalKeyRotator = null;
 const getKeyRotator = () => {
-  const keys = [fugleKey, secondFugleKey].filter(k => k);
+  const keys = [fugleKey, secondFugleKey].filter(Boolean);
   if (!globalKeyRotator || globalKeyRotator.count !== keys.length) globalKeyRotator = new KeyRotator(keys);
   return globalKeyRotator;
 };
@@ -700,8 +698,7 @@ function loadState(){
   const storedNames = LS.get(LS.KEYS.TAB_NAMES, defaultTabNames);
   tabNames = Array.from({length: 5}, (_, i) => storedNames[i] || defaultTabNames[i]);
 
-  let maxTabs = tabCount === 0 ? 1 : tabCount;
-  if(currentTab >= maxTabs) currentTab = 0;
+  if(currentTab >= (tabCount === 0 ? 1 : tabCount)) currentTab = 0;
 
   for(let i=0; i<5; i++){
     tabStocks[i] = LS.get(LS.KEYS.STOCK(i), []);
@@ -742,7 +739,6 @@ function applyThemeText(t){
   if(t !== 'light') body.classList.add(t);
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
-  
   applyHistColsState();
 }
 
@@ -760,16 +756,10 @@ function toggleTicker() {
   LS.set(LS.KEYS.TICKER, showTicker);
 }
 
-/* ========================================================= 🌟 內嵌式統計選單切換邏輯 ========================================================= */
 function applyHistColsState() {
   const btn = $('histToggleBtnAdvanced');
-  if (showHistCols) {
-    document.body.classList.add('show-hist');
-    if (btn) btn.textContent = '📊 漲跌幅 (歷史)：已開啟';
-  } else {
-    document.body.classList.remove('show-hist');
-    if (btn) btn.textContent = '📊 漲跌幅 (歷史)：已關閉';
-  }
+  document.body.classList.toggle('show-hist', showHistCols);
+  if (btn) btn.textContent = `📊 漲跌幅 (歷史)：${showHistCols ? '已開啟' : '已關閉'}`;
 }
 
 function toggleHistCols() {
@@ -813,13 +803,12 @@ const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
 
 function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const p = s.price;
-  const chg = s.change ?? 0;
+  const p = s.price, chg = s.change ?? 0;
   const mktValue = p != null ? Math.round(shares * p) : 0;
-  const todayPnl = p != null || s.change != null ? Math.round(shares * chg) : 0;
+  const todayPnl = (p != null || s.change != null) ? Math.round(shares * chg) : 0;
   
   let cost = 0, unPnl = 0, roi = 0, hasCost = false;
-  if (s.buyPrice != null && s.buyPrice > 0 && p != null) {
+  if (s.buyPrice > 0 && p != null) {
     hasCost = true;
     cost = s.buyPrice * shares;
     unPnl = Math.round(mktValue - cost);
@@ -829,9 +818,7 @@ function calcStockInfo(s) {
 }
 
 function getStockHtmlInner(s) {
-  const info = calcStockInfo(s);
-  const p = s.price; 
-  const chg = s.change ?? 0;
+  const info = calcStockInfo(s), p = s.price, chg = s.change ?? 0;
   
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
@@ -840,41 +827,19 @@ function getStockHtmlInner(s) {
       totalHtml = `<div class="total-main">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
       <div class="total-sub">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
     } else {
-      totalHtml = `<div class="total-main neutral">—</div>
-      <div class="total-sub neutral">點擊 ✎ 設均價</div>`;
+      totalHtml = `<div class="total-main neutral">—</div><div class="total-sub neutral">點擊 ✎ 設均價</div>`;
     }
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
-  
-  let priceHtml = '—';
-  if (p != null) {
-    priceHtml = `<div class="price-container">
-      <div class="price ${pClass}">${formatPrice(p)}</div>
-      <div class="price-sub">${info.mktValue.toLocaleString()}</div>
-    </div>`;
-  }
-
-  let changeHtml = '—';
-  if (s.change != null && s.changePercent != null) {
-    const cgStr = `${getSign(chg)}${chg.toFixed(2)}`;
-    const cgpStr = `(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)`;
-    changeHtml = `<div class="change-container">
-      <div class="chg ${pClass}">${cgStr}</div>
-      <div class="change-sub ${pClass}">${cgpStr}</div>
-    </div>`;
-  }
+  const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
+  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
 
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
   const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
   const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
-
-  const pct5Str = genPctStr(s.pct5), pct5Class = genPctCls(s.pct5);
-  const pct20Str = genPctStr(s.pct20), pct20Class = genPctCls(s.pct20);
-  const pct60Str = genPctStr(s.pct60), pct60Class = genPctCls(s.pct60);
-  const pct120Str = genPctStr(s.pct120), pct120Class = genPctCls(s.pct120);
 
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
@@ -886,10 +851,10 @@ function getStockHtmlInner(s) {
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
     <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
-    <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 16px;">${pct5Str}</div>
-    <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 16px;">${pct20Str}</div>
-    <div class="hist-col ${pct60Class}" style="font-weight: 800; font-size: 16px;">${pct60Str}</div>
-    <div class="hist-col ${pct120Class}" style="font-weight: 800; font-size: 16px;">${pct120Str}</div>
+    <div class="hist-col ${genPctCls(s.pct5)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct5)}</div>
+    <div class="hist-col ${genPctCls(s.pct20)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct20)}</div>
+    <div class="hist-col ${genPctCls(s.pct60)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct60)}</div>
+    <div class="hist-col ${genPctCls(s.pct120)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct120)}</div>
     <div class="act">
       <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
       <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
@@ -897,39 +862,33 @@ function getStockHtmlInner(s) {
 }
 
 function renderAll(){
-  const body = $('listBody'); const empty = $('emptyState');
+  const body = $('listBody'), empty = $('emptyState');
   const uiEls = ['tableScroll', 'summaryArea', 'historyBtn'].map($);
-  
   const stocks = tabStocks[currentTab];
+  
   if(stocks.length === 0){ 
-    body.innerHTML = '';
-    empty.style.display = 'block'; 
+    body.innerHTML = ''; empty.style.display = 'block'; 
     uiEls.forEach(e => e.style.display = 'none'); 
     return; 
   }
   
   empty.style.display = 'none'; 
   uiEls.forEach(e => e.style.display = 'block');
-  
   body.innerHTML = stocks.map(s => `<div class="srow" data-id="${s.id}">${getStockHtmlInner(s)}</div>`).join('');
   updateSummary();
 }
 
 function renderRow(s) {
   const el = document.querySelector(`.srow[data-id="${s.id}"]`);
-  if(el) { el.innerHTML = getStockHtmlInner(s); }
+  if(el) el.innerHTML = getStockHtmlInner(s);
 }
 
 function updateSummary(){
   let pnl = 0, asset = 0, totalUnPnl = 0, hasUnPnl = false;
   tabStocks[currentTab].forEach(s => {
     const info = calcStockInfo(s);
-    pnl += info.todayPnl;
-    asset += info.mktValue;
-    if (info.hasCost) {
-      totalUnPnl += info.unPnl;
-      hasUnPnl = true;
-    }
+    pnl += info.todayPnl; asset += info.mktValue;
+    if (info.hasCost) { totalUnPnl += info.unPnl; hasUnPnl = true; }
   });
   
   const setHtml = (id, val, cls) => { const e = $(id); e.textContent = val; e.className = `val ${cls}`; };
@@ -958,10 +917,7 @@ function renderApiStats() {
 async function fetchWithProxy(url) {
   for (const proxy of PROXY_LIST) {
     try {
-      const res = await fetch(proxy + encodeURIComponent(url), { 
-        signal: AbortSignal.timeout(API_TIMEOUT), 
-        cache: 'no-store' 
-      });
+      const res = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
       if (res.ok) return res;
     } catch (e) {}
   }
@@ -976,19 +932,15 @@ async function fetchFugle(sym){
       if (res.ok) {
         const d = await res.json();
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        
-        let vol = 0;
-        if (d.total) {
-          vol = d.total.tradeValue || d.total.tradeVolume || 0;
-        }
-
+        const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
         if (p != null) { 
           trackApiUsage('Fugle'); 
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, volume: vol, source: 'Fugle', name: d.name || ''}; 
         }
       }
     } catch(e) {}
-  } return null; 
+  } 
+  return null; 
 }
 
 async function fetchYahoo(sym){
@@ -1000,8 +952,7 @@ async function fetchYahoo(sym){
       if (text.length < 2) return null;
       const cols = text.pop().split(',');
       if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const p = parseFloat(cols[4]); const o = parseFloat(cols[1]); const v = parseFloat(cols[6] || 0);
-      const chg = +(p - o).toFixed(2);
+      const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
       trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), volume: v, source: 'Yahoo', name: ''};
     } catch(e) { return null; }
   };
@@ -1012,19 +963,15 @@ async function fetchHistoryData(sym) {
   const todayStr = new Date().toISOString().split('T')[0];
   const cacheKey = `${LS.KEYS.HIST_CACHE}_${todayStr}`;
   let dayCache = LS.get(cacheKey, {});
-  
   if (dayCache[sym]) return dayCache[sym];
 
   const tryFetch = async (suffix) => {
     try {
       const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${suffix}?interval=1d&range=1y`;
-      const res = await fetchWithProxy(u);
-      if (!res) return null;
-      const d = await res.json();
-      if (!d.chart.result) return null;
+      const res = await fetchWithProxy(u); if (!res) return null;
+      const d = await res.json(); if (!d.chart.result) return null;
       const closes = d.chart.result[0].indicators.quote[0].close.filter(c => c != null);
-      const L = closes.length;
-      if(L === 0) return null;
+      const L = closes.length; if(L === 0) return null;
       return {
         d5: L > 5 ? closes[L - 1 - 5] : null,
         d20: L > 20 ? closes[L - 1 - 20] : null,
@@ -1035,45 +982,33 @@ async function fetchHistoryData(sym) {
   };
 
   const res = await tryFetch('.TW') || await tryFetch('.TWO');
-  if (res) {
-    dayCache[sym] = res;
-    LS.set(cacheKey, dayCache);
-  }
+  if (res) { dayCache[sym] = res; LS.set(cacheKey, dayCache); }
   return res;
 }
 
 function updateTwiiDOM(res, isOffline = false) {
   if(!res) return;
-  
-  // 一級：臺灣加權指數標題
   const titleBox = $('idxTitle');
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
   const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
-  
-  // 二級：大盤指數與今日成交量 (已移除標題，直接以括號包裹)
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
-    if (res.volume && res.volume > 0) {
-      const volInHundredMillion = Math.round(res.volume / 100000000);
-      els.v.textContent = `(${volInHundredMillion > 0 ? volInHundredMillion.toLocaleString() + ' 億' : res.volume.toLocaleString()})`;
-    } else {
-      els.v.textContent = `(—)`;
-    }
+    if (res.volume > 0) {
+      const vol100m = Math.round(res.volume / 100000000);
+      els.v.textContent = `(${vol100m > 0 ? vol100m.toLocaleString() + ' 億' : res.volume.toLocaleString()})`;
+    } else { els.v.textContent = `(—)`; }
   }
 
-  // 三級：今日指數與漲跌幅
   if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
   if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
-  
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
 async function refreshPrices(){
-  if (navigator.onLine === false) { showToast('處於離線狀態，顯示快取資料'); return; }
+  if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
   let idxR = await fetchFugle('IX0001');
-
   if (!idxR) {
     try {
       const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
@@ -1090,7 +1025,6 @@ async function refreshPrices(){
       }
     } catch(e) {}
   }
-
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
   try {
@@ -1121,11 +1055,8 @@ async function refreshPrices(){
     const batch = uniqueSyms.slice(i, i + 3);
     const promises = batch.map(async sym => {
       let r = await fetchFugle(sym) || await fetchYahoo(sym);
-      let hist = histCache[sym];
-      if (!hist) {
-        hist = await fetchHistoryData(sym);
-        if (hist) histCache[sym] = hist;
-      }
+      let hist = histCache[sym] || await fetchHistoryData(sym);
+      if (hist) histCache[sym] = hist;
       return { sym, r, hist };
     });
     const results = await Promise.allSettled(promises);
@@ -1160,13 +1091,13 @@ async function refreshPrices(){
     updateSummary();
   }
   
-  const isOpen = () => { const t = new Date(); const d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && ((h>=8 && h<=14) || h>=15 || h<=5); };
+  const isOpen = () => { const t = new Date(), d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && ((h>=8 && h<=14) || h>=15 || h<=5); };
   currentInterval = isOpen() ? (getKeyRotator().count === 2 ? 10000 : 20000) : 60000;
   if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
 }
 
-/* ========================================================= 🔀 指數卡片拖拽排序功能 (三級結構) ========================================================= */
+/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
 let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
@@ -1178,17 +1109,10 @@ function renderGlobalIndices(indices, isOffline = false) {
     const name = matched ? matched.name : item.name;
     const cls = getColorCls(item.pct);
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
-      <!-- 一級：國外指數名稱 -->
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
-      
-      <!-- 二級：指數 (當前數值，靠右) -->
       <div class="idx-data-row">
-        <div class="idx-box-price-wrap">
-          <span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span>
-        </div>
+        <div class="idx-box-price-wrap"><span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
       </div>
-      
-      <!-- 三級：今日指數 (漲跌/幅度，靠右) -->
       <div class="idx-data-row">
         <div class="idx-box-change-row ${cls}">
           <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
@@ -1199,13 +1123,11 @@ function renderGlobalIndices(indices, isOffline = false) {
     </div>`;
   }).join('');
   container.insertAdjacentHTML('beforeend', html);
-
   bindDragAndDropEvents();
 }
 
 function bindDragAndDropEvents() {
-  const cards = document.querySelectorAll('.idx-card-box.draggable-card');
-  cards.forEach(card => {
+  document.querySelectorAll('.idx-card-box.draggable-card').forEach(card => {
     card.addEventListener('dragstart', handleDragStart);
     card.addEventListener('dragover', handleDragOver);
     card.addEventListener('dragleave', handleDragLeave);
@@ -1223,15 +1145,11 @@ function handleDragStart(e) {
 function handleDragOver(e) {
   if (e.preventDefault) e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
-  if (this.getAttribute('data-symbol') !== draggedIdxSymbol) {
-    this.classList.add('drag-over');
-  }
+  if (this.getAttribute('data-symbol') !== draggedIdxSymbol) this.classList.add('drag-over');
   return false;
 }
 
-function handleDragLeave() {
-  this.classList.remove('drag-over');
-}
+function handleDragLeave() { this.classList.remove('drag-over'); }
 
 function handleDrop(e) {
   if (e.stopPropagation) e.stopPropagation();
@@ -1261,9 +1179,7 @@ function handleDrop(e) {
 }
 
 function handleDragEnd() {
-  document.querySelectorAll('.idx-card-box').forEach(card => {
-    card.classList.remove('dragging', 'drag-over');
-  });
+  document.querySelectorAll('.idx-card-box').forEach(card => card.classList.remove('dragging', 'drag-over'));
 }
 
 /* ========================================================= 🖱 互動與資料修改 ========================================================= */
@@ -1327,10 +1243,7 @@ function saveEditStock() {
 }
 
 function checkAutoSave() {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
+  const now = new Date(), dayOfWeek = now.getDay(), hours = now.getHours(), minutes = now.getMinutes();
 
   if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
     const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -1338,41 +1251,30 @@ function checkAutoSave() {
     
     for(let i=0; i<5; i++) {
        if(tabStocks[i].length === 0) continue; 
-       
-       const alreadySaved = tabRecords[i].some(r => r.date === todayStr);
-       if (!alreadySaved) {
+       if (!tabRecords[i].some(r => r.date === todayStr)) {
           let pnl = 0, asset = 0;
           tabStocks[i].forEach(s => {
             const info = calcStockInfo(s);
             pnl += info.todayPnl; asset += info.mktValue;
           });
           const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-          
           tabRecords[i].unshift({date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: now.getTime()});
-          
           if(tabRecords[i].length > 30) tabRecords[i].length = 30;
           LS.set(LS.KEYS.RECORD(i), tabRecords[i]);
           savedAny = true;
        }
     }
-    
-    if (savedAny && $('historyModalOverlay').classList.contains('show')) {
-       renderHistory();
-    }
+    if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
   }
 }
 
-function openHistoryModal() {
-  renderHistory();
-  $('historyModalOverlay').classList.add('show');
-}
+function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
 
 function clearAllHistory() {
   if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
   tabRecords[currentTab] = [];
   LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]);
-  renderHistory();
-  showToast('已清空全部記錄');
+  renderHistory(); showToast('已清空全部記錄');
 }
 
 function deleteHistory(ts) {
@@ -1395,7 +1297,6 @@ function renderHistory(){
 function openModal(){
   $('fugleKeyInput').value = fugleKey; $('secondFugleKeyInput').value = secondFugleKey;
   $('tabCountSelect').value = tabCount;
-  
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   applyHistColsState(); 
   
@@ -1458,20 +1359,15 @@ function exportData() {
     tabStocks: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.STOCK(i), [])),
     tabRecords: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.RECORD(i), [])),
     tabNames: LS.get(LS.KEYS.TAB_NAMES, ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5']),
-    fugleKey: fugleKey, 
-    secondFugleKey: secondFugleKey, 
-    theme: LS.getStr(LS.KEYS.THEME, 'light'), 
-    tabCount: tabCount, 
-    customForeignIndices: availableIndices 
+    fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME, 'light'), 
+    tabCount, customForeignIndices: availableIndices 
   };
   
   const a = document.createElement('a'); 
   a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], {type:"application/json"}));
   const date = new Date(); 
   a.download = `stock_backup_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.json`;
-  a.click(); 
-  URL.revokeObjectURL(a.href); 
-  showToast('✅ 備份已下載');
+  a.click(); URL.revokeObjectURL(a.href); showToast('✅ 備份已下載');
 }
 
 function importData(e) {
@@ -1484,13 +1380,11 @@ function importData(e) {
       
       if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
       if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
-      
       if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
       if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
       if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
       if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
       if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
-      
       if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
       
       alert('🎉 還原成功！'); location.reload();
@@ -1540,12 +1434,9 @@ heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 ['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
 
 document.addEventListener('visibilitychange', () => { 
-  if (document.visibilityState === 'visible') {
-    heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
-    forceRefresh();
-  } else {
-    heartbeatWorker.postMessage({ action: 'stop' });
-  }
+  const isVis = document.visibilityState === 'visible';
+  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
+  if (isVis) forceRefresh();
 });
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
