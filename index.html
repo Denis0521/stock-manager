@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.29'; 
+const APP_VER = 'V7.37'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -195,6 +195,16 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
   color: var(--down) !important;
 }
 
+/* 漲跌停專用樣式（覆蓋原有顏色） */
+.price.limit-up {
+  background-color: #dc2626 !important;
+  color: white !important;
+}
+.price.limit-down {
+  background-color: #16a34a !important;
+  color: white !important;
+}
+
 /* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
 .tabs-bar { display: flex; padding: 0 8px; margin: 6px 10px 0; gap: 4px; align-items: flex-end; }
 .tab-btn { flex: 1; height: 36px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(to bottom, var(--s-light) 0%, var(--bg) 100%); color: var(--t-muted); font-weight: 600; cursor: pointer; position: relative; top: 1px; z-index: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); border-radius: 8px 8px 0 0; box-shadow: inset 0 2px 2px var(--protrude-l); opacity: 0.5; transition: color 0.2s, filter 0.2s, opacity 0.3s; }
@@ -275,7 +285,7 @@ body.show-hist .hist-col { display: flex !important; }
 .qty-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 
 .price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
-.srow .price { font-weight: 800; font-size: 17px; }
+.srow .price { font-weight: 800; font-size: 17px; display: inline-flex; align-items: center; gap: 4px; }
 
 .price-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
@@ -603,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.29</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.37</div>
     </div>
   </div>
 </div>
@@ -668,6 +678,7 @@ const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
 /* LocalStorage 統一管理 */
 const LS = {
@@ -855,7 +866,16 @@ function getStockHtmlInner(s) {
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
-  const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
+  
+  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
+  let limitClass = '';
+  if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
+    limitClass = 'limit-up';
+  } else if (p != null && s.limitDown != null && s.limitDown > 0 && Math.abs(p - s.limitDown) < 0.005) {
+    limitClass = 'limit-down';
+  }
+  
+  const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass} ${limitClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
   const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
 
   const safeName = escapeHTML(s.name || '');
@@ -959,20 +979,54 @@ async function fetchWithProxy(url) {
 
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
+  
+  // 1. 先取得報價 (使用 quote 端點)
+  let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
-      const res = await fetch(FUGLE_API + encodeURIComponent(sym), { headers: {'X-API-KEY': kr.next()}, signal: AbortSignal.timeout(API_TIMEOUT) });
+      const res = await fetch(FUGLE_API + encodeURIComponent(sym), { 
+        headers: {'X-API-KEY': kr.next()}, 
+        signal: AbortSignal.timeout(API_TIMEOUT) 
+      });
       if (res.ok) {
-        const d = await res.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
-        if (p != null) { 
-          trackApiUsage('Fugle'); 
-          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, volume: vol, source: 'Fugle', name: d.name || ''}; 
-        }
+        quoteData = await res.json();
+        break;
       }
     } catch(e) {}
-  } 
+  }
+  if (!quoteData) return null;
+
+  // 2. 再取得基本資料 (使用 ticker 端點)，包含漲跌停價
+  let tickerData = null;
+  for (let i = 0; i < kr.count; i++){
+    try {
+      const res = await fetch(TICKER_API + encodeURIComponent(sym), { 
+        headers: {'X-API-KEY': kr.next()}, 
+        signal: AbortSignal.timeout(API_TIMEOUT) 
+      });
+      if (res.ok) {
+        tickerData = await res.json();
+        break;
+      }
+    } catch(e) {}
+  }
+
+  // 3. 合併資料並回傳
+  const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
+  if (p != null) { 
+    trackApiUsage('Fugle'); 
+    return {
+      price: p,
+      change: quoteData.change ?? 0,
+      changePercent: quoteData.changePercent ?? 0,
+      volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
+      source: 'Fugle',
+      name: quoteData.name || '',
+      // 從 tickerData 中取得漲跌停價，若無則為 null
+      limitUp: tickerData?.limitUpPrice ?? null,
+      limitDown: tickerData?.limitDownPrice ?? null
+    }; 
+  }
   return null; 
 }
 
@@ -1105,6 +1159,9 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
+                // 更新漲跌停價
+                s.limitUp = r.limitUp;
+                s.limitDown = r.limitDown;
               }
               if (hist && s.price != null) {
                 s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
@@ -1241,7 +1298,8 @@ function addStock(){
   tabStocks[currentTab].push({
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
     displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
-    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null
+    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null,
+    limitUp: null, limitDown: null
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
