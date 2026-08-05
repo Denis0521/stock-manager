@@ -435,15 +435,19 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
-  <!-- 臺灣加權指數 -->
   <div class="idx-card-box">
+    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
+    
+    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
+    
+    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -451,40 +455,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
-  </div>
-
-  <!-- 🆕 台指期（日盤） -->
-  <div class="idx-card-box" id="futureDayBox">
-    <div class="idx-box-name" id="futureDayTitle">🇹🇼 台指期</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futureDayPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futureDayChange"></span>
-        <span id="futureDayPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futureDaySource">Loading...</div>
-  </div>
-
-  <!-- 🆕 台指期盤後（夜盤） -->
-  <div class="idx-card-box" id="futureNightBox">
-    <div class="idx-box-name" id="futureNightTitle">🌙 台指期盤後</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futureNightPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futureNightChange"></span>
-        <span id="futureNightPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futureNightSource">Loading...</div>
   </div>
 </div>
 
@@ -1165,66 +1135,6 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
-// ==================== 🆕 Taifex 期貨資料擷取與渲染 ====================
-async function fetchTaifex() {
-  try {
-    const res = await fetch('https://taifex.denis0521.workers.dev/taifex', {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (!res.ok) throw new Error('Taifex API 回應錯誤');
-    const data = await res.json();
-    return data;
-  } catch (e) {
-    console.warn('Taifex API 擷取失敗:', e.message);
-    return null;
-  }
-}
-
-function renderTaifex(data) {
-  const day = data?.day;
-  const night = data?.night;
-
-  // 日盤（台指期）
-  if (day) {
-    const priceEl = document.getElementById('futureDayPrice');
-    const changeEl = document.getElementById('futureDayChange');
-    const pctEl = document.getElementById('futureDayPct');
-    const sourceEl = document.getElementById('futureDaySource');
-
-    if (priceEl) priceEl.textContent = day.price?.toLocaleString() ?? '—';
-    if (changeEl) {
-      changeEl.textContent = (day.change ?? 0) >= 0 ? '+' + (day.change ?? 0).toFixed(2) : (day.change ?? 0).toFixed(2);
-      changeEl.className = (day.change ?? 0) > 0 ? 'up' : (day.change ?? 0) < 0 ? 'down' : '';
-    }
-    if (pctEl) {
-      const pct = day.pct ?? 0;
-      pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
-      pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
-    }
-    if (sourceEl) sourceEl.textContent = `via Taifex ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
-  }
-
-  // 夜盤（台指期盤後）
-  if (night) {
-    const priceEl = document.getElementById('futureNightPrice');
-    const changeEl = document.getElementById('futureNightChange');
-    const pctEl = document.getElementById('futureNightPct');
-    const sourceEl = document.getElementById('futureNightSource');
-
-    if (priceEl) priceEl.textContent = night.price?.toLocaleString() ?? '—';
-    if (changeEl) {
-      changeEl.textContent = (night.change ?? 0) >= 0 ? '+' + (night.change ?? 0).toFixed(2) : (night.change ?? 0).toFixed(2);
-      changeEl.className = (night.change ?? 0) > 0 ? 'up' : (night.change ?? 0) < 0 ? 'down' : '';
-    }
-    if (pctEl) {
-      const pct = night.pct ?? 0;
-      pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
-      pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
-    }
-    if (sourceEl) sourceEl.textContent = `via Taifex ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
-  }
-}
-
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
@@ -1246,12 +1156,6 @@ async function refreshPrices(){
     } catch(e) {}
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
-
-  // 🆕 擷取 Taifex 期貨資料
-  const taifexData = await fetchTaifex();
-  if (taifexData) {
-    renderTaifex(taifexData);
-  }
 
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
@@ -1327,13 +1231,12 @@ async function refreshPrices(){
   renderApiStats();
 }
 
-// ==================== 🛠 修正後的 renderGlobalIndices（只移除國外指數卡片） ====================
+/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
+let draggedIdxSymbol = null;
+
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 只移除國外指數卡片（有 draggable-card 類別），保留臺灣加權指數與期貨卡片
-  Array.from(container.children).forEach(e => {
-    if (e.classList.contains('draggable-card')) e.remove();
-  });
+  Array.from(container.children).slice(1).forEach(e => e.remove());
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
@@ -1356,9 +1259,6 @@ function renderGlobalIndices(indices, isOffline = false) {
   container.insertAdjacentHTML('beforeend', html);
   bindDragAndDropEvents();
 }
-
-/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
-let draggedIdxSymbol = null;
 
 function bindDragAndDropEvents() {
   document.querySelectorAll('.idx-card-box.draggable-card').forEach(card => {
@@ -1677,13 +1577,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-// 於頁面載入後立即嘗試載入期貨資料（非同步）
-setTimeout(() => {
-  fetchTaifex().then(data => {
-    if (data) renderTaifex(data);
-  });
-}, 300);
 
 const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
