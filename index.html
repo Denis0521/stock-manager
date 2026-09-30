@@ -194,16 +194,16 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-data-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 8px; margin-top: 1px; }
 .idx-box-price-wrap { display: flex; align-items: baseline; gap: 6px; }
 .idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } 
-.idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 700; white-space: nowrap; }
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; } 
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
-.list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
+.list-wrap { min-width: 765px; transition: min-width 0.3s ease; }
 .list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
 
-body.show-hist .list-wrap { min-width: 1100px; }
+body.show-hist .list-wrap { min-width: 1101px; }
 body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 84px 84px 84px 84px 80px; }
 .hist-col { display: none !important; }
 body.show-hist .hist-col { display: flex !important; }
@@ -331,7 +331,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .idx-card-box { min-width: 200px; padding: 8px 14px; }
   .idx-box-name { font-size: 17px; }
   .idx-box-price { font-size: 17px; } 
-  .idx-box-change-row { font-size: 15px; }
+  .idx-box-change-row { font-size: 17px; }
   .idx-box-vol { font-size: 16px; }
   .manual-content { font-size: 17px; }
   .manual-content h3 { font-size: 19px; }
@@ -580,6 +580,10 @@ body.tech .modal h2 { color: var(--a1); }
 #addModalOverlay .modal h2, #editModalOverlay .modal h2 { margin-bottom: 22px; }
 #addModalOverlay .modal-close, #editModalOverlay .modal-close { height: 50px; padding: 0 12px; border-radius: 18px; white-space: nowrap; }
 #addModalOverlay .modal > div:last-child, #editModalOverlay .modal > div:last-child { gap: 14px !important; margin-top: 26px !important; }
+
+/* 表頭文字大小全部一致 */
+.list-header > div { font-size: 17px; font-weight: 600; }
+@media (min-width: 768px) { .list-header > div { font-size: 18px; } }
 
 
 </style>
