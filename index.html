@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#F3EDFC">
+<meta name="theme-color" id="themeColorMeta" content="#9CC2BE">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.54-pl'; 
+const APP_VER = 'V7.54-ru'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -342,15 +342,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    🏺 青花瓷主題層（只改外觀：配色、光澤、圓角、字形；不改字級與版面）
    ========================================================= */
 :root {
-  /* ☀️ 淺紫 × 深橘 × 多彩 組合 */
-  --bg:#F3EDFC; --bg-card:#FCFAFF; --s-light:#FFFFFF; --s-dark:#CFC1E6;
-  --t-main:#2A1B4D; --t-muted:#715F9A; --up:#E0264A; --down:#0E9F78;
-  --accent:#E8590C; --border-light:#DDD0F2;
-  --a1:#F26A1B; --a3:#7B4DD8; --glaze-top:#FFFFFF; --glaze-bot:#E9DEF9; --row-alt:#F8F3FE;
-  --hl:rgba(255,255,255,.95); --rim-shade:rgba(123,77,216,.14); --ring:rgba(232,89,12,.32);
-  --bg-glow:rgba(232,89,12,.34); --bg-glow2:rgba(150,100,235,.34);
-  --bead-hi:#FFC9A3;
-  --bg-grad:linear-gradient(160deg, rgba(232,89,12,.38) 0%, rgba(255,110,150,.28) 20%, rgba(180,130,245,.34) 44%, rgba(110,150,255,.28) 68%, rgba(70,200,190,.28) 100%);
+  /* ☀️ 淺白卡片 × 汝窯天青漸層底層 */
+  --bg:#9CC2BE; --bg-card:#FAFDFC; --s-light:#C4DEDA; --s-dark:#5D8581;
+  --t-main:#1B2B2A; --t-muted:#5B7774; --up:#D12A40; --down:#0B8A5C;
+  --accent:#4A817D; --border-light:#D3E5E2;
+  --a1:#7DB0AB; --a3:#3C6C68; --glaze-top:#FFFFFF; --glaze-bot:#E4F0EE; --row-alt:#F2F8F7;
+  --hl:rgba(255,255,255,.9); --rim-shade:rgba(74,129,125,.12); --ring:rgba(255,255,255,.6);
+  --bg-glow:rgba(205,232,228,.55); --bg-glow2:rgba(60,105,100,.30);
+  --bead-hi:#D6EEEA;
+  --bg-grad:linear-gradient(180deg, rgba(210,235,231,.60) 0%, rgba(170,208,203,.30) 30%, rgba(0,0,0,0) 55%, rgba(45,85,80,.38) 100%);
   --gold:#C9A24A; --gold-2:#F3DC94; --gold-line:rgba(201,162,74,.55);
   --f-body:"Chiron GoRound TC","PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
@@ -635,6 +635,9 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
 #noticeOverlay .modal { margin-top: 0; }
 
 
+
+/* ☀️ 淺色主題：汝窯底層上的頁籤文字改黑色，確保對比 */
+body:not(.tech):not(.blue-light):not(.purple-light):not(.pink):not(.gray-light) .tab-btn:not(.active) { color: #000; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
@@ -1001,7 +1004,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#F3EDFC' }
+    'light': { emoji: '☀️', color: '#9CC2BE' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
