@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.78-chartF'; 
+const APP_VER = 'V7.84-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -314,9 +314,9 @@ body.show-hist .hist-col { display: flex !important; }
 .chart-title { min-width: 0; font-weight: 800; font-size: 18px; color: var(--t-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chart-title small { font-weight: normal; font-size: 13px; color: var(--t-muted); margin-left: 8px; }
 #chartModalOverlay .btn-close-icon { position: static; flex: 0 0 auto; }
-.chart-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 0 12px 6px 16px; border-bottom: 1px solid var(--border-light); }
-.chart-tfs { display: flex; gap: 8px; }
-.chart-tfs button { min-width: 52px; height: 32px; padding: 0 14px; font-size: 14px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 16px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-main); cursor: pointer; }
+.chart-tools { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 6px 16px; border-bottom: 1px solid var(--border-light); }
+.chart-tfs { display: flex; gap: 6px; }
+.chart-tfs button { min-width: 44px; height: 32px; padding: 0 10px; font-size: 14px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 16px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-main); cursor: pointer; }
 .chart-tfs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 .chart-info { flex: 0 0 auto; min-height: 34px; padding: 6px 16px 0; font-size: 12px; line-height: 1.5; color: var(--t-muted); }
 .chart-info b { font-weight: 700; }
@@ -324,7 +324,7 @@ body.show-hist .hist-col { display: flex !important; }
 .chart-body canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
 .chart-body .tradingview-widget-container, .chart-body .tradingview-widget-container__widget { width: 100%; height: 100%; }
 .chart-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--t-muted); font-size: 15px; pointer-events: none; }
-.chart-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-light); font-size: 13px; color: var(--t-main); -webkit-overflow-scrolling: touch; }
+.chart-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; border-top: 1px solid var(--border-light); padding: 2px 16px calc(14px + env(safe-area-inset-bottom, 0px)); font-size: 13px; color: var(--t-main); -webkit-overflow-scrolling: touch; }
 .cp-title { font-weight: 800; font-size: 13px; color: var(--accent); margin: 10px 0 4px; }
 .cp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
 .cp-grid > div { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
@@ -332,8 +332,34 @@ body.show-hist .hist-col { display: flex !important; }
 .cp-grid b { font-weight: 700; }
 .cp-book { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 18px; }
 .cp-book > div { display: flex; justify-content: space-between; }
+.cp-note { color: var(--t-muted); padding: 14px 0; line-height: 1.6; }
+.cp-small { font-size: 11px; color: var(--t-muted); margin-top: 6px; line-height: 1.5; }
+.chart-sw { height: 32px; padding: 0 12px; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 16px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--accent); cursor: pointer; }
+.chart-ptabs { flex: 0 0 auto; display: flex; gap: 6px; padding: 8px 16px 4px; border-top: 1px solid var(--border-light); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chart-ptabs::-webkit-scrollbar { display: none; }
+.chart-ptabs button { flex: 0 0 auto; height: 28px; padding: 0 12px; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 14px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-muted); cursor: pointer; }
+.chart-ptabs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.chart-modal.ind .chart-body { flex-basis: 52%; }
+.cp-vol { display: grid; grid-template-columns: 56px minmax(0, 1fr) 62px; align-items: center; gap: 8px; padding: 3px 0; }
+.cp-vol.now { background: var(--bg-card); border-radius: 6px; }
+.cp-vol .bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; background: var(--border-light); }
+.cp-vol .bar i { display: block; height: 100%; }
+.cp-vol b { text-align: right; font-weight: 600; }
+.cp-tr { display: grid; grid-template-columns: 70px 1fr 1fr 28px; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border-light); font-variant-numeric: tabular-nums; }
+.cp-tr > span:nth-child(2), .cp-tr > span:nth-child(3) { text-align: right; }
+.cp-tr > span:last-child { text-align: center; font-size: 12px; }
+.cp-tr.hd { color: var(--t-muted); font-size: 12px; }
+.cp-list > div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
+.cp-list > div > span:first-child { color: var(--t-muted); }
+.cp-hold { display: grid; grid-template-columns: 18px minmax(0, 1fr) 56px 54px; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
+.cp-hold .rk { color: var(--t-muted); font-size: 12px; text-align: center; }
+.cp-hold .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-hold .nm small { color: var(--t-muted); margin-left: 4px; font-size: 11px; }
+.cp-hold .bar { height: 6px; border-radius: 3px; background: var(--border-light); overflow: hidden; }
+.cp-hold .bar i { display: block; height: 100%; background: var(--accent); }
+.cp-hold b { text-align: right; }
 .chart-modal.tv .chart-body { flex: 1 1 auto; }
-.chart-modal.tv .chart-tools, .chart-modal.tv .chart-info, .chart-modal.tv .chart-panel { display: none; }
+.chart-modal.tv .chart-tools, .chart-modal.tv .chart-info, .chart-modal.tv .chart-panel, .chart-modal.tv .chart-ptabs { display: none; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
@@ -816,9 +842,10 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
       <div class="chart-title" id="chartTitle"></div>
       <button type="button" class="btn-close-icon" onclick="closeChartModal()">✕</button>
     </div>
-    <div class="chart-tools"><div class="chart-tfs" id="chartTfs"></div></div>
+    <div class="chart-tools"><div class="chart-tfs" id="chartTfs"></div><button type="button" class="chart-sw" id="chartIndBtn" onclick="cycleChartInd()"></button></div>
     <div class="chart-info" id="chartInfo"></div>
     <div class="chart-body" id="chartBody"></div>
+    <div class="chart-ptabs" id="chartPtabs"></div>
     <div class="chart-panel" id="chartPanel"></div>
   </div>
 </div>
@@ -2111,6 +2138,14 @@ async function loadFinanceNews() {
 let lastRowDragAt = 0, chartOpenSeq = 0, chartTf = 'D', chartCur = null;
 const CHART_TFS = [['5', '5分'], ['D', '日'], ['W', '週'], ['M', '月']];
 const CHART_UP = '#E5484D', CHART_DN = '#1FA971';
+const CHART_INDS = ['vol', 'kd', 'macd', 'rsi'], IND_LABEL = { vol: '副圖：量', kd: '副圖：KD', macd: '副圖：MACD', rsi: '副圖：RSI' };
+let chartInd = LS.getStr('tw_chart_ind', 'vol'); if (!CHART_INDS.includes(chartInd)) chartInd = 'vol';
+function cycleChartInd() {
+  chartInd = CHART_INDS[(CHART_INDS.indexOf(chartInd) + 1) % CHART_INDS.length]; LS.set('tw_chart_ind', chartInd);
+  $('chartIndBtn').textContent = IND_LABEL[chartInd];
+  $('chartModalOverlay').querySelector('.chart-modal').classList.toggle('ind', chartInd !== 'vol');
+  drawChart(); chartInfoUpdate();
+}
 const FUGLE_STOCK = 'https://api.fugle.tw/marketdata/v1.0/stock/';
 $('appVerBox').textContent = '版本：' + APP_VER;
 
@@ -2156,6 +2191,81 @@ async function fugleHistRows(sym, tf) {
   catch (e) { if (e.message === 'nokey') throw e; j = await fugleGet(q); }
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 })).filter(validBar);
 }
+// 同時向所有代理發出請求，最快成功的優先；全部失敗才算失敗
+function proxyJson(url) {
+  const tasks = PROXY_LIST.map(px => (async () => {
+    const res = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(10000), cache: 'no-store' });
+    if (!res.ok) throw new Error('http' + res.status);
+    const j = await res.json();
+    if (!j || !j.chart) throw new Error('bad');
+    return j;
+  })());
+  return Promise.any(tasks).catch(() => null);
+}
+async function yahooHistRows(sym, tf) {
+  const [range, itv] = tf === 'D' ? ['1y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
+  const order = suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
+  let log = '代理伺服器無回應';
+  for (const sfx of order) {
+    let j = null;
+    for (const host of ['query1', 'query2']) {
+      j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=${itv}&range=${range}`);
+      if (j) break;
+    }
+    if (!j) return { rows: null, log };
+    const res = j.chart.result && j.chart.result[0];
+    if (!res || !res.timestamp) { log = '查無此代號資料'; continue; }
+    const q = res.indicators.quote[0];
+    const rows = res.timestamp.map((t, i) => ({ t: new Date(t * 1000 + 8 * 3600e3).toISOString().slice(0, 10), o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i] || 0 })).filter(validBar);
+    if (rows.length) { suffixCache.set(sym, sfx); return { rows, log: '' }; }
+  }
+  return { rows: null, log };
+}
+// 本機累積：Fugle 每次只給近期資料，每次開圖就把新資料合併存起來，歷史會越存越長
+const histKey = (sym, tf) => `tw_chart_hist_v1_${tf}_${sym}`;
+function histCacheGet(sym, tf) {
+  try { const j = JSON.parse(localStorage.getItem(histKey(sym, tf)) || 'null'); return j && Array.isArray(j.rows) ? j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })) : []; } catch (e) { return []; }
+}
+function histCacheSet(sym, tf, rows) {
+  try { localStorage.setItem(histKey(sym, tf), JSON.stringify({ rows: rows.slice(-520).map(r => [r.t, r.o, r.h, r.l, r.c, r.v]) })); } catch (e) {}
+}
+async function workerGet(path) {
+  const r = await fetch(CF_WORKER_URL + path, { signal: AbortSignal.timeout(12000) });
+  if (!r.ok) throw new Error('http' + r.status);
+  return r.json();
+}
+async function chartHistRows(c) {
+  const { sym, tf } = c, diag = [], need = tf === 'D' ? 120 : tf === 'W' ? 60 : 36;
+  let fRows = [], err = null;
+  try { fRows = await fugleHistRows(sym, tf); diag.push(`Fugle ${fRows.length} 根${fRows.length ? '（最早 ' + fRows[0].t + '）' : ''}`); }
+  catch (e) { err = e; if (e.message === 'nokey') throw e; diag.push('Fugle 取得失敗'); }
+  const cRows = histCacheGet(sym, tf);
+  let yRows = null;
+  if (fRows.length < need && cRows.length < need) {
+    let wlog = '';
+    try {
+      const j = await workerGet(`/hist?symbol=${encodeURIComponent(sym)}&tf=${tf}`);
+      if (Array.isArray(j.rows)) yRows = j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })).filter(validBar);
+      else wlog = 'Worker 尚未更新';
+    } catch (e) { wlog = e.message === 'http404' ? '查無此代號' : '連線失敗'; }
+    if (yRows && yRows.length) diag.push(`Worker ${yRows.length} 根`);
+    else {
+      yRows = null; diag.push(`Worker 失敗（${wlog || '無資料'}）`);
+      const y = await yahooHistRows(sym, tf);
+      yRows = y.rows; diag.push(yRows ? `Yahoo ${yRows.length} 根` : `Yahoo 失敗（${y.log}）`);
+    }
+  }
+  let rows;
+  if (tf === 'D') {
+    const m = new Map(); cRows.forEach(r => m.set(r.t, r)); (yRows || []).forEach(r => m.set(r.t, r)); fRows.forEach(r => m.set(r.t, r));
+    rows = [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1);
+    if (cRows.length) diag.push(`本機累積 ${cRows.length} 根`);
+  } else rows = yRows && yRows.length > fRows.length ? yRows : cRows.length > fRows.length ? cRows : fRows;
+  if (rows.length) histCacheSet(sym, tf, rows);
+  c.diag = diag.join('；');
+  if (!rows.length && err) throw err;
+  return rows;
+}
 async function fugleIntradayRows(sym) {
   const j = await fugleGet(`intraday/candles/${encodeURIComponent(sym)}?timeframe=5`);
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 }))
@@ -2176,6 +2286,38 @@ function calcMA(rows, n) {
   rows.forEach((r, i) => { sum += r.c; if (i >= n) sum -= rows[i - n].c; out.push(i >= n - 1 ? sum / n : null); });
   return out;
 }
+function emaArr(vals, n) {
+  const k = 2 / (n + 1); let prev = null;
+  return vals.map(v => { if (v == null) return null; prev = prev == null ? v : v * k + prev * (1 - k); return prev; });
+}
+function rsiArr(cl, n) {
+  const out = cl.map(() => null); if (cl.length <= n) return out;
+  let g = 0, l = 0;
+  for (let i = 1; i <= n; i++) { const ch = cl[i] - cl[i - 1]; if (ch >= 0) g += ch; else l -= ch; }
+  let ag = g / n, al = l / n; out[n] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+  for (let i = n + 1; i < cl.length; i++) {
+    const ch = cl[i] - cl[i - 1];
+    ag = (ag * (n - 1) + Math.max(ch, 0)) / n; al = (al * (n - 1) + Math.max(-ch, 0)) / n;
+    out[i] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+  }
+  return out;
+}
+function calcInd(rows) {
+  const n = rows.length, cl = rows.map(r => r.c), k = [], d = [];
+  let pk = 50, pd = 50;
+  for (let i = 0; i < n; i++) {
+    if (i < 8) { k.push(null); d.push(null); continue; }
+    let hh = -Infinity, ll = Infinity;
+    for (let j = i - 8; j <= i; j++) { hh = Math.max(hh, rows[j].h); ll = Math.min(ll, rows[j].l); }
+    const rsv = hh === ll ? 50 : (rows[i].c - ll) / (hh - ll) * 100;
+    pk = pk * 2 / 3 + rsv / 3; pd = pd * 2 / 3 + pk / 3; k.push(pk); d.push(pd);
+  }
+  const e12 = emaArr(cl, 12), e26 = emaArr(cl, 26);
+  const dif = cl.map((_, i) => i >= 25 ? e12[i] - e26[i] : null), dea = emaArr(dif, 9);
+  const osc = dif.map((v, i) => v != null && dea[i] != null ? v - dea[i] : null);
+  return { k, d, dif, dea, osc, r6: rsiArr(cl, 6), r14: rsiArr(cl, 14) };
+}
+function chartRecalc(c) { c.ma = [5, 20, 60].map(n => calcMA(c.data, n)); calcYear(c); c.ind = calcInd(c.data); }
 function calcYear(c) {
   if (c.tf !== 'D' || !c.data.length) return;
   const rows = c.data.slice(-245);
@@ -2187,7 +2329,7 @@ async function loadFugleChart(c) {
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate();
   chartMsg('圖表載入中…');
   try {
-    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : fugleHistRows(c.sym, c.tf);
+    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : chartHistRows(c);
     const [rows, q] = await Promise.all([rowsP, fugleQuote(c.sym)]);
     if (q) c.quote = q;
     if (c.tf === 'D') mergeLiveQuote(rows, c.quote);
@@ -2195,7 +2337,7 @@ async function loadFugleChart(c) {
     renderChartPanel();
     if (!rows.length) { chartMsg(c.tf === '5' ? '目前沒有當日分K資料（非交易時段或休市）' : '沒有取得K線資料'); return; }
     c.data = rows; c.vis = { '5': 54, D: 60, W: 52, M: 48 }[c.tf];
-    c.ma = [5, 20, 60].map(n => calcMA(rows, n)); calcYear(c);
+    chartRecalc(c);
     chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel(); scheduleChartRefresh(c, seq);
   } catch (e) {
     if (seq !== chartOpenSeq || chartCur !== c) return;
@@ -2213,7 +2355,8 @@ function scheduleChartRefresh(c, seq) {
         if (seq !== chartOpenSeq || chartCur !== c) return;
         if (q) c.quote = q;
         if (rows && rows.length) c.data = rows; else if (c.tf === 'D') mergeLiveQuote(c.data, c.quote);
-        c.ma = [5, 20, 60].map(n => calcMA(c.data, n)); calcYear(c);
+        chartRecalc(c);
+        if (c.ptab === 'vol') loadVolTab(c, true); else if (c.ptab === 'trades') loadTradesTab(c, true);
         drawChart(); chartInfoUpdate(); renderChartPanel();
       } catch (e) {}
     }
@@ -2223,7 +2366,7 @@ function scheduleChartRefresh(c, seq) {
 
 /* ---------- 繪圖 ---------- */
 const fmtP = v => (+Number(v).toFixed(2)).toString();
-const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() : Math.round(v / 1000).toLocaleString() + ' 張';
+const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() + ' 張' : Math.round(v / 1000).toLocaleString() + ' 張';
 function drawChart() {
   const cv = $('chartCanvas'); if (!cv || !chartCur) return;
   const c = chartCur, W = cv.parentElement.clientWidth, H = cv.parentElement.clientHeight, dpr = window.devicePixelRatio || 1;
@@ -2234,7 +2377,10 @@ function drawChart() {
   const cs = getComputedStyle(document.body);
   const cMuted = cs.getPropertyValue('--t-muted').trim() || '#888', cGrid = cs.getPropertyValue('--border-light').trim() || '#ddd', cMain = cs.getPropertyValue('--t-main').trim() || '#222';
   const padR = 52, padT = 8, padB = 20, gap = 8;
-  const volH = Math.round((H - padT - padB) * 0.22), priceH = H - padT - padB - volH - gap;
+  const hasInd = chartInd !== 'vol', avail = H - padT - padB;
+  const indH = hasInd ? Math.round(avail * 0.27) : 0, volH = Math.round(avail * (hasInd ? 0.13 : 0.22));
+  const priceH = avail - volH - indH - gap * (hasInd ? 2 : 1), bottomY = padT + priceH + gap + volH + (hasInd ? gap + indH : 0);
+  const ind = c.ind || calcInd([]);
   const vis = Math.max(Math.min(c.vis, data.length), Math.min(30, c.vis)); // 資料太少時保留空位，K 棒不會變得又寬又大
   const end = data.length - c.off, start = Math.max(0, end - vis);
   const slice = data.slice(start, end), n = slice.length;
@@ -2269,6 +2415,35 @@ function drawChart() {
     g.stroke();
   });
   g.lineWidth = 1;
+  if (hasInd) { // 技術指標副圖
+    const top = padT + priceH + gap + volH + gap, ih = indH - 4;
+    let lo2 = 0, hi2 = 100, lines = [], refs = [], hist = null, name = '';
+    if (chartInd === 'kd') { lines = [[ind.k, '#F59E0B'], [ind.d, '#3B82F6']]; refs = [20, 50, 80]; name = 'KD(9,3,3)'; }
+    else if (chartInd === 'rsi') { lines = [[ind.r6, '#F59E0B'], [ind.r14, '#3B82F6']]; refs = [30, 50, 70]; name = 'RSI(6,14)'; }
+    else {
+      let m = 0; for (let i = start; i < end; i++) [ind.dif[i], ind.dea[i], ind.osc[i]].forEach(v => { if (v != null) m = Math.max(m, Math.abs(v)); });
+      m = (m || 1) * 1.1; lo2 = -m; hi2 = m; lines = [[ind.dif, '#F59E0B'], [ind.dea, '#3B82F6']]; hist = ind.osc; refs = [0]; name = 'MACD(12,26,9)';
+    }
+    const yI = v => top + 2 + (hi2 - v) / (hi2 - lo2) * ih;
+    g.strokeStyle = cGrid; g.beginPath(); g.moveTo(0, top - gap / 2 + 0.5); g.lineTo(plotW, top - gap / 2 + 0.5); g.stroke();
+    g.textBaseline = 'middle'; g.textAlign = 'left';
+    refs.forEach(v => {
+      const y = Math.round(yI(v)) + 0.5; g.strokeStyle = cGrid; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(0, y); g.lineTo(plotW, y); g.stroke(); g.setLineDash([]);
+      g.fillStyle = cMuted; g.fillText(String(v), plotW + 4, y);
+    });
+    const any = lines.some(([arr]) => arr.slice(start, end).some(v => v != null));
+    if (hist) slice.forEach((_, i) => {
+      const v = hist[start + i]; if (v == null) return; const x = xAt(i), y0 = yI(0), y1 = yI(v);
+      g.fillStyle = v >= 0 ? CHART_UP : CHART_DN; g.globalAlpha = 0.7; g.fillRect(x - bw / 2, Math.min(y0, y1), bw, Math.max(1, Math.abs(y1 - y0))); g.globalAlpha = 1;
+    });
+    lines.forEach(([arr, col]) => {
+      g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath(); let st2 = false;
+      for (let i = start; i < end; i++) { const v = arr[i]; if (v == null) continue; const x = xAt(i - start), y = yI(v); if (!st2) { g.moveTo(x, y); st2 = true; } else g.lineTo(x, y); }
+      g.stroke();
+    });
+    g.lineWidth = 1; g.fillStyle = cMuted; g.textBaseline = 'top'; g.fillText(name, 4, top + 2);
+    if (!any) { g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('資料不足，無法計算', plotW / 2, top + ih / 2); }
+  }
   const lastBar = data[data.length - 1];
   if (c.off === 0) {
     const y = yP(lastBar.c), col = lastBar.c >= lastBar.o ? CHART_UP : CHART_DN;
@@ -2278,9 +2453,17 @@ function drawChart() {
   }
   if (c.sel != null && c.sel >= start && c.sel < end) {
     const x = xAt(c.sel - start); g.strokeStyle = cMain; g.globalAlpha = 0.5; g.setLineDash([4, 3]);
-    g.beginPath(); g.moveTo(Math.round(x) + 0.5, padT); g.lineTo(Math.round(x) + 0.5, padT + priceH + gap + volH); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    g.beginPath(); g.moveTo(Math.round(x) + 0.5, padT); g.lineTo(Math.round(x) + 0.5, bottomY); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
   }
   c.L = { step, plotW, start, n, vis };
+}
+function indInfoHTML(c, i) {
+  const ind = c.ind; if (!ind || chartInd === 'vol') return '';
+  const f = (v, d = 1) => v != null ? v.toFixed(d) : '—', sp = (col, t) => `<span style="color:${col}">${t}</span>`;
+  if (chartInd === 'kd') return '<br>' + sp('#F59E0B', 'K ' + f(ind.k[i])) + '　' + sp('#3B82F6', 'D ' + f(ind.d[i]));
+  if (chartInd === 'rsi') return '<br>' + sp('#F59E0B', 'RSI6 ' + f(ind.r6[i])) + '　' + sp('#3B82F6', 'RSI14 ' + f(ind.r14[i]));
+  const o = ind.osc[i];
+  return '<br>' + sp('#F59E0B', 'DIF ' + f(ind.dif[i], 2)) + '　' + sp('#3B82F6', 'DEA ' + f(ind.dea[i], 2)) + '　' + sp(o == null ? 'inherit' : o >= 0 ? CHART_UP : CHART_DN, 'OSC ' + f(o, 2));
 }
 function chartInfoUpdate() {
   const el = $('chartInfo'), c = chartCur;
@@ -2290,50 +2473,38 @@ function chartInfoUpdate() {
   const chg = pc != null ? d.c - pc : null, col = v => v > 0 ? CHART_UP : v < 0 ? CHART_DN : 'inherit';
   const chgTxt = chg != null ? ` <b style="color:${col(chg)}">${chg > 0 ? '+' : ''}${fmtP(chg)} (${chg > 0 ? '+' : ''}${(chg / pc * 100).toFixed(2)}%)</b>` : '';
   el.innerHTML = `${escapeHTML(d.t.replace('T', ' ').slice(0, 16))}　開 <b>${fmtP(d.o)}</b> 高 <b style="color:${CHART_UP}">${fmtP(d.h)}</b> 低 <b style="color:${CHART_DN}">${fmtP(d.l)}</b> 收 <b>${fmtP(d.c)}</b>${chgTxt}　量 ${fmtV(c, d.v)}<br>` +
-    `<span style="color:#F59E0B">MA5 ${c.ma[0][i] != null ? fmtP(c.ma[0][i]) : '—'}</span>　<span style="color:#3B82F6">MA20 ${c.ma[1][i] != null ? fmtP(c.ma[1][i]) : '—'}</span>　<span style="color:#A855F7">MA60 ${c.ma[2][i] != null ? fmtP(c.ma[2][i]) : '—'}</span>`;
+    `<span style="color:#F59E0B">MA5 ${c.ma[0][i] != null ? fmtP(c.ma[0][i]) : '—'}</span>　<span style="color:#3B82F6">MA20 ${c.ma[1][i] != null ? fmtP(c.ma[1][i]) : '—'}</span>　<span style="color:#A855F7">MA60 ${c.ma[2][i] != null ? fmtP(c.ma[2][i]) : '—'}</span>` + indInfoHTML(c, i);
 }
 
 /* ---------- 下方資訊面板 ---------- */
-function renderChartPanel() {
-  const c = chartCur, el = $('chartPanel'); if (!c || c.engine !== 'fugle') { el.innerHTML = ''; return; }
-  const q = c.quote, s = c.stock, num = v => typeof v === 'number' && isFinite(v);
-  const clr = (v, ref) => !num(v) || !num(ref) ? '' : v > ref ? `style="color:${CHART_UP}"` : v < ref ? `style="color:${CHART_DN}"` : '';
-  const row = (k, v, extra = '') => `<div><span>${k}</span><b ${extra}>${v}</b></div>`;
-  const signed = v => (v > 0 ? '+' : '') + v.toLocaleString();
-  let html = '';
-  if (s) {
-    const info = calcStockInfo(s), has = info.hasCost, pc = v => v > 0 ? `style="color:${CHART_UP}"` : v < 0 ? `style="color:${CHART_DN}"` : '';
-    html += `<div class="cp-title">我的持股</div><div class="cp-grid">` +
-      row('持有', `${escapeHTML(String(s.displayQty))} ${escapeHTML(s.displayUnit || '')}`) +
-      row('均價', s.buyPrice > 0 ? fmtP(s.buyPrice) : '未設') +
-      row('市值', info.mktValue.toLocaleString()) +
-      row('成本', has ? Math.round(info.cost).toLocaleString() : '—') +
-      row('今日損益', signed(info.todayPnl), pc(info.todayPnl)) +
-      row('未實現損益', has ? signed(info.unPnl) : '—', has ? pc(info.unPnl) : '') +
-      row('報酬率', has ? `${info.roi > 0 ? '+' : ''}${info.roi.toFixed(2)}%` : '—', has ? pc(info.roi) : '') + `</div>`;
-  }
+const numOk = v => typeof v === 'number' && isFinite(v);
+const upDnStyle = (v, ref = 0) => !numOk(v) || !numOk(ref) ? '' : v > ref ? `style="color:${CHART_UP}"` : v < ref ? `style="color:${CHART_DN}"` : '';
+const cpRow = (k, v, extra = '') => `<div><span>${k}</span><b ${extra}>${v}</b></div>`;
+
+function panelQuoteHTML(c) {
+  const q = c.quote; let html = '';
   if (q) {
     const t = q.total || {}, prev = q.previousClose ?? q.referencePrice;
-    const yi = v => num(v) ? (v >= 1e8 ? (v / 1e8).toFixed(2) + ' 億' : Math.round(v / 1e4).toLocaleString() + ' 萬') : '—';
+    const yi = v => numOk(v) ? (v >= 1e8 ? (v / 1e8).toFixed(2) + ' 億' : Math.round(v / 1e4).toLocaleString() + ' 萬') : '—';
     const askV = t.tradeVolumeAtAsk, bidV = t.tradeVolumeAtBid;
     html += `<div class="cp-title">今日行情${q.date ? `（${escapeHTML(String(q.date))}）` : ''}</div><div class="cp-grid">` +
-      row('昨收', num(prev) ? fmtP(prev) : '—') +
-      row('開盤', num(q.openPrice) ? fmtP(q.openPrice) : '—', clr(q.openPrice, prev)) +
-      row('最高', num(q.highPrice) ? fmtP(q.highPrice) : '—', clr(q.highPrice, prev)) +
-      row('最低', num(q.lowPrice) ? fmtP(q.lowPrice) : '—', clr(q.lowPrice, prev)) +
-      row('均價', num(q.avgPrice) ? fmtP(q.avgPrice) : '—', clr(q.avgPrice, prev)) +
-      row('振幅', num(q.amplitude) ? q.amplitude.toFixed(2) + '%' : '—') +
-      row('成交量', num(t.tradeVolume) ? Math.round(t.tradeVolume).toLocaleString() + ' 張' : '—') +
-      row('成交金額', yi(t.tradeValue)) +
-      row('成交筆數', num(t.transaction) ? t.transaction.toLocaleString() : '—') +
-      row('內盤/外盤', num(bidV) && num(askV) && bidV + askV > 0 ? `${(bidV / (bidV + askV) * 100).toFixed(0)}% / ${(askV / (bidV + askV) * 100).toFixed(0)}%` : '—') + `</div>`;
+      cpRow('昨收', numOk(prev) ? fmtP(prev) : '—') +
+      cpRow('開盤', numOk(q.openPrice) ? fmtP(q.openPrice) : '—', upDnStyle(q.openPrice, prev)) +
+      cpRow('最高', numOk(q.highPrice) ? fmtP(q.highPrice) : '—', upDnStyle(q.highPrice, prev)) +
+      cpRow('最低', numOk(q.lowPrice) ? fmtP(q.lowPrice) : '—', upDnStyle(q.lowPrice, prev)) +
+      cpRow('均價', numOk(q.avgPrice) ? fmtP(q.avgPrice) : '—', upDnStyle(q.avgPrice, prev)) +
+      cpRow('振幅', numOk(q.amplitude) ? q.amplitude.toFixed(2) + '%' : '—') +
+      cpRow('成交量', numOk(t.tradeVolume) ? Math.round(t.tradeVolume).toLocaleString() + ' 張' : '—') +
+      cpRow('成交金額', yi(t.tradeValue)) +
+      cpRow('成交筆數', numOk(t.transaction) ? t.transaction.toLocaleString() : '—') +
+      cpRow('內盤/外盤', numOk(bidV) && numOk(askV) && bidV + askV > 0 ? `${(bidV / (bidV + askV) * 100).toFixed(0)}% / ${(askV / (bidV + askV) * 100).toFixed(0)}%` : '—') + `</div>`;
     const bids = (q.bids || []).slice(0, 5), asks = (q.asks || []).slice(0, 5);
     if (bids.length || asks.length) {
       let book = '';
       for (let i = 0; i < Math.max(bids.length, asks.length); i++) {
         const b = bids[i], a = asks[i];
-        book += `<div><span ${clr(b && b.price, prev)}>${b ? fmtP(b.price) : '—'}</span><span>${b ? b.size : ''}</span></div>` +
-                `<div><span ${clr(a && a.price, prev)}>${a ? fmtP(a.price) : '—'}</span><span>${a ? a.size : ''}</span></div>`;
+        book += `<div><span ${upDnStyle(b && b.price, prev)}>${b ? fmtP(b.price) : '—'}</span><span>${b ? b.size : ''}</span></div>` +
+                `<div><span ${upDnStyle(a && a.price, prev)}>${a ? fmtP(a.price) : '—'}</span><span>${a ? a.size : ''}</span></div>`;
       }
       html += `<div class="cp-title">五檔報價（買 ／ 賣，單位：張）</div><div class="cp-book">${book}</div>`;
     }
@@ -2341,10 +2512,122 @@ function renderChartPanel() {
   if (c.year) {
     const last = c.data.length ? c.data[c.data.length - 1].c : null;
     html += `<div class="cp-title">近一年區間</div><div class="cp-grid">` +
-      row('最高', fmtP(c.year.hi), `style="color:${CHART_UP}"`) + row('最低', fmtP(c.year.lo), `style="color:${CHART_DN}"`) +
-      (last != null ? row('距高點', ((last / c.year.hi - 1) * 100).toFixed(2) + '%') + row('距低點', '+' + ((last / c.year.lo - 1) * 100).toFixed(2) + '%') : '') + `</div>`;
+      cpRow('最高', fmtP(c.year.hi), `style="color:${CHART_UP}"`) + cpRow('最低', fmtP(c.year.lo), `style="color:${CHART_DN}"`) +
+      (last != null ? cpRow('距高點', ((last / c.year.hi - 1) * 100).toFixed(2) + '%') + cpRow('距低點', '+' + ((last / c.year.lo - 1) * 100).toFixed(2) + '%') : '') + `</div>`;
   }
-  el.innerHTML = html || '<div style="color:var(--t-muted); padding-top:12px;">暫無資料</div>';
+  if (c.diag) html += `<div class="cp-small">K 線資料來源：${escapeHTML(c.diag)}</div>`;
+  return html || '<div class="cp-note">暫無資料</div>';
+}
+
+const failState = e => e.message === 'nokey' ? 'nokey' : /^http40[13]$/.test(e.message) ? 'plan' : 'err';
+const failNote = st => ({ loading: '載入中…', nokey: '尚未設定 Fugle Key，請到「進階」輸入 Key。', plan: '目前的 Fugle 方案沒有這項資料的權限。', empty: '目前沒有資料（非交易時段，或今天尚未成交）。', err: '資料取得失敗，請稍後再試。' }[st] || '');
+const timeOf = t => { if (!numOk(t)) return '—'; const ms = t > 1e14 ? t / 1000 : t > 1e11 ? t : t * 1000; return new Date(ms + 8 * 3600e3).toISOString().slice(11, 19); };
+
+async function loadVolTab(c, silent) {
+  if (c.volBusy) return; c.volBusy = true;
+  if (!silent && !c.vol) { c.vol = { state: 'loading' }; renderChartPanel(); }
+  try {
+    const j = await fugleGet(`intraday/volumes/${encodeURIComponent(c.sym)}`);
+    const rows = (j.data || []).filter(x => numOk(x.price) && numOk(x.volume));
+    c.vol = rows.length ? { state: 'ok', rows } : { state: 'empty' };
+  } catch (e) { if (!(c.vol && c.vol.state === 'ok')) c.vol = { state: failState(e) }; }
+  c.volBusy = false;
+  if (chartCur === c && c.ptab === 'vol') renderChartPanel();
+}
+async function loadTradesTab(c, silent) {
+  if (c.trBusy) return; c.trBusy = true;
+  if (!silent && !c.trades) { c.trades = { state: 'loading' }; renderChartPanel(); }
+  try {
+    const j = await fugleGet(`intraday/trades/${encodeURIComponent(c.sym)}?limit=60`);
+    const rows = (j.data || []).filter(x => numOk(x.price)).map(x => ({ p: x.price, s: x.size ?? x.volume ?? 0, bid: x.bid, ask: x.ask, t: x.time }))
+      .sort((a, b) => (numOk(b.t) ? b.t : 0) - (numOk(a.t) ? a.t : 0)).slice(0, 60);
+    c.trades = rows.length ? { state: 'ok', rows } : { state: 'empty' };
+  } catch (e) { if (!(c.trades && c.trades.state === 'ok')) c.trades = { state: failState(e) }; }
+  c.trBusy = false;
+  if (chartCur === c && c.ptab === 'trades') renderChartPanel();
+}
+function panelVolHTML(c) {
+  const v = c.vol; if (!v || v.state !== 'ok') return `<div class="cp-note">${failNote(v ? v.state : 'loading')}</div>`;
+  let rows = v.rows.slice();
+  if (rows.length > 80) rows = rows.sort((a, b) => b.volume - a.volume).slice(0, 80);
+  rows.sort((a, b) => b.price - a.price);
+  const vmax = Math.max(...rows.map(r => r.volume)) || 1, total = v.rows.reduce((a, r) => a + r.volume, 0);
+  const top = v.rows.reduce((m, r) => r.volume > m.volume ? r : m, v.rows[0]);
+  const prev = c.quote ? (c.quote.previousClose ?? c.quote.referencePrice) : null;
+  const last = c.quote && numOk(c.quote.lastPrice) ? c.quote.lastPrice : (c.data.length ? c.data[c.data.length - 1].c : null);
+  const askT = v.rows.reduce((a, r) => a + (r.volumeAtAsk || 0), 0), bidT = v.rows.reduce((a, r) => a + (r.volumeAtBid || 0), 0);
+  const body = rows.map(r => {
+    const b = (r.volumeAtBid || 0) / vmax * 100, a = (r.volumeAtAsk || 0) / vmax * 100, o = Math.max(0, r.volume / vmax * 100 - a - b);
+    return `<div class="cp-vol${last != null && Math.abs(r.price - last) < 1e-6 ? ' now' : ''}"><span ${upDnStyle(r.price, prev)}><b>${fmtP(r.price)}</b></span>` +
+      `<span class="bar"><i style="width:${b.toFixed(1)}%;background:${CHART_DN}"></i><i style="width:${a.toFixed(1)}%;background:${CHART_UP}"></i><i style="width:${o.toFixed(1)}%;background:var(--t-muted);opacity:.5"></i></span>` +
+      `<b>${Math.round(r.volume).toLocaleString()}</b></div>`;
+  }).join('');
+  return `<div class="cp-title">分價量表（今日）</div><div class="cp-grid" style="margin-bottom:6px">` +
+    cpRow('量最大價位', `${fmtP(top.price)}（${Math.round(top.volume).toLocaleString()}）`) + cpRow('總量', Math.round(total).toLocaleString() + ' 張') +
+    (askT + bidT > 0 ? cpRow('外盤', (askT / (askT + bidT) * 100).toFixed(0) + '%', `style="color:${CHART_UP}"`) + cpRow('內盤', (bidT / (askT + bidT) * 100).toFixed(0) + '%', `style="color:${CHART_DN}"`) : '') + `</div>` +
+    body + `<div class="cp-small">長條：<span style="color:${CHART_UP}">紅＝外盤</span>、<span style="color:${CHART_DN}">綠＝內盤</span>、灰＝未分類；亮底為目前成交價。</div>`;
+}
+function panelTradesHTML(c) {
+  const v = c.trades; if (!v || v.state !== 'ok') return `<div class="cp-note">${failNote(v ? v.state : 'loading')}</div>`;
+  const prev = c.quote ? (c.quote.previousClose ?? c.quote.referencePrice) : null;
+  const body = v.rows.map(r => {
+    const tag = numOk(r.ask) && r.p >= r.ask ? `<span style="color:${CHART_UP}">外</span>` : numOk(r.bid) && r.p <= r.bid ? `<span style="color:${CHART_DN}">內</span>` : '<span></span>';
+    return `<div class="cp-tr"><span>${timeOf(r.t)}</span><span ${upDnStyle(r.p, prev)}><b>${fmtP(r.p)}</b></span><span>${Math.round(r.s).toLocaleString()}</span>${tag}</div>`;
+  }).join('');
+  return `<div class="cp-title">最近成交明細（最新 ${v.rows.length} 筆）</div><div class="cp-tr hd"><span>時間</span><span>成交價</span><span>單量</span><span></span></div>${body}` +
+    `<div class="cp-small">外＝成交價在賣價以上（主動買），內＝成交價在買價以下（主動賣）。</div>`;
+}
+const isEtfSym = sym => /^00\d/.test(sym);
+async function loadDivTab(c) {
+  if (c.div) return;
+  c.div = { state: 'loading' }; renderChartPanel();
+  try {
+    const j = await workerGet(`/div?symbol=${encodeURIComponent(c.sym)}`);
+    c.div = Array.isArray(j.dividends) ? (j.dividends.length ? { state: 'ok', list: j.dividends } : { state: 'empty' }) : { state: 'noworker' };
+  } catch (e) { c.div = { state: e.message === 'http404' ? 'empty' : 'err' }; }
+  if (chartCur === c) renderChartPanel();
+}
+async function loadHoldTab(c) {
+  if (c.hold) return;
+  c.hold = { state: 'loading' }; renderChartPanel();
+  try {
+    const j = await workerGet(`/holdings?symbol=${encodeURIComponent(c.sym)}`);
+    c.hold = Array.isArray(j.holdings) && j.holdings.length ? { state: 'ok', date: j.date, src: j.source, list: j.holdings } : { state: Array.isArray(j.holdings) ? 'empty' : 'noworker' };
+  } catch (e) { c.hold = { state: e.message === 'http404' ? 'empty' : 'err' }; }
+  if (chartCur === c) renderChartPanel();
+}
+const workerNote = st => ({ noworker: '需要先更新 Cloudflare Worker 才能取得這項資料。', empty: '查無資料（可能尚未配息，或來源網站沒有這檔）。' }[st] || failNote(st));
+function panelDivHTML(c) {
+  const v = c.div; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
+  const yearAgo = new Date(Date.now() + 8 * 3600e3 - 365 * 864e5).toISOString().slice(0, 10);
+  const yr = v.list.filter(x => x.date >= yearAgo), sum = yr.reduce((a, x) => a + x.amount, 0);
+  const price = c.quote && numOk(c.quote.lastPrice) ? c.quote.lastPrice : (c.stock && numOk(c.stock.price) ? c.stock.price : null);
+  const shares = c.stock ? calcStockInfo(c.stock).shares : 0;
+  let html = `<div class="cp-title">近一年配息</div><div class="cp-grid">` +
+    cpRow('合計', fmtP(sum) + ' 元') + cpRow('次數', yr.length + ' 次') +
+    cpRow('現價殖利率', price && sum ? (sum / price * 100).toFixed(2) + '%' : '—') + cpRow('最近一次', escapeHTML(v.list[0].date)) + `</div>`;
+  if (shares > 0 && sum > 0) html += `<div class="cp-small">以目前持有 ${shares.toLocaleString()} 股估算，近一年配息約 ${Math.round(shares * sum).toLocaleString()} 元（過去配息不代表未來）。</div>`;
+  html += `<div class="cp-title">歷史配息（每股，依除息日）</div><div class="cp-list">` +
+    v.list.slice(0, 16).map(x => `<div><span>${escapeHTML(x.date)}</span><b>${fmtP(x.amount)} 元</b></div>`).join('') + `</div>`;
+  return html;
+}
+function panelHoldHTML(c) {
+  const v = c.hold; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
+  const top = v.list.slice(0, 10), max = Math.max(...top.map(x => Math.abs(x.weight))) || 1, sum = top.reduce((a, x) => a + x.weight, 0);
+  const rows = top.map((x, i) => `<div class="cp-hold"><span class="rk">${i + 1}</span><span class="nm">${escapeHTML(x.name || x.symbol)}${x.symbol ? `<small>${escapeHTML(x.symbol.replace(/\.(TW|TWO)$/i, ''))}</small>` : ''}</span>` +
+    `<span class="bar"><i style="width:${(Math.abs(x.weight) / max * 100).toFixed(0)}%"></i></span><b>${x.weight.toFixed(2)}%</b></div>`).join('');
+  return `<div class="cp-title">前十大持股${v.date ? `（資料日 ${escapeHTML(String(v.date))}）` : ''}</div>` +
+    `<div class="cp-grid" style="margin-bottom:6px">${cpRow('前十大合計', sum.toFixed(2) + '%')}${cpRow('揭露檔數', v.list.length + (v.list.length >= 30 ? '+' : '') + ' 檔')}</div>${rows}` +
+    `<div class="cp-small">資料來源：${escapeHTML(v.src || '')}，僅供參考；持股可能和最新揭露有時間差。</div>`;
+}
+function renderChartPanel() {
+  const c = chartCur, el = $('chartPanel'), tabs = $('chartPtabs');
+  if (!c || c.engine !== 'fugle') { el.innerHTML = ''; tabs.innerHTML = ''; return; }
+  tabs.innerHTML = [['quote', '行情'], ['vol', '分價量'], ['trades', '成交明細'], ['div', '配息'], ...(isEtfSym(c.sym) ? [['hold', '成分股']] : [])]
+    .map(([k, n]) => `<button type="button" class="${k === c.ptab ? 'on' : ''}" data-ptab="${k}">${n}</button>`).join('');
+  const top = el.scrollTop;
+  el.innerHTML = c.ptab === 'vol' ? panelVolHTML(c) : c.ptab === 'trades' ? panelTradesHTML(c) : c.ptab === 'div' ? panelDivHTML(c) : c.ptab === 'hold' ? panelHoldHTML(c) : panelQuoteHTML(c);
+  el.scrollTop = top;
 }
 
 function bindChartCanvas(cv) {
@@ -2429,8 +2712,9 @@ function renderChartTools() {
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
-  body.innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = '';
-  $('chartModalOverlay').querySelector('.chart-modal').classList.toggle('tv', c.engine === 'tv');
+  body.innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = ''; $('chartPtabs').innerHTML = '';
+  const mdl = $('chartModalOverlay').querySelector('.chart-modal'); mdl.classList.toggle('tv', c.engine === 'tv'); mdl.classList.toggle('ind', chartInd !== 'vol');
+  $('chartIndBtn').textContent = IND_LABEL[chartInd];
   renderChartTools();
   if (c.engine === 'fugle') {
     const cv = document.createElement('canvas'); cv.id = 'chartCanvas'; body.appendChild(cv); bindChartCanvas(cv);
@@ -2441,14 +2725,14 @@ function openChartModal(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}${s.name ? `<small>${escapeHTML(s.name)}</small>` : ''}`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null });
+  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function teardownChart() {
   chartOpenSeq++;
   if (chartCur) clearTimeout(chartCur.timer);
   chartCur = null;
   $('chartModalOverlay').classList.remove('show');
-  $('chartBody').innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = ''; // 移除圖表，不在背景繼續佔資源
+  $('chartBody').innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = ''; $('chartPtabs').innerHTML = ''; // 移除圖表，不在背景繼續佔資源
 }
 function closeChartModal() {
   if (history.state && history.state.chart) history.back(); else teardownChart();
@@ -2458,6 +2742,11 @@ $('chartModalOverlay').addEventListener('click', e => { if (e.target === e.curre
 $('chartTfs').addEventListener('click', e => {
   const b = e.target.closest('button[data-tf]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
   chartTf = chartCur.tf = b.dataset.tf; renderChartTools(); loadFugleChart(chartCur);
+});
+$('chartPtabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-ptab]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
+  const c = chartCur; c.ptab = b.dataset.ptab; renderChartPanel(); $('chartPanel').scrollTop = 0;
+  if (c.ptab === 'vol') loadVolTab(c); else if (c.ptab === 'trades') loadTradesTab(c); else if (c.ptab === 'div') loadDivTab(c); else if (c.ptab === 'hold') loadHoldTab(c);
 });
 document.addEventListener('click', e => {
   const h = e.target.closest('.srow .sym-container');
